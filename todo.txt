@@ -1,13 +1,32 @@
 TODO:
 - minimany działający particle system
+  - prosty splash z krwią: emiter generuje cząsteczki o różnych wielkościach, wycentrowane
+    lęcące w losowych kierunkach
+  - płomień bazujący na animowanej teksturze ?
+  - wymachy: pozycja emitera szybko się zmienia (leci po splajnie) i generuje krótko żyjące cząsteczki
+    które się nie ruszają, ale są odpowiednio obrócone (są skierowane w kierunku wymachu) 
+  - odpryski przy kopaniu tuneli
+  - wypicie mikstury: emiter po okręgu równomiernie cząstki lecące do zewnątrz; można zrobić dwie warstwy
+    jedna pod drugą
+  - czar leczenia
+  - teleport in / out
+  - magiczna ochrona: pulsująca biała otoczka
+
 - minimalny działający program do testowania (w tle powinno się dać wyświetlić scenki z gry, żeby
   od razu było widoczne jak to się komponuje docelowo)
 - wykombinowanie jakie te particle mają być
 - wykombinowanie jak je parametryzowac
 - jak zapisywać konfiguracje efektów do pliku?
 - ...
-
 - darmowe teksturki, linki do źródeł?
+
+- POTENCJALNE PROBLEMY:
+  - keeperrl działa w dwóch trybach: turowym i real-time; dodatkowo ma tryb pauzy
+    systemy cząstek muszą sensownie działać w każdym z tych trybów
+  - integracja:
+    - int2, float2, operacje matematyczne
+    - CSpan<>, Span<>  -> std::span w C++20?
+    - generator liczb losowych (Random z libfwk)
 
 ------------------------------ Inspiracja ---------------------------------------------------------
 
@@ -15,6 +34,8 @@ TODO:
 - Terraria ?
 - Dead Cells ma niezłe efekty
 - Myth fallen lords: miała fajne efekty cząstkowe do walki (śmieci i wpływ granatów na nie)
+- Baldur's gate, etc. jeśli chodzi o czary
+- TODO: popatrzeć na streamy SplatterCata
 - TODO: poszukać więcej fajnych gier top-down... ???
 
 

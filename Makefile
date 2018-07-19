@@ -17,7 +17,8 @@ _dummy := $(shell [ -d output ] || mkdir -p output)
 _dummy := $(shell [ -d $(BUILD_DIR) ] || mkdir -p $(BUILD_DIR))
 _dummy := $(shell [ -d $(BUILD_DIR)/imgui ] || mkdir -p $(BUILD_DIR)/imgui)
 
-SHARED_SRC=imgui/imgui imgui/imgui_draw imgui/imgui_demo imgui_wrapper
+SHARED_SRC=curve\
+		   imgui/imgui imgui/imgui_draw imgui/imgui_demo imgui_wrapper
 
 PROGRAM_SRC=psystem2d
 
