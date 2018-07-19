@@ -1,5 +1,19 @@
 #include "curve.h"
 
+template <class T> Curve<T>::Curve() = default;
+template <class T> Curve<T>::~Curve() = default;
+
+template <class T>
+Curve<T>::Curve(T value) : m_keys({0.0f}), m_values({value}), m_interp(InterpolationType::linear) {}
+
+template <class T>
+Curve<T>::Curve(vector<T> values, InterpolationType interp)
+	: m_values(move(values)), m_interp(interp) {
+	m_keys.resize(m_values.size());
+	for(int n = 0; n < m_keys.size(); n++)
+		m_keys[n] = float(n) / float(m_keys.size() - 1);
+}
+
 template <class T>
 Curve<T>::Curve(vector<float> keys, vector<T> values, InterpolationType interp)
 	: m_keys(move(keys)), m_values(move(values)), m_interp(interp) {

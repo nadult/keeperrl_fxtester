@@ -1,3 +1,6 @@
+Dokument google:
+https://docs.google.com/document/d/10MbrynYjchbdK_8ktb1hMgdaupQAVE-z4DZIZ5x-Pts/edit
+
 TODO:
 - minimany działający particle system
   - prosty splash z krwią: emiter generuje cząsteczki o różnych wielkościach, wycentrowane

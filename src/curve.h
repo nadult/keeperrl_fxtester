@@ -34,6 +34,10 @@ template <class T> T interpCubic(const T &y0, const T &y1, const T &y2, const T 
 template <class T> struct Curve {
   public:
 	Curve(vector<float> keys, vector<T> values, InterpolationType);
+	Curve(vector<T> values, InterpolationType); // regular keys
+	Curve(T value);
+	Curve();
+	~Curve();
 
 	// Position is always within range: <0, 1>
 	T sample(float position) const;

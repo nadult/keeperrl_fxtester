@@ -1,19 +1,37 @@
 #include "imgui/imgui.h"
 #include "imgui_wrapper.h"
 #include <fwk/filesystem.h>
+#include <fwk/gfx/dtexture.h>
 #include <fwk/gfx/font_factory.h>
 #include <fwk/gfx/gfx_device.h>
+#include <fwk/gfx/material.h>
 #include <fwk/gfx/opengl.h>
 #include <fwk/gfx/renderer2d.h>
+#include <fwk/math/box.h>
 #include <fwk/sys/backtrace.h>
 #include <fwk/sys/input.h>
+#include <fwk/sys/stream.h>
+
+#include "particle_system.h"
 
 class App {
   public:
 	App()
 		: m_viewport(GfxDevice::instance().windowSize()),
 		  m_font(FontFactory().makeFont("data/LiberationSans-Regular.ttf", 14)),
-		  m_imgui(GfxDevice::instance(), ImGuiStyleMode::mini) {}
+		  m_imgui(GfxDevice::instance(), ImGuiStyleMode::mini) {
+		m_ps.addDefaults();
+		m_ps.addInstance(0, float2());
+
+		auto &pdefs = m_ps.particleDefs();
+		for(int n = 0; n < pdefs.size(); n++) {
+			auto &pdef = pdefs[n];
+			string file_name = "data/" + pdef.texture_name;
+			Loader loader(file_name);
+			m_textures.emplace_back(make_immutable<DTexture>(pdef.texture_name, loader));
+			m_materials.emplace_back(m_textures.back());
+		}
+	}
 
 	void doMenu() {
 		ImGui::Begin("PSystem2D menu", nullptr,
@@ -25,6 +43,9 @@ class App {
 				m_exit_please = true;
 			ImGui::EndMenu();
 		}
+
+		if(ImGui::InputFloat("scale", &m_scale))
+			m_scale = clamp(m_scale, 0.1f, 20.0f);
 
 		ImGui::Separator();
 
@@ -42,6 +63,8 @@ class App {
 
 	void tick(GfxDevice &device, double time_diff) {
 		FWK_PROFILE("tick");
+
+		m_ps.simulate(time_diff);
 
 		auto events = device.inputEvents();
 		m_imgui.beginFrame(device);
@@ -62,7 +85,17 @@ class App {
 		FWK_PROFILE("render");
 		Renderer2D rlist2d(m_viewport);
 
-		GfxDevice::clearColor(ColorId::green);
+		float2 center(m_viewport.size() / 2);
+
+		GfxDevice::clearColor(FColor(0.1, 0.1, 0.1));
+
+		for(auto &quad : m_ps.genQuads()) {
+			float2 positions[4];
+			for(int n = 0; n < 4; n++)
+				positions[n] = quad.positions[n] * m_scale + center;
+			rlist2d.addQuads(positions, quad.tex_coords, quad.colors,
+							 m_materials[quad.particle_def_id]);
+		}
 		rlist2d.render();
 	}
 	const IRect &viewport() const { return m_viewport; }
@@ -93,6 +126,12 @@ class App {
 	IRect m_viewport;
 	int m_menu_width;
 	int2 m_menu_size;
+
+	float m_scale = 5.0f;
+
+	ParticleManager m_ps;
+	vector<PTexture> m_textures;
+	vector<SimpleMaterial> m_materials;
 
 	mutable float2 m_max_extents;
 	FilePath m_data_path;
