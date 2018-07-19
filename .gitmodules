@@ -1,0 +1,6 @@
+[submodule "imgui"]
+	path = imgui
+	url = git@github.com:nadult/imgui.git
+[submodule "libfwk"]
+	path = libfwk
+	url = git@github.com:nadult/libfwk.git

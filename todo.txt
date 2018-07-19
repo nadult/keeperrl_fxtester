@@ -1,0 +1,7 @@
+TODO:
+- minimany działający particle system
+- minimalny działający program do testowania
+- wykombinowanie jakie te particle mają być
+- wykombinowanie jak je parametryzowac
+- jak je zapisywać?
+- ...
