@@ -55,18 +55,28 @@ struct ParticleDef {
 	// particle time
 	Curve<float> alpha;
 	Curve<float> size;
+	Curve<float> slowdown;
 	Curve<float3> color;
 
+	int2 texture_tiles = int2(1, 1);
 	string texture_name;
 	string name;
 };
+
+// Na jakie sposoby możemy definiować różne wartości:
+// - stała wartość
+// - krzywa w różny sposób interpolowana, regularna lub nie
+// - dwie krzywe (min / max)
+// - ... ?
+// - niektóre parametry powinny być opcjonalne ?
 
 // Różne kształty emitera;
 // Emiterem mogą też być cząsteczki innego subsystemu ?
 struct EmitterDef {
 	Curve<float> frequency; // particles per second
-	Curve<float> strength;
+	Curve<float> strength_min, strength_max;
 	Curve<float> direction, direction_spread; // in radians
+	Curve<float> rotation_speed_min, rotation_speed_max;
 
 	// TODO: zamiast częstotliwości możemy mieć docelową ilość cząsteczek
 	// (danego rodzaju?) w danym momencie
@@ -79,6 +89,9 @@ struct ParticleSystemDef {
 	struct SubSystem {
 		ParticleDefId particle_id;
 		EmitterDefId emitter_id;
+
+		int max_active_particles = INT_MAX;
+		int max_total_particles = INT_MAX;
 	};
 	vector<SubSystem> subsystems;
 	float anim_length;
@@ -92,6 +105,7 @@ struct Particle {
 	float2 pos, movement;
 	float size, life, max_life;
 	float rot, rot_speed;
+	int2 tex_tile;
 };
 
 struct ParticleSystem {
@@ -99,6 +113,7 @@ struct ParticleSystem {
 		vector<Particle> particles;
 		float emission_fract = 0.0f;
 		int random_seed = 123;
+		int total_particles = 0;
 	};
 
 	ParticleSystem(float2 pos, ParticleSystemDefId, int spawn_time, int num_subsystems);

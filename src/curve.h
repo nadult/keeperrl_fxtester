@@ -2,7 +2,7 @@
 
 #include "base.h"
 
-DEFINE_ENUM(InterpolationType, linear, cosine, quadratic, cubic);
+DEFINE_ENUM(InterpType, linear, cosine, quadratic, cubic);
 
 template <class T> T interpCosine(const T &a, const T &b, float x) {
 	return lerp(a, b, (1.0f - std::cos(x * fconstant::pi)) * 0.5f);
@@ -33,8 +33,8 @@ template <class T> T interpCubic(const T &y0, const T &y1, const T &y2, const T 
 
 template <class T> struct Curve {
   public:
-	Curve(vector<float> keys, vector<T> values, InterpolationType);
-	Curve(vector<T> values, InterpolationType); // regular keys
+	Curve(vector<float> keys, vector<T> values, InterpType = InterpType::linear);
+	Curve(vector<T> values, InterpType = InterpType::linear); // regular keys
 	Curve(T value);
 	Curve();
 	~Curve();
@@ -44,7 +44,7 @@ template <class T> struct Curve {
 
 	vector<float> m_keys;
 	vector<T> m_values;
-	InterpolationType m_interp; // TODO: this doesn't have to be here
+	InterpType m_interp; // TODO: this doesn't have to be here
 };
 
 extern template struct Curve<float>;

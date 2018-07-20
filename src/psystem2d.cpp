@@ -54,9 +54,13 @@ class App {
 		ImGui::SetWindowSize(m_menu_size);
 
 		if(ImGui::InputFloat("Zoom", &m_zoom))
-			m_zoom = clamp(m_zoom, 0.1f, 20.0f);
+			m_zoom = clamp(m_zoom, 0.25f, 10.0f);
+		if(ImGui::InputFloat("Anim speed", &m_animation_speed))
+			m_animation_speed = clamp(m_animation_speed, 0.0f, 100.0f);
 
-		if(ImGui::BeginMenu("Select background")) {
+		if(ImGui::Button("Select background"))
+			ImGui::OpenPopup("select_back");
+		if(ImGui::BeginPopup("select_back")) {
 			if(ImGui::MenuItem("disabled", nullptr, !m_background_id))
 				m_background_id = none;
 			for(int n = 0; n < m_backgrounds.size(); n++) {
@@ -64,7 +68,7 @@ class App {
 				if(ImGui::MenuItem(back.name.c_str(), nullptr, m_background_id == n))
 					m_background_id = n;
 			}
-			ImGui::EndMenu();
+			ImGui::EndPopup();
 		}
 
 		ImGui::Text("Alive systems: %d", m_ps.aliveSystems().size());
@@ -78,7 +82,7 @@ class App {
 			ImGui::ShowTestWindow(&show_test_window);
 		}
 
-		m_menu_width = 180;
+		m_menu_width = 220;
 		m_menu_size = vmax(m_menu_size, int2(m_menu_width + 20, ImGui::GetCursorPosY()));
 
 		ImGui::End();
@@ -109,7 +113,7 @@ class App {
 	void tick(GfxDevice &device, double time_diff) {
 		FWK_PROFILE("tick");
 
-		m_ps.simulate(time_diff);
+		m_ps.simulate(time_diff * m_animation_speed);
 
 		auto events = device.inputEvents();
 		m_imgui.beginFrame(device);
@@ -132,8 +136,11 @@ class App {
 				m_view_pos -= float2(event.mouseMove()) * screen_to_tile;
 			if(event.mouseButtonDown(InputButton::left))
 				addSpawner(m_selection);
-			if(event.isMouseOverEvent())
+			if(event.isMouseOverEvent()) {
 				m_selection = int2(m_view_pos + float2(event.mousePos()) * screen_to_tile);
+				if(int zoom = event.mouseWheel())
+					m_zoom = clamp(m_zoom * (zoom > 0 ? 1.25f : 0.8f), 0.25f, 10.0f);
+			}
 		}
 
 		updateSpawners();
@@ -229,6 +236,7 @@ class App {
 	float2 m_view_pos; // in tiles
 	int2 m_selection;
 	float m_zoom = 2.0f;
+	float m_animation_speed = 1.0f;
 
 	struct SpawnTool {
 		SpawnerType type = SpawnerType::single;

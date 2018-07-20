@@ -1,10 +1,8 @@
 #include "fx_manager.h"
 
-using InterpType = InterpolationType;
-
 static void addTestEffect(FXManager &mgr) {
 	EmitterDef edef;
-	edef.strength = 30.0f;
+	edef.strength_min = edef.strength_max = 30.0f;
 	edef.direction = 0.0f;
 	edef.direction_spread = fconstant::pi;
 	edef.frequency = {{10.0f, 55.0f, 0.0f, 0.0}, InterpType::cosine};
@@ -27,24 +25,29 @@ static void addTestEffect(FXManager &mgr) {
 
 static void addSplinterEffect(FXManager &mgr) {
 	EmitterDef edef;
-	edef.strength = 150.0f;
+	edef.strength_min = 20.0f;
+	edef.strength_max = 60.0f;
 	edef.direction = 0.0f;
-	edef.direction_spread = 0.5f;
-	edef.frequency = {{150.0f, 0.0f, 0.0f, 0.0}, InterpType::cosine};
+	edef.direction_spread = fconstant::pi;
+	edef.rotation_speed_min = -0.5f;
+	edef.rotation_speed_max = 0.5f;
+	edef.frequency = 999.0f;
 
 	ParticleDef pdef;
-	pdef.life = 0.1f;
-	pdef.size = 7.0f;
-	pdef.alpha = {{0.0f, 0.8f, 1.0f}, {1.0, 1.0, 0.0}, InterpType::linear};
+	pdef.life = 5.0f; // life min-max ?
+	pdef.size = 8.0f;
+	pdef.slowdown = {{0.0f, 0.1f}, {5.0f, 1000.0f}};
+	pdef.alpha = {{0.0f, 0.8f, 1.0f}, {1.0, 1.0, 0.0}};
 
-	FColor brown(IColor(208, 116, 60));
-	pdef.color = {{brown.rgb(), brown.rgb() * 0.2f}, InterpType::linear};
-	// TODO: fix texture
-	pdef.texture_name = "circular.png";
+	FColor brown(IColor(120, 87, 46));
+	pdef.color = brown.rgb();
+	pdef.texture_name = "flakes_4x4_borders.png";
+	pdef.texture_tiles = int2(4, 4);
 
 	ParticleSystemDef psdef;
 	psdef.subsystems.emplace_back(mgr.addDef(pdef), mgr.addDef(edef));
-	psdef.anim_length = 1.0f;
+	psdef.subsystems.back().max_total_particles = 6;
+	psdef.anim_length = 5.0f;
 	psdef.name = "splinter";
 	mgr.addDef(psdef);
 

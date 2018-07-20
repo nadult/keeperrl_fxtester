@@ -67,5 +67,6 @@ class FXManager {
 	// TODO: ref-countowane instancje ? możemy też zrobić podobnie jak
 	// we FreeFT: każda instancja ma też licznik spawnu;
 	vector<ParticleSystem> m_systems;
+	Random m_random;
 	int m_spawn_clock = 0;
 };

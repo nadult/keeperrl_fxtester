@@ -4,18 +4,17 @@ template <class T> Curve<T>::Curve() = default;
 template <class T> Curve<T>::~Curve() = default;
 
 template <class T>
-Curve<T>::Curve(T value) : m_keys({0.0f}), m_values({value}), m_interp(InterpolationType::linear) {}
+Curve<T>::Curve(T value) : m_keys({0.0f}), m_values({value}), m_interp(InterpType::linear) {}
 
 template <class T>
-Curve<T>::Curve(vector<T> values, InterpolationType interp)
-	: m_values(move(values)), m_interp(interp) {
+Curve<T>::Curve(vector<T> values, InterpType interp) : m_values(move(values)), m_interp(interp) {
 	m_keys.resize(m_values.size());
 	for(int n = 0; n < m_keys.size(); n++)
 		m_keys[n] = float(n) / float(m_keys.size() - 1);
 }
 
 template <class T>
-Curve<T>::Curve(vector<float> keys, vector<T> values, InterpolationType interp)
+Curve<T>::Curve(vector<float> keys, vector<T> values, InterpType interp)
 	: m_keys(move(keys)), m_values(move(values)), m_interp(interp) {
 	DASSERT(m_keys.size() == m_values.size());
 	for(int n = 0; n < m_keys.size(); n++) {
@@ -47,14 +46,14 @@ template <class T> T Curve<T>::sample(float position) const {
 	float t = key1 == key2 ? 0.0 : (position - key1) / (key2 - key1);
 
 	switch(m_interp) {
-	case InterpolationType::linear:
+	case InterpType::linear:
 		return lerp(m_values[ids[1]], m_values[ids[2]], t);
-	case InterpolationType::cosine:
+	case InterpType::cosine:
 		return interpCosine(m_values[ids[1]], m_values[ids[2]], t);
-	case InterpolationType::quadratic:
+	case InterpType::quadratic:
 		return interpQuadratic(m_values[ids[0]], m_values[ids[1]], m_values[ids[2]],
 							   m_values[ids[3]], t);
-	case InterpolationType::cubic:
+	case InterpType::cubic:
 		return interpCubic(m_values[ids[0]], m_values[ids[1]], m_values[ids[2]], m_values[ids[3]],
 						   t);
 	}
