@@ -12,7 +12,7 @@
 #include <fwk/sys/input.h>
 #include <fwk/sys/stream.h>
 
-#include "particle_system.h"
+#include "fx_manager.h"
 #include "spawner.h"
 
 // Rodzaje spawnowalnych efektów:
@@ -30,7 +30,6 @@ class App {
 		: m_viewport(GfxDevice::instance().windowSize()),
 		  m_font(FontFactory().makeFont("data/LiberationSans-Regular.ttf", 14)),
 		  m_imgui(GfxDevice::instance(), ImGuiStyleMode::mini) {
-		m_ps.addDefaults();
 
 		auto &pdefs = m_ps.particleDefs();
 		for(int n = 0; n < pdefs.size(); n++) {
@@ -66,8 +65,13 @@ class App {
 
 		ImGui::Separator();
 
+		bool spawn_looped = m_spawn_tool.type == SpawnerType::repeated;
+		if(ImGui::Checkbox("Looped spawners", &spawn_looped))
+			m_spawn_tool.type = spawn_looped ? SpawnerType::repeated : SpawnerType::single;
+
 		ImGui::Text("LMB: add spawner\ndel: remove spawners under cursor");
 		ImGui::Text("Spawners: %d", m_spawners.size());
+		ImGui::Text("Alive systems: %d", m_ps.aliveSystems().size());
 
 		static bool show_test_window = 0;
 		if(show_test_window) {
@@ -97,7 +101,6 @@ class App {
 			spawner.update(m_ps);
 		for(int n = 0; n < m_spawners.size(); n++)
 			if(m_spawners[n].is_dead) {
-				m_spawners[n].remove(m_ps);
 				m_spawners[n] = m_spawners.back();
 				m_spawners.pop_back();
 				n--;
@@ -229,11 +232,11 @@ class App {
 	float m_zoom = 2.0f;
 
 	struct SpawnTool {
-		SpawnerType type = SpawnerType::repeated;
-		int system_id = 0;
+		SpawnerType type = SpawnerType::single;
+		ParticleSystemDefId system_id = ParticleSystemDefId(0);
 	} m_spawn_tool;
 
-	ParticleManager m_ps;
+	FXManager m_ps;
 	vector<Spawner> m_spawners;
 
 	vector<PTexture> m_particle_textures;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "base.h"
+#include "particle_system.h"
 
 DEFINE_ENUM(SpawnerType, single, repeated);
 
@@ -8,14 +8,15 @@ struct Spawner {
 	using Type = SpawnerType;
 
 	// TODO: dodatkowe parametry
-	Spawner(Type type, int2 tile_pos, int system_id);
+	Spawner(Type type, int2 tile_pos, ParticleSystemDefId);
 
-	void update(ParticleManager &);
-	void remove(ParticleManager &);
+	void update(FXManager &);
+	void remove(FXManager &);
 
-	Type type;
 	int2 tile_pos;
-	int system_id;
-	Maybe<int> instance_id;
+	ParticleSystemDefId def_id;
+	ParticleSystemId instance_id;
+	int spawn_count = 0;
 	bool is_dead = false;
+	Type type;
 };

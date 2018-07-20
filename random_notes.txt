@@ -7,3 +7,6 @@ Problem: jak zrobić żeby  efekty były tak samo rozpikselowane jak pozostałe 
  teksturką; W ogólności nie da się dobrze dopasować rozdzielczości teksturek na cząsteczkach
  do rozdzielczości aktualnego widoku (nawet jak się wyłączy filtrowanie tekstur w openglu).
  opcja: rendering do tekstury a następnie 2x upscale
+
+Problem: serializacja: jak poprawnie zrespawnować systemy cząstkowe po załadowaniu save-a?
+   zapisywanie stanu wszystkich cząsteczek raczej odpada;

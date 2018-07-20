@@ -1,8 +1,8 @@
-#include "particle_system.h"
+#include "fx_manager.h"
 
 using InterpType = InterpolationType;
 
-void ParticleManager::addDefaults() {
+void FXManager::addDefaultDefs() {
 	EmitterDef edef;
 	edef.strength = 5.0f;
 	edef.direction = 1.0f;
@@ -23,7 +23,7 @@ void ParticleManager::addDefaults() {
 	m_emitter_defs.emplace_back(edef);
 
 	ParticleSystemDef psdef;
-	psdef.subsystems.emplace_back(0, 0);
+	psdef.subsystems.emplace_back(ParticleDefId(0), EmitterDefId(0));
 	psdef.anim_length = 10.0f;
 	m_system_defs.emplace_back(psdef);
 };

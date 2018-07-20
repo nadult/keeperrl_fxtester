@@ -1,30 +1,23 @@
 #include "spawner.h"
 
-#include "particle_system.h"
+#include "fx_manager.h"
 
-Spawner::Spawner(Type type, int2 tile_pos, int system_id)
-	: type(type), tile_pos(tile_pos), system_id(system_id) {}
+Spawner::Spawner(Type type, int2 tile_pos, ParticleSystemDefId def_id)
+	: type(type), tile_pos(tile_pos), def_id(def_id) {}
 
-void Spawner::update(ParticleManager &manager) {
+void Spawner::update(FXManager &manager) {
 	if(is_dead)
 		return;
 
-	if(instance_id) {
-		auto &inst = manager.instances()[*instance_id];
-		if(inst.is_dead) { // TODO: proper cleanup
-			instance_id = none;
-			if(type == Type::single) {
-				is_dead = true;
-				return;
-			}
+	if(manager.dead(instance_id)) {
+		if(spawn_count > 0 && type == Type::single) {
+			is_dead = true;
+			return;
 		}
-	} else {
-		instance_id = manager.addInstance(system_id, float2(tile_pos) * default_tile_size);
+
+		spawn_count++;
+		instance_id = manager.addSystem(def_id, float2(tile_pos) * default_tile_size);
 	}
 }
 
-void Spawner::remove(ParticleManager &manager) {
-	// TODO: proper removal
-	if(instance_id)
-		manager.remove(*instance_id);
-}
+void Spawner::remove(FXManager &manager) { manager.kill(instance_id); }

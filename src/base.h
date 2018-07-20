@@ -13,13 +13,19 @@ using namespace fwk;
 
 struct ParticleDef;
 struct EmitterDef;
-
 struct ParticleSystemDef;
-struct ParticleInstance;
-struct SubSystemInstance;
 
+struct Particle;
+struct ParticleSystem;
+
+class FXManager;
 struct RenderQuad;
 
-class ParticleManager;
-
 static constexpr int default_tile_size = 24;
+
+struct RenderQuad {
+	array<float2, 4> positions;
+	array<float2, 4> tex_coords;
+	FColor color;
+	int particle_def_id;
+};

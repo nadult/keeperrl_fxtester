@@ -3,6 +3,8 @@
 #include "base.h"
 #include "curve.h"
 
+#include "tag_id.h"
+
 // Najpierw chcemy uzyskać proste efekty:
 // - emiter który jest w stanie emitować ileś tam cząsteczek na sekundę
 // - cząsteczka która może zmieniać kolor, ma kierunek lotu, zmieniającą się alfę i czas życia
@@ -17,10 +19,33 @@
 //
 // Nad specjalizacjami zastanawiamy się w kontekście konkretnego efektu jaki chcemy uzyskać
 
-// TODO: lepsze nazewnictwo...
-
 // AT: animation time:
 // PT: particle time: particle.life / particle.max_life
+
+using ParticleDefId = TagId<ParticleDef>;
+using EmitterDefId = TagId<EmitterDef>;
+using ParticleSystemDefId = TagId<ParticleSystemDef>;
+
+// Identifies a particluar particle system instance
+// Can be invalid (instances with time can die)
+class ParticleSystemId {
+  public:
+	ParticleSystemId() : m_index(-1) {}
+	ParticleSystemId(int index, int spawn_time) : m_index(index), m_spawn_time(spawn_time) {
+		PASSERT(index >= 0 && spawn_time >= 0);
+	}
+
+	bool validIndex() const { return m_index >= 0; }
+	explicit operator bool() const { return validIndex(); }
+
+	operator int() const { return m_index; }
+	int index() const { return m_index; }
+	int spawnTime() const { return m_spawn_time; }
+
+  private:
+	int m_index;
+	int m_spawn_time;
+};
 
 struct ParticleDef {
 	// Defines spawned particle life in seconds for given AT
@@ -50,8 +75,8 @@ struct EmitterDef {
 
 struct ParticleSystemDef {
 	struct SubSystem {
-		int emitter_id;
-		int particle_id;
+		ParticleDefId particle_id;
+		EmitterDefId emitter_id;
 	};
 	vector<SubSystem> subsystems;
 	float anim_length;
@@ -59,7 +84,7 @@ struct ParticleSystemDef {
 	// TODO: co się dzieje jak się kończy animacja? kasujemy instancję, czy wyłączamy emisję?
 };
 
-struct ParticleInstance {
+struct Particle {
 	float particleTime() const { return life / max_life; }
 
 	float2 pos, movement;
@@ -67,67 +92,24 @@ struct ParticleInstance {
 	float rot, rot_speed;
 };
 
-// TODO: better name to differentiate from system ?
-struct SubSystemInstance {
-	vector<ParticleInstance> particles;
-	float emission_fract = 0.0f;
-	int random_seed = 123;
-};
+struct ParticleSystem {
+	struct SubSystem {
+		vector<Particle> particles;
+		float emission_fract = 0.0f;
+		int random_seed = 123;
+	};
 
-struct ParticleSystemInstance {
-	ParticleSystemInstance(float2 pos, int system_id);
+	ParticleSystem(float2 pos, ParticleSystemDefId, int spawn_time, int num_subsystems);
 
-	void clear();
+	void kill();
 
 	// TODO: this should be small vector?
-	vector<SubSystemInstance> subsystems;
+	vector<SubSystem> subsystems;
 	float2 pos;
-	int system_id;
+
+	ParticleSystemDefId def_id;
+	int spawn_time;
+
 	float anim_time = 0.0f;
 	bool is_dead = false;
-};
-
-struct RenderQuad {
-	array<float2, 4> positions;
-	array<float2, 4> tex_coords;
-	FColor color;
-	int particle_def_id;
-};
-
-class ParticleManager {
-  public:
-	int addInstance(int system_id, float2 pos);
-	void simulate(float time_delta);
-	void addDefaults();
-
-	const auto &particleDefs() const { return m_particle_defs; }
-	const auto &emitterDefs() const { return m_emitter_defs; }
-	const auto &systemDefs() const { return m_system_defs; }
-	const auto &instances() const { return m_instances; }
-
-	// TODO: definitely type-safe id's
-	void remove(int instance_id);
-
-	// TODO: addInstance powinno zwrócić identyfikator który jednoznacznie
-	// identyfikuje instancję; Instancja może zginąć i być zastąpiona przez inną
-	// może mieć ten sam indeks, ale inny licznik spawnu
-
-	vector<RenderQuad> genQuads() const;
-
-	// TODO: otypowane indeksy ?
-
-  private:
-	void simulate(ParticleSystemInstance &, float time_delta);
-	void initialize(ParticleSystemInstance &);
-
-	vector<ParticleDef> m_particle_defs;
-	vector<EmitterDef> m_emitter_defs;
-	vector<ParticleSystemDef> m_system_defs;
-
-	// TODO: tutaj przydałby się IndexedVector?
-	// (żeby mozna było trzymać indeksy konkretnych instancji)
-	//
-	// TODO: ref-countowane instancje ? możemy też zrobić podobnie jak
-	// we FreeFT: każda instancja ma też licznik spawnu;
-	vector<ParticleSystemInstance> m_instances;
 };
