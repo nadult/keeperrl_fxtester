@@ -168,3 +168,18 @@ vector<ParticleSystemId> FXManager::aliveSystems() const {
 
 	return out;
 }
+
+ParticleDefId FXManager::addDef(ParticleDef def) {
+	m_particle_defs.emplace_back(move(def));
+	return ParticleDefId(m_particle_defs.size() - 1);
+}
+
+EmitterDefId FXManager::addDef(EmitterDef def) {
+	m_emitter_defs.emplace_back(move(def));
+	return EmitterDefId(m_emitter_defs.size() - 1);
+}
+
+ParticleSystemDefId FXManager::addDef(ParticleSystemDef def) {
+	m_system_defs.emplace_back(move(def));
+	return ParticleSystemDefId(m_system_defs.size() - 1);
+}

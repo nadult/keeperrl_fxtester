@@ -40,6 +40,10 @@ class FXManager {
 
 	ParticleSystemId addSystem(ParticleSystemDefId, float2 pos);
 
+	ParticleDefId addDef(ParticleDef);
+	EmitterDefId addDef(EmitterDef);
+	ParticleSystemDefId addDef(ParticleSystemDef);
+
 	vector<ParticleSystemId> aliveSystems() const;
 	const auto &systems() const { return m_systems; }
 	auto &systems() { return m_systems; }

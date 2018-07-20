@@ -61,6 +61,8 @@ struct ParticleDef {
 	string name;
 };
 
+// Różne kształty emitera;
+// Emiterem mogą też być cząsteczki innego subsystemu ?
 struct EmitterDef {
 	Curve<float> frequency; // particles per second
 	Curve<float> strength;

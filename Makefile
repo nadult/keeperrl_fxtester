@@ -17,7 +17,7 @@ _dummy := $(shell [ -d output ] || mkdir -p output)
 _dummy := $(shell [ -d $(BUILD_DIR) ] || mkdir -p $(BUILD_DIR))
 _dummy := $(shell [ -d $(BUILD_DIR)/imgui ] || mkdir -p $(BUILD_DIR)/imgui)
 
-SHARED_SRC=curve particle_system particle_system_defs fx_manager spawner\
+SHARED_SRC=curve particle_system fx_factory fx_manager spawner\
 		   imgui/imgui imgui/imgui_draw imgui/imgui_demo imgui_wrapper
 
 PROGRAM_SRC=psystem2d

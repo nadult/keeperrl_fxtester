@@ -1,4 +1,5 @@
 #include "imgui/imgui.h"
+#include "imgui_funcs.h"
 #include "imgui_wrapper.h"
 #include <fwk/filesystem.h>
 #include <fwk/gfx/dtexture.h>
@@ -14,13 +15,6 @@
 
 #include "fx_manager.h"
 #include "spawner.h"
-
-// Rodzaje spawnowalnych efektów:
-// - relatywne: magiczny efekt podpięty do jakiejś postaci; jak postać się
-//   przesuwa, to particle przesuwają się wraz z nią
-// - absolutne: jeśli zmienimy pozycję efektu, to stare cząsteczki zostają
-//   na swoim miejscu
-// - to można zrobić per-sub-system
 
 class App {
   public:
@@ -44,12 +38,22 @@ class App {
 		loadBackgrounds();
 	}
 
+	void doSpawnToolMenu() {
+		vector<const char *> names = transform(
+			m_ps.systemDefs(), [](const ParticleSystemDef &def) { return def.name.c_str(); });
+		selectIndex("New system", m_spawn_tool.system_id, names);
+		selectEnum("Spawner type", m_spawn_tool.type);
+
+		ImGui::Text("LMB: add spawner\ndel: remove spawners under cursor");
+		ImGui::Text("Spawners: %d", m_spawners.size());
+	}
+
 	void doMenu() {
 		ImGui::Begin("PSystem2D menu", nullptr,
 					 ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 		ImGui::SetWindowSize(m_menu_size);
 
-		if(ImGui::InputFloat("zoom", &m_zoom))
+		if(ImGui::InputFloat("Zoom", &m_zoom))
 			m_zoom = clamp(m_zoom, 0.1f, 20.0f);
 
 		if(ImGui::BeginMenu("Select background")) {
@@ -63,15 +67,10 @@ class App {
 			ImGui::EndMenu();
 		}
 
+		ImGui::Text("Alive systems: %d", m_ps.aliveSystems().size());
 		ImGui::Separator();
 
-		bool spawn_looped = m_spawn_tool.type == SpawnerType::repeated;
-		if(ImGui::Checkbox("Looped spawners", &spawn_looped))
-			m_spawn_tool.type = spawn_looped ? SpawnerType::repeated : SpawnerType::single;
-
-		ImGui::Text("LMB: add spawner\ndel: remove spawners under cursor");
-		ImGui::Text("Spawners: %d", m_spawners.size());
-		ImGui::Text("Alive systems: %d", m_ps.aliveSystems().size());
+		doSpawnToolMenu();
 
 		static bool show_test_window = 0;
 		if(show_test_window) {

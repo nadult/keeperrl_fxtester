@@ -10,3 +10,11 @@ Problem: jak zrobić żeby  efekty były tak samo rozpikselowane jak pozostałe 
 
 Problem: serializacja: jak poprawnie zrespawnować systemy cząstkowe po załadowaniu save-a?
    zapisywanie stanu wszystkich cząsteczek raczej odpada;
+
+Uwaga: są różne rodzaje spawnowalnych efektór:
+- relatywne: magiczny efekt podpięty do jakiejś postaci; jak postać się
+  przesuwa, to particle przesuwają się wraz z nią
+- absolutne: jeśli zmienimy pozycję efektu, to stare cząsteczki zostają
+  na swoim miejscu
+- to można zrobić per-sub-system
+
