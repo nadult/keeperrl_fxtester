@@ -4,16 +4,18 @@ using InterpType = InterpolationType;
 
 void FXManager::addDefaultDefs() {
 	EmitterDef edef;
-	edef.strength = 5.0f;
+	edef.strength = 30.0f;
 	edef.direction = 1.0f;
 	edef.direction_spread = fconstant::pi;
-	edef.frequency = {{10.0f, 100.0f}, InterpType::cosine};
+	edef.frequency = {{10.0f, 55.0f, 0.0f, 0.0}, InterpType::cosine};
+
 	edef.name = "test emitter 01";
 
 	ParticleDef pdef;
-	pdef.life = 15.0f;
+	pdef.life = 1.0f;
 	pdef.size = 32.0f;
-	pdef.alpha = {{0.0f, 0.1, 0.9f, 1.0f}, {0.0, 1.0, 1.0, 0.1}, InterpType::linear};
+	pdef.alpha = {{0.0f, 0.1, 0.8f, 1.0f}, {0.0, 1.0, 1.0, 0.0}, InterpType::linear};
+
 	pdef.color = {{float3(1.0f, 1.0f, 0.0f), float3(0.5f, 1.0f, 0.5f), float3(0.2f, 0.5f, 1.0f)},
 				  InterpType::linear};
 	pdef.name = "test particle 01";

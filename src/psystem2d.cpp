@@ -93,7 +93,7 @@ class App {
 	void removeSpawner(int2 pos) {
 		for(auto &spawner : m_spawners)
 			if(spawner.tile_pos == pos)
-				spawner.is_dead = true;
+				spawner.kill(m_ps);
 	}
 
 	void updateSpawners() {
@@ -256,7 +256,7 @@ extern "C" {
 int main(int argc, char **argv) {
 	double time = getTime();
 	int2 resolution(1300, 800);
-	GfxDeviceFlags gfx_flags = GfxDeviceOpt::resizable;
+	GfxDeviceFlags gfx_flags = GfxDeviceOpt::resizable | GfxDeviceOpt::vsync;
 	Backtrace::t_default_mode = BacktraceMode::full;
 
 	for(int n = 1; n < argc; n++) {

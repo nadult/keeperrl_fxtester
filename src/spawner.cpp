@@ -16,8 +16,12 @@ void Spawner::update(FXManager &manager) {
 		}
 
 		spawn_count++;
-		instance_id = manager.addSystem(def_id, float2(tile_pos) * default_tile_size);
+		float2 spawn_pos = (float2(tile_pos) + float2(0.5f)) * default_tile_size;
+		instance_id = manager.addSystem(def_id, spawn_pos);
 	}
 }
 
-void Spawner::remove(FXManager &manager) { manager.kill(instance_id); }
+void Spawner::kill(FXManager &manager) {
+	manager.kill(instance_id);
+	is_dead = true;
+}

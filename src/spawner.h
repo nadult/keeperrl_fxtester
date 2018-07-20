@@ -11,7 +11,7 @@ struct Spawner {
 	Spawner(Type type, int2 tile_pos, ParticleSystemDefId);
 
 	void update(FXManager &);
-	void remove(FXManager &);
+	void kill(FXManager &);
 
 	int2 tile_pos;
 	ParticleSystemDefId def_id;
