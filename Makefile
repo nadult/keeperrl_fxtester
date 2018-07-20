@@ -20,7 +20,7 @@ _dummy := $(shell [ -d $(BUILD_DIR)/imgui ] || mkdir -p $(BUILD_DIR)/imgui)
 SHARED_SRC=curve particle_system fx_factory fx_manager spawner\
 		   imgui/imgui imgui/imgui_draw imgui/imgui_demo imgui_wrapper
 
-PROGRAM_SRC=psystem2d
+PROGRAM_SRC=fx_tester
 
 ALL_SRC=$(PROGRAM_SRC) $(SHARED_SRC) $(IMGUI_SRC)
 
