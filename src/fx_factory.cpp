@@ -38,15 +38,18 @@ static void addSplinterEffect(FXManager &mgr) {
 	pdef.size = 8.0f;
 	pdef.slowdown = {{0.0f, 0.1f}, {5.0f, 1000.0f}};
 	pdef.alpha = {{0.0f, 0.8f, 1.0f}, {1.0, 1.0, 0.0}};
+	pdef.attract_bottom = 1.0f;
 
 	FColor brown(IColor(120, 87, 46));
-	pdef.color = brown.rgb();
+	// Kiedy cząsteczki opadną pod drzewo, robią się w zasięgu cienia
+	// TODO: lepiej rysować je po prostu pod cieniem
+	pdef.color = {{0.0f, 0.04f, 0.06}, {brown.rgb(), brown.rgb(), brown.rgb() * 0.6f}};
 	pdef.texture_name = "flakes_4x4_borders.png";
 	pdef.texture_tiles = int2(4, 4);
 
 	ParticleSystemDef psdef;
 	psdef.subsystems.emplace_back(mgr.addDef(pdef), mgr.addDef(edef));
-	psdef.subsystems.back().max_total_particles = 6;
+	psdef.subsystems.back().max_total_particles = 4;
 	psdef.anim_length = 5.0f;
 	psdef.name = "splinter";
 	mgr.addDef(psdef);

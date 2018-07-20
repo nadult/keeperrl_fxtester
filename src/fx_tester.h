@@ -51,6 +51,7 @@ class FXTester {
 	int2 m_selected_tile;
 	float m_zoom = 2.0f;
 	float m_animation_speed = 1.0f;
+	bool m_show_cursor = false;
 
 	struct SpawnTool;
 	struct OcclusionTool;

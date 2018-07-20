@@ -56,6 +56,7 @@ struct ParticleDef {
 	Curve<float> alpha;
 	Curve<float> size;
 	Curve<float> slowdown;
+	Curve<float> attract_bottom; // TODO: jakoś lepiej to zrobić
 	Curve<float3> color;
 
 	int2 texture_tiles = int2(1, 1);

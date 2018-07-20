@@ -17,12 +17,22 @@ void FXManager::simulate(ParticleSystem &ps, float time_delta) {
 		for(auto &pinst : ssinst.particles) {
 			float ptime = pinst.particleTime();
 			float slowdown = 1.0f / (1.0f + pdef.slowdown.sample(ptime));
+			float attract_bottom = pdef.attract_bottom.sample(ptime);
+
 			pinst.pos += pinst.movement * time_delta;
 			pinst.rot += pinst.rot_speed * time_delta;
 			if(slowdown < 1.0f) {
 				float factor = pow(slowdown, time_delta);
 				pinst.movement *= factor;
 				pinst.rot_speed *= factor;
+			}
+			if(attract_bottom > 0.0f) {
+				FRect bottom_rect(-12, 5, 10, 12);
+				auto closest_pos = bottom_rect.closestPoint(pinst.pos);
+				float dist = distance(closest_pos, pinst.pos);
+
+				if(dist > 0.01f)
+					pinst.movement += (closest_pos - pinst.pos) * attract_bottom;
 			}
 			pinst.life += time_delta;
 		}

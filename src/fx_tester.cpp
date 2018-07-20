@@ -151,6 +151,7 @@ void FXTester::doMenu() {
 		m_zoom = clamp(m_zoom, 0.25f, 10.0f);
 	if(ImGui::InputFloat("Anim speed", &m_animation_speed))
 		m_animation_speed = clamp(m_animation_speed, 0.0f, 100.0f);
+	ImGui::Checkbox("Show cursor", &m_show_cursor);
 
 	if(ImGui::Button("Select background"))
 		ImGui::OpenPopup("select_back");
@@ -251,7 +252,7 @@ void FXTester::render() const {
 
 	drawOccluders(out);
 
-	{ // drawing marker
+	if(m_show_cursor) {
 		float2 sel_pos(m_selected_tile);
 		FRect sel_rect = FRect(sel_pos, sel_pos + float2(1)) * tile_to_screen;
 		out.addFilledRect(sel_rect, m_marker_tex);
