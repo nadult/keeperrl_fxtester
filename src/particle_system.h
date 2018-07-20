@@ -55,6 +55,7 @@ struct ParticleSystemDef {
 	};
 	vector<SubSystem> subsystems;
 	float anim_length;
+	string name;
 	// TODO: co się dzieje jak się kończy animacja? kasujemy instancję, czy wyłączamy emisję?
 };
 
@@ -89,7 +90,7 @@ struct ParticleSystemInstance {
 struct RenderQuad {
 	array<float2, 4> positions;
 	array<float2, 4> tex_coords;
-	array<FColor, 4> colors;
+	FColor color;
 	int particle_def_id;
 };
 
@@ -103,6 +104,13 @@ class ParticleManager {
 	const auto &emitterDefs() const { return m_emitter_defs; }
 	const auto &systemDefs() const { return m_system_defs; }
 	const auto &instances() const { return m_instances; }
+
+	// TODO: definitely type-safe id's
+	void remove(int instance_id);
+
+	// TODO: addInstance powinno zwrócić identyfikator który jednoznacznie
+	// identyfikuje instancję; Instancja może zginąć i być zastąpiona przez inną
+	// może mieć ten sam indeks, ale inny licznik spawnu
 
 	vector<RenderQuad> genQuads() const;
 
@@ -118,5 +126,8 @@ class ParticleManager {
 
 	// TODO: tutaj przydałby się IndexedVector?
 	// (żeby mozna było trzymać indeksy konkretnych instancji)
+	//
+	// TODO: ref-countowane instancje ? możemy też zrobić podobnie jak
+	// we FreeFT: każda instancja ma też licznik spawnu;
 	vector<ParticleSystemInstance> m_instances;
 };

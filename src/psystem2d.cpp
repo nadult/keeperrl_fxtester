@@ -13,25 +13,32 @@
 #include <fwk/sys/stream.h>
 
 #include "particle_system.h"
+#include "spawner.h"
+
+// Rodzaje spawnowalnych efektów:
+// - relatywne: magiczny efekt podpięty do jakiejś postaci; jak postać się
+//   przesuwa, to particle przesuwają się wraz z nią
+// - absolutne: jeśli zmienimy pozycję efektu, to stare cząsteczki zostają
+//   na swoim miejscu
+// - to można zrobić per-sub-system
 
 class App {
   public:
-	static constexpr int tile_size = 24;
+	static constexpr int tile_size = default_tile_size;
 
 	App()
 		: m_viewport(GfxDevice::instance().windowSize()),
 		  m_font(FontFactory().makeFont("data/LiberationSans-Regular.ttf", 14)),
 		  m_imgui(GfxDevice::instance(), ImGuiStyleMode::mini) {
 		m_ps.addDefaults();
-		m_ps.addInstance(0, float2());
 
 		auto &pdefs = m_ps.particleDefs();
 		for(int n = 0; n < pdefs.size(); n++) {
 			auto &pdef = pdefs[n];
 			string file_name = "data/" + pdef.texture_name;
 			Loader loader(file_name);
-			m_textures.emplace_back(make_immutable<DTexture>(pdef.texture_name, loader));
-			m_materials.emplace_back(m_textures.back());
+			m_particle_textures.emplace_back(make_immutable<DTexture>(pdef.texture_name, loader));
+			m_particle_materials.emplace_back(m_particle_textures.back());
 		}
 
 		m_marker_tex = loadTexture("data/marker.png");
@@ -59,16 +66,42 @@ class App {
 
 		ImGui::Separator();
 
+		ImGui::Text("LMB: add spawner\ndel: remove spawners under cursor");
+		ImGui::Text("Spawners: %d", m_spawners.size());
+
 		static bool show_test_window = 0;
 		if(show_test_window) {
 			ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiSetCond_FirstUseEver);
 			ImGui::ShowTestWindow(&show_test_window);
 		}
 
-		m_menu_width = 120;
+		m_menu_width = 180;
 		m_menu_size = vmax(m_menu_size, int2(m_menu_width + 20, ImGui::GetCursorPosY()));
 
 		ImGui::End();
+	}
+
+	void addSpawner(int2 pos) {
+		auto &tool = m_spawn_tool;
+		m_spawners.emplace_back(tool.type, m_selection, tool.system_id);
+	}
+
+	void removeSpawner(int2 pos) {
+		for(auto &spawner : m_spawners)
+			if(spawner.tile_pos == pos)
+				spawner.is_dead = true;
+	}
+
+	void updateSpawners() {
+		for(auto &spawner : m_spawners)
+			spawner.update(m_ps);
+		for(int n = 0; n < m_spawners.size(); n++)
+			if(m_spawners[n].is_dead) {
+				m_spawners[n].remove(m_ps);
+				m_spawners[n] = m_spawners.back();
+				m_spawners.pop_back();
+				n--;
+			}
 	}
 
 	void tick(GfxDevice &device, double time_diff) {
@@ -82,10 +115,6 @@ class App {
 		events = m_imgui.finishFrame(device);
 
 		float screen_to_tile = 1.0f / (m_zoom * tile_size);
-		auto istate = device.inputState();
-		if(istate.isMouseButtonPressed(InputButton::right))
-			m_view_pos -= float2(istate.mouseMove()) * screen_to_tile;
-		m_selection = int2(m_view_pos + float2(istate.mousePos()) * screen_to_tile);
 
 		for(auto event : events) {
 			if(event.keyDown(InputKey::f11)) {
@@ -94,7 +123,18 @@ class App {
 															 : GfxDeviceOpt::fullscreen_desktop;
 				gfx_device.setWindowFullscreen(flags);
 			}
+			if(event.keyDown(InputKey::del)) {
+				removeSpawner(m_selection);
+			}
+			if(event.mouseButtonPressed(InputButton::right))
+				m_view_pos -= float2(event.mouseMove()) * screen_to_tile;
+			if(event.mouseButtonDown(InputButton::left))
+				addSpawner(m_selection);
+			if(event.isMouseOverEvent())
+				m_selection = int2(m_view_pos + float2(event.mousePos()) * screen_to_tile);
 		}
+
+		updateSpawners();
 	}
 
 	void render() const {
@@ -115,8 +155,9 @@ class App {
 			float2 positions[4];
 			for(int n = 0; n < 4; n++)
 				positions[n] = quad.positions[n] * m_zoom;
-			rlist2d.addQuads(positions, quad.tex_coords, quad.colors,
-							 m_materials[quad.particle_def_id]);
+			array<FColor, 4> colors{{quad.color, quad.color, quad.color, quad.color}};
+			rlist2d.addQuads(positions, quad.tex_coords, colors,
+							 m_particle_materials[quad.particle_def_id]);
 		}
 
 		{
@@ -187,9 +228,16 @@ class App {
 	int2 m_selection;
 	float m_zoom = 2.0f;
 
+	struct SpawnTool {
+		SpawnerType type = SpawnerType::repeated;
+		int system_id = 0;
+	} m_spawn_tool;
+
 	ParticleManager m_ps;
-	vector<PTexture> m_textures;
-	vector<SimpleMaterial> m_materials;
+	vector<Spawner> m_spawners;
+
+	vector<PTexture> m_particle_textures;
+	vector<SimpleMaterial> m_particle_materials;
 	PTexture m_marker_tex;
 
 	vector<Background> m_backgrounds;

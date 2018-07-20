@@ -11,3 +11,15 @@
 
 using namespace fwk;
 
+struct ParticleDef;
+struct EmitterDef;
+
+struct ParticleSystemDef;
+struct ParticleInstance;
+struct SubSystemInstance;
+
+struct RenderQuad;
+
+class ParticleManager;
+
+static constexpr int default_tile_size = 24;

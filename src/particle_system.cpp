@@ -106,12 +106,15 @@ void ParticleManager::simulate(float delta) {
 	for(auto &inst : m_instances)
 		if(!inst.is_dead)
 			simulate(inst, delta);
+	// TODO: remove dead instances
 }
 
 vector<RenderQuad> ParticleManager::genQuads() const {
 	vector<RenderQuad> out;
 
 	for(auto &sinst : m_instances) {
+		if(sinst.is_dead)
+			continue;
 		auto &sdef = m_system_defs[sinst.system_id];
 
 		for(int ssid = 0; ssid < sdef.subsystems.size(); ssid++) {
@@ -129,12 +132,16 @@ vector<RenderQuad> ParticleManager::genQuads() const {
 
 				auto corners = FRect(pos - size, pos + size).corners();
 				FColor color(pdef.color.sample(ptime), alpha);
-				array<FColor, 4> colors{{color, color, color, color}};
 				// TODO: rotate
-				out.emplace_back(corners, tex_coords, colors, part_def_id);
+				out.emplace_back(corners, tex_coords, color, part_def_id);
 			}
 		}
 	}
 
 	return out;
+}
+
+void ParticleManager::remove(int instance_id) {
+	if(instance_id >= 0 && instance_id < m_instances.size())
+		m_instances[instance_id].clear();
 }
