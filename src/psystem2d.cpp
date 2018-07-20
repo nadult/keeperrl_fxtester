@@ -46,15 +46,16 @@ class App {
 		if(ImGui::InputFloat("zoom", &m_zoom))
 			m_zoom = clamp(m_zoom, 0.1f, 20.0f);
 
-		if(!m_backgrounds.empty())
-			if(ImGui::BeginMenu("Select background")) {
-				for(int n = 0; n < m_backgrounds.size(); n++) {
-					auto &back = m_backgrounds[n];
-					if(ImGui::MenuItem(back.name.c_str()))
-						m_background_id = n;
-				}
-				ImGui::EndMenu();
+		if(ImGui::BeginMenu("Select background")) {
+			if(ImGui::MenuItem("disabled", nullptr, !m_background_id))
+				m_background_id = none;
+			for(int n = 0; n < m_backgrounds.size(); n++) {
+				auto &back = m_backgrounds[n];
+				if(ImGui::MenuItem(back.name.c_str(), nullptr, m_background_id == n))
+					m_background_id = n;
 			}
+			ImGui::EndMenu();
+		}
 
 		ImGui::Separator();
 
@@ -104,8 +105,8 @@ class App {
 		GfxDevice::clearColor(FColor(0.1, 0.1, 0.1));
 		float tile_to_screen = m_zoom * float(tile_size);
 
-		if(!m_backgrounds.empty()) {
-			auto &back = m_backgrounds[m_background_id];
+		if(m_background_id) {
+			auto &back = m_backgrounds[*m_background_id];
 			auto size = float2(back.texture->size()) * tile_to_screen / float(back.tile_size);
 			rlist2d.addFilledRect(FRect(size), back.texture);
 		}
@@ -171,6 +172,8 @@ class App {
 				tile_size = 24;
 			m_backgrounds.emplace_back(loadTexture(file_name), tile_size, element);
 		}
+		if(!m_backgrounds.empty())
+			m_background_id = 0;
 	}
 
   private:
@@ -190,7 +193,7 @@ class App {
 	PTexture m_marker_tex;
 
 	vector<Background> m_backgrounds;
-	int m_background_id = 0;
+	Maybe<int> m_background_id;
 
 	mutable float2 m_max_extents;
 	FilePath m_data_path;
