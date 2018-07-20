@@ -2,7 +2,7 @@
 #include "imgui/imgui.h"
 
 template <class Index> bool selectIndex(ZStr title, Index &value, CSpan<const char *> strings) {
-	DASSERT(strings.inRange((int)value));
+	DASSERT(!strings.empty() && strings.inRange((int)value));
 
 	ImGui::Text("%s", title.c_str());
 	int width = ImGui::GetItemRectSize().x;
