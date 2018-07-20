@@ -1,0 +1,9 @@
+Wymiary kafli: 24x24 (dwukrotnie powiększone)
+  niektóre sprite-y na kaflach wystają poza region samego kafla
+  np. drzewka albo niektóre postacie wystają trochę z góry
+
+Problem: jak zrobić żeby  efekty były tak samo rozpikselowane jak pozostałe sprite-y?
+ każda cząsteczka jest jakoś obróconym i przeskalowanym quadem z rozciągniętą
+ teksturką; W ogólności nie da się dobrze dopasować rozdzielczości teksturek na cząsteczkach
+ do rozdzielczości aktualnego widoku (nawet jak się wyłączy filtrowanie tekstur w openglu).
+ opcja: rendering do tekstury a następnie 2x upscale

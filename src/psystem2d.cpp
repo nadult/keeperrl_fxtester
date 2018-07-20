@@ -16,6 +16,27 @@
 
 class App {
   public:
+	struct Background {
+		PTexture texture;
+		int tile_size;
+		string name;
+	};
+
+	void loadBackgrounds() {
+		auto bkg_dir = "data/backgrounds/", bkg_suffix = ".png";
+		for(auto element : findFiles(bkg_dir, bkg_suffix)) {
+			string file_name = bkg_dir + element + bkg_suffix;
+			Loader loader(file_name);
+			int tile_size = 48;
+			if(element.find("_24") == element.size() - 3)
+				tile_size = 24;
+			m_backgrounds.emplace_back(make_immutable<DTexture>(file_name, loader), tile_size,
+									   element);
+		}
+	}
+
+	static float tileScale(int tile_size) { return float(tile_size) / 24.0f; }
+
 	App()
 		: m_viewport(GfxDevice::instance().windowSize()),
 		  m_font(FontFactory().makeFont("data/LiberationSans-Regular.ttf", 14)),
@@ -31,6 +52,8 @@ class App {
 			m_textures.emplace_back(make_immutable<DTexture>(pdef.texture_name, loader));
 			m_materials.emplace_back(m_textures.back());
 		}
+
+		loadBackgrounds();
 	}
 
 	void doMenu() {
@@ -38,14 +61,18 @@ class App {
 					 ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 		ImGui::SetWindowSize(m_menu_size);
 
-		if(ImGui::BeginMenu("Exit")) {
-			if(ImGui::MenuItem("I AM SURE!"))
-				m_exit_please = true;
-			ImGui::EndMenu();
-		}
-
 		if(ImGui::InputFloat("scale", &m_scale))
 			m_scale = clamp(m_scale, 0.1f, 20.0f);
+
+		if(!m_backgrounds.empty())
+			if(ImGui::BeginMenu("Select background")) {
+				for(int n = 0; n < m_backgrounds.size(); n++) {
+					auto &back = m_backgrounds[n];
+					if(ImGui::MenuItem(back.name.c_str()))
+						m_background_id = n;
+				}
+				ImGui::EndMenu();
+			}
 
 		ImGui::Separator();
 
@@ -89,6 +116,14 @@ class App {
 
 		GfxDevice::clearColor(FColor(0.1, 0.1, 0.1));
 
+		if(!m_backgrounds.empty()) {
+			auto &back = m_backgrounds[m_background_id];
+			SimpleMaterial mat(back.texture);
+			float2 size = float2(back.texture->size()) * 0.5f * m_scale / tileScale(back.tile_size);
+			FRect rect(center - size, center + size);
+			rlist2d.addFilledRect(rect, mat);
+		}
+
 		for(auto &quad : m_ps.genQuads()) {
 			float2 positions[4];
 			for(int n = 0; n < 4; n++)
@@ -109,6 +144,9 @@ class App {
 
 		if(auto *profiler = Profiler::instance())
 			profiler->updateTimer("mainLoop", time - device.frameTime(), time, false);
+
+		m_viewport = IRect(device.windowSize());
+
 		tick(device, time_diff);
 		render();
 		m_imgui.drawFrame(GfxDevice::instance());
@@ -127,11 +165,14 @@ class App {
 	int m_menu_width;
 	int2 m_menu_size;
 
-	float m_scale = 5.0f;
+	float m_scale = 2.0f;
 
 	ParticleManager m_ps;
 	vector<PTexture> m_textures;
 	vector<SimpleMaterial> m_materials;
+
+	vector<Background> m_backgrounds;
+	int m_background_id = 0;
 
 	mutable float2 m_max_extents;
 	FilePath m_data_path;
@@ -143,7 +184,7 @@ extern "C" {
 int main(int argc, char **argv) {
 	double time = getTime();
 	int2 resolution(1300, 800);
-	GfxDeviceFlags gfx_flags;
+	GfxDeviceFlags gfx_flags = GfxDeviceOpt::resizable;
 	Backtrace::t_default_mode = BacktraceMode::full;
 
 	for(int n = 1; n < argc; n++) {
