@@ -127,7 +127,7 @@ FXTester::FXTester()
 	auto &pdefs = m_ps.particleDefs();
 	for(int n = 0; n < pdefs.size(); n++) {
 		auto &pdef = pdefs[n];
-		string file_name = "data/" + pdef.texture_name;
+		string file_name = "data/particles/" + pdef.texture_name;
 		Loader loader(file_name);
 		m_particle_textures.emplace_back(make_immutable<DTexture>(pdef.texture_name, loader));
 		m_particle_materials.emplace_back(m_particle_textures.back());

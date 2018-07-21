@@ -42,6 +42,8 @@ template <class T> struct Curve {
 	// Position is always within range: <0, 1>
 	T sample(float position) const;
 
+	void print(float step = 0.05f) const;
+
 	vector<float> m_keys;
 	vector<T> m_values;
 	InterpType m_interp; // TODO: this doesn't have to be here

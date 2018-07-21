@@ -1,9 +1,10 @@
 *) Animacja rąbania drewna:
   - kierunkowo drzazgi nie wyglądają za dobrze (dlaczego?)
   - drzazgi (przynajmniej niektóre) mogłyby się chować za drzewo
-  - można pokombinować aby drzazgi leciały bardziej kierunkowo, ale już próbowałem i nie wygląda to za dobrze
+    cząsteczki mogą mieć parametr: layer, który może być losowany
   - można zrobić lepszą teksturkę (tak, żeby bardziej wyglądała jak drewno)
   - atraktor do podłogi ?
+    TODO: zrobić bardziej generyczne i opcjonalne atraktory 
 
 
 *) Animacja do kopania tuneli:

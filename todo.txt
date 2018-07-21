@@ -5,6 +5,7 @@ TODO:
 - jakieś zapisywanie efektów do pliku ?
   może na razie spróbujmy zrobić wszystko z kodu?
   chcemy wizualizację krzywych?
+- zapisywanie stanu programu do pliku
 
 - minimany działający particle system
   - odpryski przy kopaniu tuneli

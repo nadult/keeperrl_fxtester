@@ -58,7 +58,36 @@ static void addSplinterEffect(FXManager &mgr) {
 	// i najlepiej, jakby drzazgi lądowały pod drzewem!
 }
 
+static void addExplosionEffect(FXManager &mgr) {
+	// TODO: tutaj trzeba zrobić tak, żeby cząsteczki które spawnują się później
+	// zaczynały z innym kolorem
+	EmitterDef edef;
+	edef.strength_min = edef.strength_max = 15.0f;
+	edef.direction = 0.0f;
+	edef.direction_spread = fconstant::pi;
+	edef.frequency = 60.0f;
+
+	ParticleDef pdef;
+	pdef.life = 0.5f;
+	pdef.size = {{5.0f, 30.0f}};
+	pdef.alpha = {{0.0f, 0.5f, 1.0f}, {0.3, 0.4, 0.0}};
+
+	IColor start_color(255, 244, 88), end_color(225, 92, 19);
+	pdef.color = {{FColor(start_color).rgb(), FColor(end_color).rgb()}};
+	pdef.texture_name = "clouds_soft_borders_4x4.png";
+	pdef.texture_tiles = int2(4, 4);
+
+	ParticleSystemDef psdef;
+	psdef.subsystems.emplace_back(mgr.addDef(pdef), mgr.addDef(edef));
+	psdef.subsystems.back().max_total_particles = 20;
+
+	psdef.anim_length = 2.0f;
+	psdef.name = "explosion";
+	mgr.addDef(psdef);
+}
+
 void FXManager::addDefaultDefs() {
 	addTestEffect(*this);
 	addSplinterEffect(*this);
+	addExplosionEffect(*this);
 };
