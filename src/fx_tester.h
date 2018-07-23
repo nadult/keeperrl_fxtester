@@ -6,7 +6,6 @@
 #include <fwk/sys/unique_ptr.h>
 
 class FXManager;
-struct Spawner;
 
 namespace fx_tester {
 
@@ -20,10 +19,6 @@ class FXTester {
 
 	void spawnToolMenu();
 	void spawnToolInput(CSpan<InputEvent>);
-	void selectSpawner(int2);
-	void addSpawner(int2);
-	void removeSpawner(int2);
-	void updateSpawners();
 
 	void loadOccluders();
 	void removeOccluder(int2);
@@ -63,7 +58,6 @@ class FXTester {
 	UniquePtr<ImGuiWrapper> m_imgui;
 
 	UniquePtr<FXManager> m_ps;
-	fwk::vector<Spawner> m_spawners;
 
 	fwk::vector<PTexture> m_particle_textures;
 	fwk::vector<SimpleMaterial> m_particle_materials;

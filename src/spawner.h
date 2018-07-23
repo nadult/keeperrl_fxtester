@@ -21,4 +21,7 @@ struct Spawner {
 	int spawn_count = 0;
 	bool is_dead = false;
 	Type type;
+
+	float param1 = 0.0f, param2 = 0.0f;
+	FVec3 color_param = FVec3(1.0f);
 };

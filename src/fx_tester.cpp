@@ -32,9 +32,47 @@ namespace fx_tester {
 // ------------------------------------- SPAWN TOOL -----------------------------------------------
 
 struct FXTester::SpawnTool {
+	void update(FXManager &mgr) {
+		for(auto &spawner : spawners)
+			spawner.update(mgr);
+		for(int n = 0; n < spawners.size(); n++)
+			if(spawners[n].is_dead) {
+				if(selection_id == n)
+					selection_id = -1;
+				else if(selection_id > n)
+					selection_id--;
+				spawners[n] = spawners.back();
+				spawners.pop_back();
+				n--;
+			}
+		if(selection_id >= spawners.size())
+			selection_id = -1;
+	}
+
+	void add(int2 pos) { spawners.emplace_back(type, pos, system_id); }
+
+	void select(int2 pos) {
+		selection_id = -1;
+		for(int n = 0; n < spawners.size(); n++)
+			if(spawners[n].tile_pos == pos) {
+				selection_id = n;
+				break;
+			}
+	}
+
+	Spawner *selection() { return selection_id == -1 ? nullptr : &spawners[selection_id]; }
+
+	void remove(FXManager &mgr, int2 pos) {
+		for(auto &spawner : spawners)
+			if(spawner.tile_pos == pos)
+				spawner.kill(mgr);
+	}
+
+	fwk::vector<Spawner> spawners;
+	int selection_id = -1;
+
 	SpawnerType type = SpawnerType::single;
 	ParticleSystemDefId system_id = ParticleSystemDefId(0);
-	int selection_id = -1;
 };
 
 void FXTester::spawnToolMenu() {
@@ -47,60 +85,26 @@ void FXTester::spawnToolMenu() {
 
 	ImGui::Text("LMB: add spawner\ndel: remove spawners under cursor");
 	ImGui::Text("LMB + ctrl: select\n");
-	ImGui::Text("Spawners: %d", m_spawners.size());
-}
+	ImGui::Text("Spawners: %d", tool.spawners.size());
 
-void FXTester::addSpawner(int2 pos) {
-	auto &tool = *m_spawn_tool;
-	m_spawners.emplace_back(tool.type, m_selected_tile, tool.system_id);
-}
-
-void FXTester::selectSpawner(int2 pos) {
-	auto &tool = *m_spawn_tool;
-	tool.selection_id = -1;
-
-	for(int n = 0; n < m_spawners.size(); n++)
-		if(m_spawners[n].tile_pos == pos) {
-			tool.selection_id = n;
-			break;
-		}
-}
-
-void FXTester::removeSpawner(int2 pos) {
-	for(auto &spawner : m_spawners)
-		if(spawner.tile_pos == pos)
-			spawner.kill(*m_ps);
-}
-
-void FXTester::updateSpawners() {
-	auto &tool = *m_spawn_tool;
-
-	for(auto &spawner : m_spawners)
-		spawner.update(*m_ps);
-	for(int n = 0; n < m_spawners.size(); n++)
-		if(m_spawners[n].is_dead) {
-			if(tool.selection_id == n)
-				tool.selection_id = -1;
-			else if(tool.selection_id > n)
-				tool.selection_id--;
-			m_spawners[n] = m_spawners.back();
-			m_spawners.pop_back();
-			n--;
-		}
-	if(tool.selection_id >= m_spawners.size())
-		tool.selection_id = -1;
+	if(auto *sel = tool.selection()) {
+		ImGui::SliderFloat("Param #1", &sel->param1, 0.0f, 1.0f);
+		ImGui::SliderFloat("Param #2", &sel->param2, 0.0f, 1.0f);
+		ImGui::ColorEdit3("Color", sel->color_param.v);
+	}
 }
 
 void FXTester::spawnToolInput(CSpan<InputEvent> events) {
+	auto &tool = *m_spawn_tool;
 	for(auto event : events) {
 		if(event.keyDown(InputKey::del))
-			removeSpawner(m_selected_tile);
+			tool.remove(*m_ps, m_selected_tile);
 		if(event.mouseButtonDown(InputButton::left)) {
 			if(event.mods() & InputModifier::lctrl)
-				selectSpawner(m_selected_tile);
+				tool.select(m_selected_tile);
 			else {
-				addSpawner(m_selected_tile);
-				selectSpawner(m_selected_tile);
+				tool.add(m_selected_tile);
+				tool.select(m_selected_tile);
 			}
 		}
 	}
@@ -271,7 +275,7 @@ void FXTester::tick(GfxDevice &device, double time_diff) {
 	else if(m_mode == Mode::occlusion)
 		occlusionToolInput(events);
 
-	updateSpawners();
+	m_spawn_tool->update(*m_ps);
 }
 
 void FXTester::drawCursor(Renderer2D &out, int2 tile_pos, FColor color) const {
@@ -310,7 +314,7 @@ void FXTester::render() const {
 	if(m_show_cursor)
 		drawCursor(out, m_selected_tile, FColor(ColorId::white, 0.2f));
 	if(m_spawn_tool->selection_id != -1)
-		drawCursor(out, m_spawners[m_spawn_tool->selection_id].tile_pos,
+		drawCursor(out, m_spawn_tool->spawners[m_spawn_tool->selection_id].tile_pos,
 				   FColor(ColorId::blue, 0.2f));
 
 	out.render();
