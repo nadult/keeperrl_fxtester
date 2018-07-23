@@ -34,7 +34,7 @@ void FXManager::simulate(ParticleSystem &ps, float time_delta) {
 				float attract_min = 5.0f, attract_max = 10.0f;
 				if(pinst.pos.y < attract_min) {
 					float dist = attract_min - pinst.pos.y;
-					pinst.movement += float2(0.0f, dist * attract_bottom);
+					pinst.movement += FVec2(0.0f, dist * attract_bottom);
 				}
 			}
 			pinst.life += time_delta;
@@ -83,13 +83,13 @@ void FXManager::simulate(ParticleSystem &ps, float time_delta) {
 
 		for(int n = 0; n < num_particles; n++) {
 			Particle new_inst;
-			new_inst.pos = float2();
+			new_inst.pos = FVec2();
 			float pangle;
 			if(angle_spread < fconstant::pi)
 				pangle = angle + rand.getDouble(-angle_spread, angle_spread);
 			else
 				pangle = rand.getDouble(0.0f, fconstant::pi * 2.0f);
-			float2 pdir = angleToVector(pangle);
+			FVec2 pdir = angleToVector(pangle);
 			float strength = rand.getDouble(strength_min, strength_max);
 			float rot_speed = rand.getDouble(rot_speed_min, rot_speed_max);
 			new_inst.movement = pdir * strength;
@@ -98,10 +98,10 @@ void FXManager::simulate(ParticleSystem &ps, float time_delta) {
 			new_inst.life = 0.0f;
 			new_inst.max_life = max_life;
 
-			if(!(pdef.texture_tiles == int2(1, 1))) {
-				int2 tex_tile(rand.get(pdef.texture_tiles.x - 1),
-							  rand.get(pdef.texture_tiles.y - 1));
-				new_inst.tex_tile = tex_tile;
+			if(!(pdef.texture_tiles == IVec2(1, 1))) {
+				IVec2 tex_tile(rand.get(pdef.texture_tiles.x - 1),
+							   rand.get(pdef.texture_tiles.y - 1));
+				new_inst.tex_tile = SVec2(tex_tile);
 			}
 			ssinst.particles.emplace_back(new_inst);
 			ssinst.total_particles++;
@@ -120,8 +120,8 @@ void FXManager::simulate(float delta) {
 			simulate(inst, delta);
 }
 
-vector<RenderQuad> FXManager::genQuads() const {
-	vector<RenderQuad> out;
+std::vector<RenderQuad> FXManager::genQuads() const {
+	std::vector<RenderQuad> out;
 
 	for(auto &ps : m_systems) {
 		if(ps.is_dead)
@@ -133,17 +133,17 @@ vector<RenderQuad> FXManager::genQuads() const {
 			auto &pdef = m_particle_defs[part_def_id];
 			auto &ssinst = ps.subsystems[ssid];
 
-			float2 inv_tex_tile = vinv(float2(pdef.texture_tiles));
+			FVec2 inv_tex_tile = vinv(FVec2(pdef.texture_tiles));
 			for(auto &pinst : ssinst.particles) {
 				float ptime = pinst.particleTime();
 
-				float2 pos = pinst.pos + ps.pos;
-				float2 size(pdef.size.sample(ptime) * 0.5f);
+				FVec2 pos = pinst.pos + ps.pos;
+				FVec2 size(pdef.size.sample(ptime) * 0.5f);
 				float alpha = pdef.alpha.sample(ptime);
 
-				FRect tex_rect(float2(1));
-				if(!(pdef.texture_tiles == int2(1, 1)))
-					tex_rect = (tex_rect + float2(pinst.tex_tile)) * inv_tex_tile;
+				FRect tex_rect(FVec2(1));
+				if(!(pdef.texture_tiles == IVec2(1, 1)))
+					tex_rect = (tex_rect + FVec2(pinst.tex_tile)) * inv_tex_tile;
 
 				auto corners = FRect(pos - size, pos + size).corners();
 				FColor color(pdef.color.sample(ptime), alpha);
@@ -179,7 +179,7 @@ const ParticleSystem &FXManager::get(ParticleSystemId id) const {
 	return m_systems[id];
 }
 
-ParticleSystemId FXManager::addSystem(ParticleSystemDefId def_id, float2 pos) {
+ParticleSystemId FXManager::addSystem(ParticleSystemDefId def_id, FVec2 pos) {
 	auto &def = (*this)[def_id];
 
 	for(int n = 0; n < m_systems.size(); n++)

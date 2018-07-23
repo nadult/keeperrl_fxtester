@@ -69,5 +69,5 @@ template <class T> void Curve<T>::print(float step) const {
 }
 
 template struct Curve<float>;
-template struct Curve<float2>;
-template struct Curve<float3>;
+template struct Curve<FVec2>;
+template struct Curve<FVec3>;

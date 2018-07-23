@@ -1,8 +1,21 @@
+#include "fx_tester_base.h"
+
+#undef FATAL
+#undef CHECK
+
+#include "fx_manager.h"
+#include "spawner.h"
+
+// TODO: move it to separate file
+Color::Color(Uint8 r, Uint8 g, Uint8 b, Uint8 a) : SDL_Color{r, g, b, a} {}
+
 #include "fx_tester.h"
 
 #include "imgui/imgui.h"
 #include "imgui_funcs.h"
 #include "imgui_wrapper.h"
+
+#include <fwk/filesystem.h>
 #include <fwk/gfx/dtexture.h>
 #include <fwk/gfx/gfx_device.h>
 #include <fwk/gfx/material.h>
@@ -13,13 +26,7 @@
 #include <fwk/sys/input.h>
 #include <fwk/sys/stream.h>
 
-#include "fx_manager.h"
-#include "spawner.h"
-
-using namespace fwk;
-
-// TODO: move it to separate file
-Color::Color(Uint8 r, Uint8 g, Uint8 b, Uint8 a) : SDL_Color{r, g, b, a} {}
+namespace fx_tester {
 
 // ------------------------------------------------------------------------------------------------
 // ------------------------------------- SPAWN TOOL -----------------------------------------------
@@ -32,29 +39,29 @@ struct FXTester::SpawnTool {
 void FXTester::spawnToolMenu() {
 	auto &tool = *m_spawn_tool;
 
-	auto names =
-		transform(m_ps.systemDefs(), [](const ParticleSystemDef &def) { return def.name.c_str(); });
+	auto names = transform(m_ps->systemDefs(),
+						   [](const ParticleSystemDef &def) { return def.name.c_str(); });
 	selectIndex("New system", tool.system_id, names);
-	selectEnum("Spawner type", tool.type);
+	selectIndex("Spawner type", tool.type, {"single", "repeated"});
 
 	ImGui::Text("LMB: add spawner\ndel: remove spawners under cursor");
 	ImGui::Text("Spawners: %d", m_spawners.size());
 }
 
-void FXTester::addSpawner(fwk::int2 pos) {
+void FXTester::addSpawner(int2 pos) {
 	auto &tool = *m_spawn_tool;
 	m_spawners.emplace_back(tool.type, m_selected_tile, tool.system_id);
 }
 
-void FXTester::removeSpawner(fwk::int2 pos) {
+void FXTester::removeSpawner(int2 pos) {
 	for(auto &spawner : m_spawners)
 		if(spawner.tile_pos == pos)
-			spawner.kill(m_ps);
+			spawner.kill(*m_ps);
 }
 
 void FXTester::updateSpawners() {
 	for(auto &spawner : m_spawners)
-		spawner.update(m_ps);
+		spawner.update(*m_ps);
 	for(int n = 0; n < m_spawners.size(); n++)
 		if(m_spawners[n].is_dead) {
 			m_spawners[n] = m_spawners.back();
@@ -77,7 +84,7 @@ void FXTester::spawnToolInput(CSpan<InputEvent> events) {
 
 struct FXTester::OcclusionTool {
 	fwk::vector<pair<PTexture, string>> textures;
-	fwk::vector<pair<int, fwk::int2>> occluders;
+	fwk::vector<pair<int, int2>> occluders;
 	int new_occluder_id = 0;
 };
 
@@ -113,25 +120,23 @@ void FXTester::occlusionToolInput(CSpan<InputEvent> events) {
 void FXTester::drawOccluders(Renderer2D &out) const {
 	auto &tool = *m_occlusion_tool;
 
-	float tile_to_screen = m_zoom * tile_size;
-	FRect tile_rect = FRect(fwk::float2(tile_to_screen));
+	float tile_to_screen = m_zoom * default_tile_size;
+	auto tile_rect = fwk::FRect(float2(tile_to_screen));
 
 	for(auto &occluder : tool.occluders) {
 		auto tex = tool.textures[occluder.first].first;
-		out.addFilledRect(tile_rect + fwk::float2(occluder.second) * tile_to_screen, tex);
+		out.addFilledRect(tile_rect + float2(occluder.second) * tile_to_screen, tex);
 	}
 }
 
 // ------------------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------------------
 
-FXTester::FXTester()
-	: m_viewport(GfxDevice::instance().windowSize()),
-	  m_imgui(GfxDevice::instance(), ImGuiStyleMode::mini) {
+FXTester::FXTester() : m_viewport(GfxDevice::instance().windowSize()) {
+	m_imgui.emplace(GfxDevice::instance(), ImGuiStyleMode::mini);
+	m_ps.emplace();
 
-	auto &pdefs = m_ps.particleDefs();
-	for(int n = 0; n < pdefs.size(); n++) {
-		auto &pdef = pdefs[n];
+	for(auto &pdef : m_ps->particleDefs()) {
 		string file_name = "data/particles/" + pdef.texture_name;
 		Loader loader(file_name);
 		m_particle_textures.emplace_back(make_immutable<DTexture>(pdef.texture_name, loader));
@@ -162,7 +167,7 @@ void FXTester::doMenu() {
 		ImGui::OpenPopup("select_back");
 	if(ImGui::BeginPopup("select_back")) {
 		if(ImGui::MenuItem("disabled", nullptr, !m_background_id))
-			m_background_id = fwk::none;
+			m_background_id = {};
 		for(int n = 0; n < m_backgrounds.size(); n++) {
 			auto &back = m_backgrounds[n];
 			if(ImGui::MenuItem(back.name.c_str(), nullptr, m_background_id == n))
@@ -171,7 +176,7 @@ void FXTester::doMenu() {
 		ImGui::EndPopup();
 	}
 
-	ImGui::Text("Alive systems: %d", m_ps.aliveSystems().size());
+	ImGui::Text("Alive systems: %d", m_ps->aliveSystems().size());
 	ImGui::Separator();
 
 	if(m_mode == Mode::spawn)
@@ -186,20 +191,20 @@ void FXTester::doMenu() {
 	}
 
 	m_menu_width = 220;
-	m_menu_size = vmax(m_menu_size, fwk::int2(m_menu_width + 20, ImGui::GetCursorPosY()));
+	m_menu_size = vmax(m_menu_size, int2(m_menu_width + 20, ImGui::GetCursorPosY()));
 
 	ImGui::End();
 }
 
 void FXTester::tick(GfxDevice &device, double time_diff) {
-	m_ps.simulate(time_diff * m_animation_speed);
+	m_ps->simulate(time_diff * m_animation_speed);
 
 	auto events = device.inputEvents();
-	m_imgui.beginFrame(device);
+	m_imgui->beginFrame(device);
 	doMenu();
-	events = m_imgui.finishFrame(device);
+	events = m_imgui->finishFrame(device);
 
-	float screen_to_tile = 1.0f / (m_zoom * tile_size);
+	float screen_to_tile = 1.0f / (m_zoom * default_tile_size);
 
 	for(auto event : events) {
 		if(event.keyDown(InputKey::f11)) {
@@ -214,10 +219,9 @@ void FXTester::tick(GfxDevice &device, double time_diff) {
 			m_mode = Mode::occlusion;
 
 		if(event.mouseButtonPressed(InputButton::right))
-			m_view_pos -= fwk::float2(event.mouseMove()) * screen_to_tile;
+			m_view_pos -= float2(event.mouseMove()) * screen_to_tile;
 		if(event.isMouseOverEvent()) {
-			m_selected_tile =
-				fwk::int2(m_view_pos + fwk::float2(event.mousePos()) * screen_to_tile);
+			m_selected_tile = int2(m_view_pos + float2(event.mousePos()) * screen_to_tile);
 			if(int zoom = event.mouseWheel())
 				m_zoom = fwk::clamp(m_zoom * (zoom > 0 ? 1.25f : 0.8f), 0.25f, 10.0f);
 		}
@@ -233,19 +237,19 @@ void FXTester::tick(GfxDevice &device, double time_diff) {
 
 void FXTester::render() const {
 	Renderer2D out(m_viewport);
-	out.setViewPos(m_view_pos * float(tile_size) * m_zoom);
+	out.setViewPos(m_view_pos * float(default_tile_size) * m_zoom);
 
 	GfxDevice::clearColor(FColor(0.1, 0.1, 0.1));
-	float tile_to_screen = m_zoom * float(tile_size);
+	float tile_to_screen = m_zoom * float(default_tile_size);
 
 	if(m_background_id) {
 		auto &back = m_backgrounds[*m_background_id];
-		auto size = fwk::float2(back.texture->size()) * tile_to_screen / float(back.tile_size);
-		out.addFilledRect(FRect(size), back.texture);
+		auto size = float2(back.texture->size()) * tile_to_screen / float(back.tile_size);
+		out.addFilledRect(fwk::FRect(size), back.texture);
 	}
 
-	for(auto &quad : m_ps.genQuads()) {
-		fwk::float2 positions[4], tex_coords[4];
+	for(auto &quad : m_ps->genQuads()) {
+		float2 positions[4], tex_coords[4];
 		for(int n = 0; n < 4; n++) {
 			positions[n] = {quad.positions[n].x * m_zoom, quad.positions[n].y * m_zoom};
 			tex_coords[n] = {quad.tex_coords[n].x, quad.tex_coords[n].y};
@@ -259,8 +263,8 @@ void FXTester::render() const {
 	drawOccluders(out);
 
 	if(m_show_cursor) {
-		fwk::float2 sel_pos(m_selected_tile);
-		FRect sel_rect = FRect(sel_pos, sel_pos + fwk::float2(1)) * tile_to_screen;
+		float2 sel_pos(m_selected_tile);
+		auto sel_rect = fwk::FRect(sel_pos, sel_pos + float2(1)) * tile_to_screen;
 		out.addFilledRect(sel_rect, m_marker_tex);
 	}
 
@@ -274,11 +278,11 @@ bool FXTester::mainLoop(GfxDevice &device) {
 	last_time = time;
 	time_diff = fwk::clamp(time_diff, 1 / 240.0, 1 / 5.0);
 
-	m_viewport = IRect(device.windowSize());
+	m_viewport = fwk::IRect(device.windowSize());
 
 	tick(device, time_diff);
 	render();
-	m_imgui.drawFrame(GfxDevice::instance());
+	m_imgui->drawFrame(GfxDevice::instance());
 
 	return true;
 }
@@ -308,7 +312,7 @@ PTexture FXTester::loadTexture(string file_name) {
 extern "C" {
 int main(int argc, char **argv) {
 	double time = getTime();
-	fwk::int2 resolution(1300, 800);
+	int2 resolution(1300, 800);
 	GfxDeviceFlags gfx_flags = GfxDeviceOpt::resizable | GfxDeviceOpt::vsync;
 	Backtrace::t_default_mode = BacktraceMode::full;
 
@@ -316,7 +320,7 @@ int main(int argc, char **argv) {
 		string argument = argv[n];
 		if(argument == "--res") {
 			ASSERT(n + 2 < argc);
-			resolution = fwk::int2(fromString<int>(argv[n + 1]), fromString<int>(argv[n + 2]));
+			resolution = int2(fromString<int>(argv[n + 1]), fromString<int>(argv[n + 2]));
 			ASSERT(resolution.x >= 320 && resolution.y >= 200);
 			n += 2;
 		} else if(argument == "--full-screen") {
@@ -338,5 +342,6 @@ int main(int argc, char **argv) {
 	gfx_device.runMainLoop(FXTester::mainLoop, &tester);
 
 	return 0;
+}
 }
 }

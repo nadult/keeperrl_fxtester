@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fvec.h"
+#include <memory>
 
 // Axis-aligned rect
 // Invariant: min <= max (use validRange)
@@ -111,7 +112,7 @@ template <class T> class Rect {
 		return true;
 	}
 
-	array<Point, 4> corners() const {
+	std::array<Point, 4> corners() const {
 		return {{m_min, {m_min[0], m_max[1]}, m_max, {m_max[0], m_min[1]}}};
 	}
 
@@ -122,13 +123,6 @@ template <class T> class Rect {
 		if(!emptyRange(tmin, tmax))
 			return Rect{tmin, tmax, no_asserts_tag};
 		return Rect{};
-	}
-
-	// When Rect touch, returned Rect will be empty
-	optional<Rect> intersection(const Rect &rhs) const {
-		auto tmin = vmax(m_min, rhs.m_min);
-		auto tmax = vmin(m_max, rhs.m_max);
-		return Rect{tmin, tmax, no_asserts_tag};
 	}
 
 	Point closestPoint(const Point &point) const { return vmin(vmax(point, m_min), m_max); }
@@ -166,5 +160,5 @@ template <class T> class Rect {
 	};
 };
 
-using FRect = Rect<float2>;
-using IRect = Rect<int2>;
+using FRect = Rect<FVec2>;
+using IRect = Rect<IVec2>;

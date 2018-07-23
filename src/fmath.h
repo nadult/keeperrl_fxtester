@@ -1,8 +1,8 @@
 #pragma once
 
-#include "util.h"
 #include <cmath>
 #include <limits>
+#include <utility>
 
 struct NoAssertsTag {};
 static constexpr NoAssertsTag no_asserts_tag;
@@ -21,7 +21,7 @@ inline float inv(float s) { return 1.0f / s; }
 inline float degToRad(float v) { return v * (2.0f * fconstant::pi / 360.0f); }
 inline float radToDeg(float v) { return v * (360.0 / (2.0 * fconstant::pi)); }
 
-pair<float, float> sincos(float radians);
+std::pair<float, float> sincos(float radians);
 
 // Return angle in range (0; 2 * PI)
 float normalizeAngle(float radians);

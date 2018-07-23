@@ -1,13 +1,17 @@
 #pragma once
 
-#include "fx_tester_base.h"
 #include <fwk/gfx_base.h>
+#include <fwk_vector.h>
+
+namespace fx_tester {
+
+using namespace fwk;
 
 DEFINE_ENUM(ImGuiStyleMode, normal, mini);
 
 class ImGuiWrapper {
   public:
-	ImGuiWrapper(fwk::GfxDevice &, ImGuiStyleMode);
+	ImGuiWrapper(GfxDevice &, ImGuiStyleMode);
 	ImGuiWrapper(ImGuiWrapper &&);
 	~ImGuiWrapper();
 
@@ -17,12 +21,12 @@ class ImGuiWrapper {
 
 	bool o_hide_menu = false;
 
-	void beginFrame(fwk::GfxDevice &);
-	fwk::vector<fwk::InputEvent> finishFrame(fwk::GfxDevice &);
-	void drawFrame(fwk::GfxDevice &);
+	void beginFrame(GfxDevice &);
+	fwk::vector<InputEvent> finishFrame(GfxDevice &);
+	void drawFrame(GfxDevice &);
 
-	void saveSettings(fwk::XmlNode) const;
-	void loadSettings(fwk::CXmlNode);
+	void saveSettings(XmlNode) const;
+	void loadSettings(CXmlNode);
 
 	using ProcessFunc = void (*)(void *);
 	void addProcess(ProcessFunc, void *arg);
@@ -42,3 +46,4 @@ class ImGuiWrapper {
 	uint m_font_tex = 0;
 	static ImGuiWrapper *s_instance;
 };
+}

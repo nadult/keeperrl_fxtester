@@ -2,19 +2,24 @@
 
 #include "fmath.h"
 
+#ifndef FWK_VEC2_CONVERSIONS
+#define FWK_VEC2_CONVERSIONS
+#endif
+
+#ifndef FWK_VEC3_CONVERSIONS
+#define FWK_VEC3_CONVERSIONS
+#endif
+
+// TODO: better name to differentiate from Vec2 ?
 template <class T> struct vec2;
 template <class T> struct vec3;
-template <class T> struct vec4;
 
-using short2 = vec2<short>;
-using short3 = vec3<short>;
-using short4 = vec4<short>;
-using int2 = vec2<int>;
-using int3 = vec3<int>;
-using int4 = vec4<int>;
-using float2 = vec2<float>;
-using float3 = vec3<float>;
-using float4 = vec4<float>;
+using SVec2 = vec2<short>;
+using SVec3 = vec3<short>;
+using IVec2 = vec2<int>;
+using IVec3 = vec3<int>;
+using FVec2 = vec2<float>;
+using FVec3 = vec3<float>;
 
 template <class T> struct vec2 {
 	using Scalar = T;
@@ -22,6 +27,7 @@ template <class T> struct vec2 {
 
 	constexpr vec2(T x, T y) : x(x), y(y) {}
 	constexpr vec2() : x(0), y(0) {}
+	FWK_VEC2_CONVERSIONS
 
 	vec2(const vec2 &) = default;
 	vec2 &operator=(const vec2 &) = default;
@@ -58,6 +64,7 @@ template <class T> struct vec3 {
 	constexpr vec3(const vec2<T> &xy, T z) : x(xy.x), y(xy.y), z(z) {}
 	constexpr vec3() : x(0), y(0), z(0) {}
 	explicit vec3(T t) : x(t), y(t), z(t) {}
+	FWK_VEC3_CONVERSIONS
 
 	vec3(const vec3 &) = default;
 	vec3 &operator=(const vec3 &) = default;
@@ -167,6 +174,6 @@ template <class T> auto cross(const vec2<T> &a, const vec2<T> &b) {
 
 template <class T> vec2<T> perpendicular(const vec2<T> &v) { return {-v[1], v[0]}; }
 
-float vectorToAngle(const float2 &normalized_vector);
-float2 angleToVector(float radians);
-float2 rotateVector(const float2 &vec, float radians);
+float vectorToAngle(const FVec2 &normalized_vector);
+FVec2 angleToVector(float radians);
+FVec2 rotateVector(const FVec2 &vec, float radians);

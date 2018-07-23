@@ -13,8 +13,7 @@ static void addTestEffect(FXManager &mgr) {
 	pdef.size = 32.0f;
 	pdef.alpha = {{0.0f, 0.1, 0.8f, 1.0f}, {0.0, 1.0, 1.0, 0.0}, InterpType::linear};
 
-	pdef.color = {{float3(1.0f, 1.0f, 0.0f), float3(0.5f, 1.0f, 0.5f), float3(0.2f, 0.5f, 1.0f)},
-				  InterpType::linear};
+	pdef.color = {{{1.0f, 1.0f, 0.0f}, {0.5f, 1.0f, 0.5f}, {0.2f, 0.5f, 1.0f}}, InterpType::linear};
 	pdef.texture_name = "circular.png";
 
 	ParticleSystemDef psdef;
@@ -46,7 +45,7 @@ static void addSplinterEffect(FXManager &mgr) {
 	// TODO: lepiej rysować je po prostu pod cieniem
 	pdef.color = {{0.0f, 0.04f, 0.06}, {brown.rgb(), brown.rgb(), brown.rgb() * 0.6f}};
 	pdef.texture_name = "flakes_4x4_borders.png";
-	pdef.texture_tiles = int2(4, 4);
+	pdef.texture_tiles = {4, 4};
 
 	ParticleSystemDef psdef;
 	psdef.subsystems.emplace_back(mgr.addDef(pdef), mgr.addDef(edef));
@@ -76,7 +75,7 @@ static void addExplosionEffect(FXManager &mgr) {
 	Color start_color(255, 244, 88), end_color(225, 92, 19);
 	pdef.color = {{FColor(start_color).rgb(), FColor(end_color).rgb()}};
 	pdef.texture_name = "clouds_soft_borders_4x4.png";
-	pdef.texture_tiles = int2(4, 4);
+	pdef.texture_tiles = {4, 4};
 
 	ParticleSystemDef psdef;
 	psdef.subsystems.emplace_back(mgr.addDef(pdef), mgr.addDef(edef));

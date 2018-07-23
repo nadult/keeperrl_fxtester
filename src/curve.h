@@ -51,5 +51,5 @@ template <class T> struct Curve {
 };
 
 extern template struct Curve<float>;
-extern template struct Curve<float2>;
-extern template struct Curve<float3>;
+extern template struct Curve<FVec2>;
+extern template struct Curve<FVec3>;

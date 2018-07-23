@@ -1,12 +1,12 @@
 #pragma once
 
 #include "particle_system.h"
-#include "renderer.h"
+#include "renderer.h" // TODO: only for Color
 
 struct RenderQuad {
 	// TODO: compress it somehow
-	std::array<float2, 4> positions;
-	std::array<float2, 4> tex_coords;
+	std::array<FVec2, 4> positions;
+	std::array<FVec2, 4> tex_coords;
 	Color color;
 	int particle_def_id;
 };
@@ -22,9 +22,9 @@ class FXManager {
 	const auto &emitterDefs() const { return m_emitter_defs; }
 	const auto &systemDefs() const { return m_system_defs; }
 
-	bool valid(ParticleDefId id) const { return id < m_particle_defs.size(); }
-	bool valid(EmitterDefId id) const { return id < m_emitter_defs.size(); }
-	bool valid(ParticleSystemDefId id) const { return id < m_system_defs.size(); }
+	bool valid(ParticleDefId id) const { return id < (int)m_particle_defs.size(); }
+	bool valid(EmitterDefId id) const { return id < (int)m_emitter_defs.size(); }
+	bool valid(ParticleSystemDefId id) const { return id < (int)m_system_defs.size(); }
 
 	const ParticleDef &operator[](ParticleDefId id) const {
 		CHECK(valid(id));
@@ -47,7 +47,7 @@ class FXManager {
 	ParticleSystem &get(ParticleSystemId);
 	const ParticleSystem &get(ParticleSystemId) const;
 
-	ParticleSystemId addSystem(ParticleSystemDefId, float2 pos);
+	ParticleSystemId addSystem(ParticleSystemDefId, FVec2 pos);
 
 	ParticleDefId addDef(ParticleDef);
 	EmitterDefId addDef(EmitterDef);
@@ -57,16 +57,16 @@ class FXManager {
 	const auto &systems() const { return m_systems; }
 	auto &systems() { return m_systems; }
 
-	vector<RenderQuad> genQuads() const;
+	std::vector<RenderQuad> genQuads() const;
 
   private:
 	void addDefaultDefs();
 	void simulate(ParticleSystem &, float time_delta);
 	void initialize(ParticleSystem &);
 
-	vector<ParticleDef> m_particle_defs;
-	vector<EmitterDef> m_emitter_defs;
-	vector<ParticleSystemDef> m_system_defs;
+	std::vector<ParticleDef> m_particle_defs;
+	std::vector<EmitterDef> m_emitter_defs;
+	std::vector<ParticleSystemDef> m_system_defs;
 
 	// TODO: add simple statistics: num particles, instances, etc.
 

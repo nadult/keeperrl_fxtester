@@ -44,7 +44,3 @@ Integracja z Keeperem:
 Integracja libfwk:
 - Problem: libfwk działa bez wyjątków (kompilacja zakłada, że są wyłączone); Jeśli libfwk
   jest używane tylko do edytora cząsteczek, to nie powinno to stanowić problemu
-- Problem: int2, float2, FColor, Color, FRect, IRect są potrzebne zarówno w particle systemach
-  jak i w aplikacji testowej; Jak rozwiązać problem konfliktów nazw i konwersji między różnymi
-  typami ?
-- Problem: makra o tych samych nazwach w libfwk & keeperze

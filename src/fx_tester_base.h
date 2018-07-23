@@ -1,17 +1,22 @@
 #pragma once
 
-#include <fwk/gfx/color.h>
-#include <fwk/gfx_base.h>
-#include <fwk/math_base.h>
+#include <fwk/math/box.h>
+#include <fwk_vector.h>
 
-struct ParticleDef;
-struct EmitterDef;
-struct ParticleSystemDef;
+#define FWK_VEC2_CONVERSIONS                                                                       \
+	vec2(const fwk::vec2<T> &rhs) : x(rhs.x), y(rhs.y) {}                                          \
+	operator fwk::vec2<T>() const { return {x, y}; }
 
-struct Particle;
-struct ParticleSystem;
+#define FWK_VEC3_CONVERSIONS                                                                       \
+	vec3(const fwk::vec3<T> &rhs) : x(rhs.x), y(rhs.y), z(rhs.z) {}                                \
+	operator fwk::vec3<T>() const { return {x, y, z}; }
 
-class FXManager;
-struct RenderQuad;
+#include "frect.h"
+#include "fvec.h"
 
-static constexpr int default_tile_size = 24;
+namespace fx_tester {
+
+class ImGuiWrapper;
+
+using namespace fwk;
+};

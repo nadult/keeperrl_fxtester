@@ -1,8 +1,8 @@
 #include "fmath.h"
 #include <algorithm>
 
-pair<float, float> sincos(float radians) {
-	pair<float, float> out;
+std::pair<float, float> sincos(float radians) {
+	std::pair<float, float> out;
 	::sincosf(radians, &out.first, &out.second);
 	return out;
 }

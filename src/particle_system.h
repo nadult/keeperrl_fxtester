@@ -4,6 +4,8 @@
 
 #include "tag_id.h"
 
+static constexpr int default_tile_size = 24;
+
 // Najpierw chcemy uzyskać proste efekty:
 // - emiter który jest w stanie emitować ileś tam cząsteczek na sekundę
 // - cząsteczka która może zmieniać kolor, ma kierunek lotu, zmieniającą się alfę i czas życia
@@ -60,9 +62,9 @@ struct ParticleDef {
 	Curve<float> size;
 	Curve<float> slowdown;
 	Curve<float> attract_bottom; // TODO: jakoś lepiej to zrobić
-	Curve<float3> color;
+	Curve<FVec3> color;
 
-	int2 texture_tiles = int2(1, 1);
+	IVec2 texture_tiles = IVec2(1, 1);
 	string texture_name;
 	string name;
 };
@@ -108,10 +110,10 @@ struct ParticleSystemDef {
 struct Particle {
 	float particleTime() const { return life / max_life; }
 
-	float2 pos, movement;
+	FVec2 pos, movement;
 	float size, life, max_life;
 	float rot, rot_speed;
-	int2 tex_tile;
+	SVec2 tex_tile;
 };
 
 struct ParticleSystem {
@@ -122,13 +124,13 @@ struct ParticleSystem {
 		int total_particles = 0;
 	};
 
-	ParticleSystem(float2 pos, ParticleSystemDefId, int spawn_time, int num_subsystems);
+	ParticleSystem(FVec2 pos, ParticleSystemDefId, int spawn_time, int num_subsystems);
 
 	void kill();
 
 	// TODO: this should be small vector?
 	std::vector<SubSystem> subsystems;
-	float2 pos;
+	FVec2 pos;
 
 	ParticleSystemDefId def_id;
 	int spawn_time;
