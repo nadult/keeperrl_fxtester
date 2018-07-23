@@ -1,15 +1,9 @@
+Główna dokumentacja jest w dokumencie na google-docsach:
+https://docs.google.com/document/d/10MbrynYjchbdK_8ktb1hMgdaupQAVE-z4DZIZ5x-Pts/edit
+
 Wymiary kafli: 24x24 (dwukrotnie powiększone)
   niektóre sprite-y na kaflach wystają poza region samego kafla
   np. drzewka albo niektóre postacie wystają trochę z góry
-
-Problem: jak zrobić żeby  efekty były tak samo rozpikselowane jak pozostałe sprite-y?
- każda cząsteczka jest jakoś obróconym i przeskalowanym quadem z rozciągniętą
- teksturką; W ogólności nie da się dobrze dopasować rozdzielczości teksturek na cząsteczkach
- do rozdzielczości aktualnego widoku (nawet jak się wyłączy filtrowanie tekstur w openglu).
- opcja: rendering do tekstury a następnie 2x upscale
-
-Problem: serializacja: jak poprawnie zrespawnować systemy cząstkowe po załadowaniu save-a?
-   zapisywanie stanu wszystkich cząsteczek raczej odpada;
 
 Uwaga: są różne rodzaje spawnowalnych efektór:
 - relatywne: magiczny efekt podpięty do jakiejś postaci; jak postać się
@@ -18,3 +12,21 @@ Uwaga: są różne rodzaje spawnowalnych efektór:
   na swoim miejscu
 - to można zrobić per-sub-system
 
+
+*) Animacja rąbania drewna:
+  - kierunkowo drzazgi nie wyglądają za dobrze (dlaczego?)
+  - drzazgi (przynajmniej niektóre) mogłyby się chować za drzewo
+    cząsteczki mogą mieć parametr: layer, który może być losowany
+  - można zrobić lepszą teksturkę (tak, żeby bardziej wyglądała jak drewno)
+  - atraktor do podłogi ?
+    TODO: zrobić bardziej generyczne i opcjonalne atraktory 
+
+
+*) Animacja do kopania tuneli:
+  - tutaj może zamiast kawałków drewna dać iskry ?
+  - ale jak to dobrze skomponować z tłem?
+
+*) Animacja wybuchu (circular blast):
+  - ...
+
+*) ...
