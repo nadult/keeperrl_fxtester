@@ -188,18 +188,21 @@ ParticleSystemId FXManager::addSystem(ParticleSystemDefId def_id, FVec2 pos) {
 				m_spawn_clock++;
 
 			m_systems[n] = {pos, def_id, m_spawn_clock, (int)def.subsystems.size()};
-			initialize(m_systems[n]);
+			initialize(def, m_systems[n]);
 			return ParticleSystemId(n, m_spawn_clock);
 		}
 
 	m_systems.emplace_back(pos, def_id, m_spawn_clock, (int)def.subsystems.size());
-	initialize(m_systems.back());
+	initialize(def, m_systems.back());
 	return ParticleSystemId(m_systems.size() - 1, m_spawn_clock);
 }
 
-void FXManager::initialize(ParticleSystem &ps) {
-	for(auto &ss : ps.subsystems)
+void FXManager::initialize(const ParticleSystemDef &def, ParticleSystem &ps) {
+	for(int ssid = 0; ssid < (int)ps.subsystems.size(); ssid++) {
+		auto &ss = ps.subsystems[ssid];
 		ss.random_seed = m_random.getLL() % 1973257861;
+		ss.emission_fract = (*this)[def.subsystems[ssid].emitter_id].initial_spawn_count;
+	}
 	// TODO: initial particles
 }
 

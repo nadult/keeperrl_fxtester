@@ -84,6 +84,8 @@ struct EmitterDef {
 	Curve<float> direction, direction_spread; // in radians
 	Curve<float> rotation_speed_min, rotation_speed_max;
 
+	float initial_spawn_count = 0.0f;
+
 	// TODO: zamiast częstotliwości możemy mieć docelową ilość cząsteczek
 	// (danego rodzaju?) w danym momencie
 	// TODO: całkowanie niektórych krzywych?

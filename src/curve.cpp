@@ -63,9 +63,10 @@ template <class T> T Curve<T>::sample(float position) const {
 }
 
 template <class T> void Curve<T>::print(float step) const {
-	//	for(float t = 0.0f; t <= 1.0f; t += step)
-	//		fwk::print("[% -> %] ", t, sample(t));
-	//	fwk::print("\n");
+	if constexpr(std::is_same<T, float>())
+		for(float t = 0.0f; t <= 1.0f; t += step)
+			printf("[%f -> %f] ", t, sample(t));
+	printf("\n");
 }
 
 template struct Curve<float>;

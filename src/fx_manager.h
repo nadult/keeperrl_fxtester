@@ -62,7 +62,7 @@ class FXManager {
   private:
 	void addDefaultDefs();
 	void simulate(ParticleSystem &, float time_delta);
-	void initialize(ParticleSystem &);
+	void initialize(const ParticleSystemDef &, ParticleSystem &);
 
 	std::vector<ParticleDef> m_particle_defs;
 	std::vector<EmitterDef> m_emitter_defs;

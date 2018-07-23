@@ -86,8 +86,34 @@ static void addExplosionEffect(FXManager &mgr) {
 	mgr.addDef(psdef);
 }
 
+static void addGrowingCirclesEffect(FXManager &mgr) {
+	EmitterDef edef;
+
+	// Ta animacja nie ma sprecyzowanej długości;
+	// Zamiast tego może być włączona / wyłączona albo może się zwięszyć/zmniejszyć jej siła
+	// krzywe które zależą od czasu animacji tracą sens;
+	edef.frequency = 1.5f;
+	edef.initial_spawn_count = 1.0f;
+
+	ParticleDef pdef;
+	pdef.life = 1.5f;
+	pdef.size = {{10.0f, 50.0f}};
+	pdef.alpha = {{0.0f, 0.3f, 0.6f, 1.0f}, {0.0f, 0.3f, 0.5f, 0.0f}};
+
+	pdef.color = FVec3(1.0f, 1.0f, 1.0f);
+	pdef.texture_name = "torus.png";
+
+	ParticleSystemDef psdef;
+	psdef.subsystems.emplace_back(mgr.addDef(pdef), mgr.addDef(edef));
+	psdef.anim_length = 999999.0f;
+	psdef.subsystems.back().max_active_particles = 4;
+	psdef.name = "speed";
+	mgr.addDef(psdef);
+}
+
 void FXManager::addDefaultDefs() {
 	addTestEffect(*this);
 	addSplinterEffect(*this);
 	addExplosionEffect(*this);
+	addGrowingCirclesEffect(*this);
 };
