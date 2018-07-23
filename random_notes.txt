@@ -30,3 +30,12 @@ Uwaga: są różne rodzaje spawnowalnych efektór:
   - ...
 
 *) ...
+
+
+
+-------------------------------------------------------------------------------
+
+Integracja z Keeperem:
+- włączenie Keepera jako submodule
+- ew. później przeniesiemy klasy psystemów do keepera (na początku na branch)
+- pozostałe klasy edytora zostają tak jak były

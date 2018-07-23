@@ -4,3 +4,6 @@
 [submodule "libfwk"]
 	path = libfwk
 	url = git@github.com:nadult/libfwk.git
+[submodule "keeperrl"]
+	path = keeperrl
+	url = https://github.com/miki151/keeperrl.git
