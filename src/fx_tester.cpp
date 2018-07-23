@@ -146,7 +146,7 @@ FXTester::FXTester() : m_viewport(GfxDevice::instance().windowSize()) {
 	m_spawn_tool.emplace();
 	m_occlusion_tool.emplace();
 
-	m_marker_tex = loadTexture("data/marker.png");
+	m_cursor_tex = loadTexture("data/cursor.png");
 	loadBackgrounds();
 	loadOccluders();
 }
@@ -263,9 +263,9 @@ void FXTester::render() const {
 	drawOccluders(out);
 
 	if(m_show_cursor) {
-		float2 sel_pos(m_selected_tile);
-		auto sel_rect = fwk::FRect(sel_pos, sel_pos + float2(1)) * tile_to_screen;
-		out.addFilledRect(sel_rect, m_marker_tex);
+		float2 sel_pos = float2(m_selected_tile * default_tile_size) - float2(2);
+		auto sel_rect = fwk::FRect(sel_pos, sel_pos + float2(default_tile_size + 4)) * m_zoom;
+		out.addFilledRect(sel_rect, SimpleMaterial(m_cursor_tex, FColor(1.0f, 1.0f, 1.0f, 0.2f)));
 	}
 
 	out.render();

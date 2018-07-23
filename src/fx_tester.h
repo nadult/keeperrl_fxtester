@@ -64,7 +64,7 @@ class FXTester {
 
 	fwk::vector<PTexture> m_particle_textures;
 	fwk::vector<SimpleMaterial> m_particle_materials;
-	PTexture m_marker_tex;
+	PTexture m_cursor_tex;
 
 	struct Background {
 		PTexture texture;
