@@ -1,6 +1,7 @@
 #pragma once
 
-#include "base.h"
+#include <type_traits>
+#include "debug.h"
 
 template <class TTag, class Base = unsigned> class TagId {
   public:
@@ -8,8 +9,7 @@ template <class TTag, class Base = unsigned> class TagId {
 	static_assert(std::is_unsigned<Base>::value);
 	static_assert(sizeof(Base) <= 4);
 
-	explicit TagId(int idx) : m_idx(idx) { PASSERT(idx >= 0); }
-	TagId(int idx, NoAssertsTag) : m_idx(idx) {}
+	explicit TagId(int idx) : m_idx(idx) { CHECK(idx >= 0); }
 
 	explicit operator bool() const = delete;
 	operator int() const { return m_idx; }

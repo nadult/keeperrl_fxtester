@@ -43,6 +43,7 @@ flags = [
 
 '-Isrc/',
 '-Ilibfwk/include',
+'-Ikeeperrl/', '-Ikeeperrl/extern/',
 '-isystem', '/usr/include/bullet',
 '-isystem', '/usr/include',
 '-isystem', '/usr/local/include',

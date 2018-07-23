@@ -15,6 +15,8 @@
 #include <fwk/sys/input.h>
 #include <fwk/sys/xml.h>
 
+using namespace fwk;
+
 ImGuiWrapper *ImGuiWrapper::s_instance = nullptr;
 
 ImGuiWrapper::ImGuiWrapper(GfxDevice &device, ImGuiStyleMode style_mode) {

@@ -1,6 +1,15 @@
 #pragma once
 
 #include "particle_system.h"
+#include "renderer.h"
+
+struct RenderQuad {
+	// TODO: compress it somehow
+	std::array<float2, 4> positions;
+	std::array<float2, 4> tex_coords;
+	Color color;
+	int particle_def_id;
+};
 
 class FXManager {
   public:
@@ -18,15 +27,15 @@ class FXManager {
 	bool valid(ParticleSystemDefId id) const { return id < m_system_defs.size(); }
 
 	const ParticleDef &operator[](ParticleDefId id) const {
-		DASSERT(valid(id));
+		CHECK(valid(id));
 		return m_particle_defs[id];
 	}
 	const EmitterDef &operator[](EmitterDefId id) const {
-		DASSERT(valid(id));
+		CHECK(valid(id));
 		return m_emitter_defs[id];
 	}
 	const ParticleSystemDef &operator[](ParticleSystemDefId id) const {
-		DASSERT(valid(id));
+		CHECK(valid(id));
 		return m_system_defs[id];
 	}
 
@@ -67,6 +76,6 @@ class FXManager {
 	// TODO: ref-countowane instancje ? możemy też zrobić podobnie jak
 	// we FreeFT: każda instancja ma też licznik spawnu;
 	vector<ParticleSystem> m_systems;
-	Random m_random;
+	RandomGen m_random;
 	int m_spawn_clock = 0;
 };

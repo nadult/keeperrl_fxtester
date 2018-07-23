@@ -1,6 +1,5 @@
 #pragma once
 
-#include "base.h"
 #include "curve.h"
 
 #include "tag_id.h"
@@ -22,6 +21,10 @@
 // AT: animation time:
 // PT: particle time: particle.life / particle.max_life
 
+struct ParticleDef;
+struct EmitterDef;
+struct ParticleSystemDef;
+
 using ParticleDefId = TagId<ParticleDef>;
 using EmitterDefId = TagId<EmitterDef>;
 using ParticleSystemDefId = TagId<ParticleSystemDef>;
@@ -32,7 +35,7 @@ class ParticleSystemId {
   public:
 	ParticleSystemId() : m_index(-1) {}
 	ParticleSystemId(int index, int spawn_time) : m_index(index), m_spawn_time(spawn_time) {
-		PASSERT(index >= 0 && spawn_time >= 0);
+		CHECK(index >= 0 && spawn_time >= 0);
 	}
 
 	bool validIndex() const { return m_index >= 0; }
@@ -88,13 +91,15 @@ struct EmitterDef {
 
 struct ParticleSystemDef {
 	struct SubSystem {
+		SubSystem(ParticleDefId pdef, EmitterDefId edef) : particle_id(pdef), emitter_id(edef) {}
+
 		ParticleDefId particle_id;
 		EmitterDefId emitter_id;
 
 		int max_active_particles = INT_MAX;
 		int max_total_particles = INT_MAX;
 	};
-	vector<SubSystem> subsystems;
+	std::vector<SubSystem> subsystems;
 	float anim_length;
 	string name;
 	// TODO: co się dzieje jak się kończy animacja? kasujemy instancję, czy wyłączamy emisję?
@@ -111,7 +116,7 @@ struct Particle {
 
 struct ParticleSystem {
 	struct SubSystem {
-		vector<Particle> particles;
+		std::vector<Particle> particles;
 		float emission_fract = 0.0f;
 		int random_seed = 123;
 		int total_particles = 0;
@@ -122,7 +127,7 @@ struct ParticleSystem {
 	void kill();
 
 	// TODO: this should be small vector?
-	vector<SubSystem> subsystems;
+	std::vector<SubSystem> subsystems;
 	float2 pos;
 
 	ParticleSystemDefId def_id;

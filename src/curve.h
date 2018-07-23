@@ -1,8 +1,9 @@
 #pragma once
 
-#include "base.h"
+#include "fvec.h"
+#include "util.h"
 
-DEFINE_ENUM(InterpType, linear, cosine, quadratic, cubic);
+RICH_ENUM(InterpType, linear, cosine, quadratic, cubic);
 
 template <class T> T interpCosine(const T &a, const T &b, float x) {
 	return lerp(a, b, (1.0f - std::cos(x * fconstant::pi)) * 0.5f);
@@ -21,9 +22,9 @@ template <class T> T interpCubic(const T &y0, const T &y1, const T &y2, const T 
 	//	auto a2 = y2 - y0;
 	//	auto a3 = y1;
 
-	auto a0 = -0.5 * y0 + 1.5 * y1 - 1.5 * y2 + 0.5 * y3;
-	auto a1 = y0 - 2.5 * y1 + 2 * y2 - 0.5 * y3;
-	auto a2 = -0.5 * y0 + 0.5 * y2;
+	auto a0 = -0.5f * y0 + 1.5f * y1 - 1.5f * y2 + 0.5f * y3;
+	auto a1 = y0 - 2.5f * y1 + 2.0f * y2 - 0.5f * y3;
+	auto a2 = -0.5f * y0 + 0.5f * y2;
 	auto a3 = y1;
 
 	return a0 * mu * mu_sq + a1 * mu_sq + a2 * mu + a3;

@@ -1,5 +1,9 @@
 #include "fx_manager.h"
 
+#include "fcolor.h"
+#include "fmath.h"
+#include "frect.h"
+
 FXManager::FXManager() { addDefaultDefs(); }
 FXManager::~FXManager() = default;
 
@@ -9,7 +13,7 @@ void FXManager::simulate(ParticleSystem &ps, float time_delta) {
 	float norm_anim_pos = ps.anim_time / def.anim_length;
 
 	// Animating live particles
-	for(int ssid = 0; ssid < def.subsystems.size(); ssid++) {
+	for(int ssid = 0; ssid < (int)def.subsystems.size(); ssid++) {
 		auto &pdef = m_particle_defs[def.subsystems[ssid].particle_id];
 		auto &ssinst = ps.subsystems[ssid];
 		float inv_time_delta = 1.0f / time_delta;
@@ -27,12 +31,11 @@ void FXManager::simulate(ParticleSystem &ps, float time_delta) {
 				pinst.rot_speed *= factor;
 			}
 			if(attract_bottom > 0.0f) {
-				FRect bottom_rect(-12, 5, 10, 12);
-				auto closest_pos = bottom_rect.closestPoint(pinst.pos);
-				float dist = distance(closest_pos, pinst.pos);
-
-				if(dist > 0.01f)
-					pinst.movement += (closest_pos - pinst.pos) * attract_bottom;
+				float attract_min = 5.0f, attract_max = 10.0f;
+				if(pinst.pos.y < attract_min) {
+					float dist = attract_min - pinst.pos.y;
+					pinst.movement += float2(0.0f, dist * attract_bottom);
+				}
 			}
 			pinst.life += time_delta;
 		}
@@ -40,7 +43,7 @@ void FXManager::simulate(ParticleSystem &ps, float time_delta) {
 
 	// Removing dead particles
 	for(auto &ssinst : ps.subsystems)
-		for(int n = 0; n < ssinst.particles.size(); n++) {
+		for(int n = 0; n < (int)ssinst.particles.size(); n++) {
 			auto &pinst = ssinst.particles[n];
 			if(pinst.life > pinst.max_life) {
 				pinst = ssinst.particles.back();
@@ -50,14 +53,14 @@ void FXManager::simulate(ParticleSystem &ps, float time_delta) {
 		}
 
 	// Emitting new particles
-	for(int ssid = 0; ssid < def.subsystems.size(); ssid++) {
+	for(int ssid = 0; ssid < (int)def.subsystems.size(); ssid++) {
 		auto &ssdef = def.subsystems[ssid];
 		auto &pdef = m_particle_defs[ssdef.particle_id];
 		auto &edef = m_emitter_defs[ssdef.emitter_id];
 		auto &ssinst = ps.subsystems[ssid];
 
-		// TODO: random z keepera
-		Random rand(ssinst.random_seed);
+		RandomGen rand;
+		rand.init(ssinst.random_seed);
 
 		float max_life = pdef.life.sample(norm_anim_pos);
 		float freq = edef.frequency.sample(norm_anim_pos);
@@ -74,35 +77,36 @@ void FXManager::simulate(ParticleSystem &ps, float time_delta) {
 		float rot_speed_min = edef.rotation_speed_min.sample(norm_anim_pos);
 		float rot_speed_max = edef.rotation_speed_max.sample(norm_anim_pos);
 
-		num_particles = min(num_particles, ssdef.max_active_particles - ssinst.particles.size(),
-							ssdef.max_total_particles - ssinst.total_particles);
+		int max_particles = min(ssdef.max_active_particles - (int)ssinst.particles.size(),
+								ssdef.max_total_particles - ssinst.total_particles);
+		num_particles = min(num_particles, max_particles);
 
 		for(int n = 0; n < num_particles; n++) {
 			Particle new_inst;
 			new_inst.pos = float2();
 			float pangle;
 			if(angle_spread < fconstant::pi)
-				pangle = angle + rand.uniform(-angle_spread, angle_spread);
+				pangle = angle + rand.getDouble(-angle_spread, angle_spread);
 			else
-				pangle = rand.uniform(0.0f, fconstant::pi * 2.0f);
+				pangle = rand.getDouble(0.0f, fconstant::pi * 2.0f);
 			float2 pdir = angleToVector(pangle);
-			float strength = rand.uniform(strength_min, strength_max);
-			float rot_speed = rand.uniform(rot_speed_min, rot_speed_max);
+			float strength = rand.getDouble(strength_min, strength_max);
+			float rot_speed = rand.getDouble(rot_speed_min, rot_speed_max);
 			new_inst.movement = pdir * strength;
-			new_inst.rot = rand.uniform(0.0f, fconstant::pi * 2.0f);
+			new_inst.rot = rand.getDouble(0.0f, fconstant::pi * 2.0f);
 			new_inst.rot_speed = rot_speed * strength;
 			new_inst.life = 0.0f;
 			new_inst.max_life = max_life;
 
-			if(pdef.texture_tiles != int2(1, 1)) {
-				int2 tex_tile(rand.uniform(pdef.texture_tiles.x),
-							  rand.uniform(pdef.texture_tiles.y));
+			if(!(pdef.texture_tiles == int2(1, 1))) {
+				int2 tex_tile(rand.get(pdef.texture_tiles.x - 1),
+							  rand.get(pdef.texture_tiles.y - 1));
 				new_inst.tex_tile = tex_tile;
 			}
 			ssinst.particles.emplace_back(new_inst);
 			ssinst.total_particles++;
 		}
-		ssinst.random_seed = rand();
+		ssinst.random_seed = rand.getLL() % 1973257861;
 	}
 
 	ps.anim_time += time_delta;
@@ -124,7 +128,7 @@ vector<RenderQuad> FXManager::genQuads() const {
 			continue;
 		auto &def = (*this)[ps.def_id];
 
-		for(int ssid = 0; ssid < def.subsystems.size(); ssid++) {
+		for(int ssid = 0; ssid < (int)def.subsystems.size(); ssid++) {
 			int part_def_id = def.subsystems[ssid].particle_id;
 			auto &pdef = m_particle_defs[part_def_id];
 			auto &ssinst = ps.subsystems[ssid];
@@ -138,14 +142,15 @@ vector<RenderQuad> FXManager::genQuads() const {
 				float alpha = pdef.alpha.sample(ptime);
 
 				FRect tex_rect(float2(1));
-				if(pdef.texture_tiles != int2(1, 1))
+				if(!(pdef.texture_tiles == int2(1, 1)))
 					tex_rect = (tex_rect + float2(pinst.tex_tile)) * inv_tex_tile;
 
 				auto corners = FRect(pos - size, pos + size).corners();
 				FColor color(pdef.color.sample(ptime), alpha);
 				for(auto &corner : corners)
 					corner = rotateVector(corner - pos, pinst.rot) + pos;
-				out.emplace_back(corners, tex_rect.corners(), color, part_def_id);
+				out.emplace_back(
+					RenderQuad{corners, tex_rect.corners(), Color(color), part_def_id});
 			}
 		}
 	}
@@ -165,12 +170,12 @@ void FXManager::kill(ParticleSystemId id) {
 }
 
 ParticleSystem &FXManager::get(ParticleSystemId id) {
-	PASSERT(valid(id));
+	CHECK(valid(id));
 	return m_systems[id];
 }
 
 const ParticleSystem &FXManager::get(ParticleSystemId id) const {
-	PASSERT(valid(id));
+	CHECK(valid(id));
 	return m_systems[id];
 }
 
@@ -182,19 +187,19 @@ ParticleSystemId FXManager::addSystem(ParticleSystemDefId def_id, float2 pos) {
 			if(m_systems[n].spawn_time == m_spawn_clock)
 				m_spawn_clock++;
 
-			m_systems[n] = {pos, def_id, m_spawn_clock, def.subsystems.size()};
+			m_systems[n] = {pos, def_id, m_spawn_clock, (int)def.subsystems.size()};
 			initialize(m_systems[n]);
 			return ParticleSystemId(n, m_spawn_clock);
 		}
 
-	m_systems.emplace_back(pos, def_id, m_spawn_clock, def.subsystems.size());
+	m_systems.emplace_back(pos, def_id, m_spawn_clock, (int)def.subsystems.size());
 	initialize(m_systems.back());
 	return ParticleSystemId(m_systems.size() - 1, m_spawn_clock);
 }
 
 void FXManager::initialize(ParticleSystem &ps) {
 	for(auto &ss : ps.subsystems)
-		ss.random_seed = m_random();
+		ss.random_seed = m_random.getLL() % 1973257861;
 	// TODO: initial particles
 }
 
@@ -210,16 +215,16 @@ vector<ParticleSystemId> FXManager::aliveSystems() const {
 }
 
 ParticleDefId FXManager::addDef(ParticleDef def) {
-	m_particle_defs.emplace_back(move(def));
+	m_particle_defs.emplace_back(std::move(def));
 	return ParticleDefId(m_particle_defs.size() - 1);
 }
 
 EmitterDefId FXManager::addDef(EmitterDef def) {
-	m_emitter_defs.emplace_back(move(def));
+	m_emitter_defs.emplace_back(std::move(def));
 	return EmitterDefId(m_emitter_defs.size() - 1);
 }
 
 ParticleSystemDefId FXManager::addDef(ParticleSystemDef def) {
-	m_system_defs.emplace_back(move(def));
+	m_system_defs.emplace_back(std::move(def));
 	return ParticleSystemDefId(m_system_defs.size() - 1);
 }

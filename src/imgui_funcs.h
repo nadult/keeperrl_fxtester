@@ -1,7 +1,9 @@
-#include "base.h"
+#include "fx_tester_base.h"
 #include "imgui/imgui.h"
+#include <fwk/format.h>
 
-template <class Index> bool selectIndex(ZStr title, Index &value, CSpan<const char *> strings) {
+template <class Index>
+bool selectIndex(fwk::ZStr title, Index &value, fwk::CSpan<const char *> strings) {
 	DASSERT(!strings.empty() && strings.inRange((int)value));
 
 	ImGui::Text("%s", title.c_str());
@@ -9,16 +11,17 @@ template <class Index> bool selectIndex(ZStr title, Index &value, CSpan<const ch
 	ImGui::SameLine();
 	ImGui::PushItemWidth(220 - width);
 	int item = (int)value;
-	bool ret = ImGui::Combo(format("##%", title).c_str(), &item, strings.data(), strings.size());
+	bool ret =
+		ImGui::Combo(fwk::format("##%", title).c_str(), &item, strings.data(), strings.size());
 	ImGui::PopItemWidth();
 
 	value = (Index)item;
 	return ret;
 }
 
-template <class Enum, EnableIfEnum<Enum>...> bool selectEnum(ZStr title, Enum &value) {
-	array<const char *, count<Enum>()> strings;
-	for(auto val : all<Enum>())
-		strings[(int)val] = toString(val);
+template <class Enum, fwk::EnableIfEnum<Enum>...> bool selectEnum(fwk::ZStr title, Enum &value) {
+	fwk::array<const char *, fwk::count<Enum>()> strings;
+	for(auto val : fwk::all<Enum>())
+		strings[(int)val] = fwk::toString(val);
 	return selectIndex(title, value, strings);
 }

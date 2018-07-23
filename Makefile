@@ -16,9 +16,12 @@ endif
 _dummy := $(shell [ -d output ] || mkdir -p output)
 _dummy := $(shell [ -d $(BUILD_DIR) ] || mkdir -p $(BUILD_DIR))
 _dummy := $(shell [ -d $(BUILD_DIR)/imgui ] || mkdir -p $(BUILD_DIR)/imgui)
+_dummy := $(shell [ -d $(BUILD_DIR)/keeperrl ] || mkdir -p $(BUILD_DIR)/keeperrl)
 
 SHARED_SRC=curve particle_system fx_factory fx_manager spawner\
-		   imgui/imgui imgui/imgui_draw imgui/imgui_demo imgui_wrapper
+		   keeperrl/debug keeperrl/util \
+		   imgui/imgui imgui/imgui_draw imgui/imgui_demo imgui_wrapper \
+		   fcolor fvec fmath\
 
 PROGRAM_SRC=fx_tester
 
@@ -49,7 +52,7 @@ LIBS=
 LINUX_LIBS=$(LINUX_FWK_LIBS) -lstdc++ -lm 
 MINGW_LIBS=$(MINGW_FWK_LIBS) 
 
-INCLUDES=-Isrc/ $(FWK_INCLUDES)
+INCLUDES=-Isrc/ -Ikeeperrl/ -Ikeeperrl/extern/ $(FWK_INCLUDES)
 
 
 NICE_FLAGS=-Wall -Wextra -Woverloaded-virtual -Wnon-virtual-dtor -Werror=return-type -Werror=switch -Wimplicit-fallthrough\
@@ -57,14 +60,14 @@ NICE_FLAGS=-Wall -Wextra -Woverloaded-virtual -Wnon-virtual-dtor -Werror=return-
 		   -Wparentheses -Wno-overloaded-virtual -Wno-undefined-inline #-Werror
 ifdef CLANG
 LINUX_FLAGS+=-Wconstant-conversion
-#LINUX_LIBS+=
+LINUX_LIBS+=-pthread
 else
 NICE_FLAGS+=-Werror=aggressive-loop-optimizations
 DISABLED_FLAGS=-Wno-unused-but-set-variable -Wno-strict-overflow
-#LINUX_LIBS+=-
+LINUX_LIBS+=-pthread
 endif
 
-FLAGS+=-std=c++1z -fno-omit-frame-pointer -fno-exceptions -pthread -fopenmp -Wall \
+FLAGS+=-std=c++1z -fno-omit-frame-pointer -pthread -fopenmp -Wall \
 	   -ggdb $(NICE_FLAGS) $(DISABLED_FLAGS) $(INCLUDES)
 
 LINUX_FLAGS=$(FLAGS) $(LINUX_FWK_FLAGS)

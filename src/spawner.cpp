@@ -2,7 +2,7 @@
 
 #include "fx_manager.h"
 
-Spawner::Spawner(Type type, int2 tile_pos, ParticleSystemDefId def_id)
+Spawner::Spawner(Type type, fwk::int2 tile_pos, ParticleSystemDefId def_id)
 	: type(type), tile_pos(tile_pos), def_id(def_id) {}
 
 void Spawner::update(FXManager &manager) {
@@ -16,8 +16,8 @@ void Spawner::update(FXManager &manager) {
 		}
 
 		spawn_count++;
-		float2 spawn_pos = (float2(tile_pos) + float2(0.5f)) * default_tile_size;
-		instance_id = manager.addSystem(def_id, spawn_pos);
+		auto spawn_pos = (fwk::float2(tile_pos) + fwk::float2(0.5f)) * default_tile_size;
+		instance_id = manager.addSystem(def_id, {spawn_pos.x, spawn_pos.y});
 	}
 }
 

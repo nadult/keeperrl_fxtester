@@ -7,7 +7,8 @@ template <class T>
 Curve<T>::Curve(T value) : m_keys({0.0f}), m_values({value}), m_interp(InterpType::linear) {}
 
 template <class T>
-Curve<T>::Curve(vector<T> values, InterpType interp) : m_values(move(values)), m_interp(interp) {
+Curve<T>::Curve(vector<T> values, InterpType interp)
+	: m_values(std::move(values)), m_interp(interp) {
 	m_keys.resize(m_values.size());
 	for(int n = 0; n < m_keys.size(); n++)
 		m_keys[n] = float(n) / float(m_keys.size() - 1);
@@ -15,18 +16,18 @@ Curve<T>::Curve(vector<T> values, InterpType interp) : m_values(move(values)), m
 
 template <class T>
 Curve<T>::Curve(vector<float> keys, vector<T> values, InterpType interp)
-	: m_keys(move(keys)), m_values(move(values)), m_interp(interp) {
-	DASSERT(m_keys.size() == m_values.size());
+	: m_keys(std::move(keys)), m_values(std::move(values)), m_interp(interp) {
+	CHECK(m_keys.size() == m_values.size());
 	for(int n = 0; n < m_keys.size(); n++) {
-		PASSERT(m_keys[n] >= 0.0f && m_keys[n] <= 1.0f);
+		CHECK(m_keys[n] >= 0.0f && m_keys[n] <= 1.0f);
 		if(n > 0)
-			PASSERT(m_keys[n] >= m_keys[n - 1]);
+			CHECK(m_keys[n] >= m_keys[n - 1]);
 	}
 }
 
 // TODO: add sampleLooped
 template <class T> T Curve<T>::sample(float position) const {
-	PASSERT(position >= 0.0f && position <= 1.0f);
+	CHECK(position >= 0.0f && position <= 1.0f);
 	if(m_values.size() <= 1)
 		return m_values.empty() ? T() : m_values.front();
 
@@ -62,9 +63,9 @@ template <class T> T Curve<T>::sample(float position) const {
 }
 
 template <class T> void Curve<T>::print(float step) const {
-	for(float t = 0.0f; t <= 1.0f; t += step)
-		fwk::print("[% -> %] ", t, sample(t));
-	fwk::print("\n");
+	//	for(float t = 0.0f; t <= 1.0f; t += step)
+	//		fwk::print("[% -> %] ", t, sample(t));
+	//	fwk::print("\n");
 }
 
 template struct Curve<float>;

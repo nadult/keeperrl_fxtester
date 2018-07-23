@@ -16,6 +16,11 @@
 #include "fx_manager.h"
 #include "spawner.h"
 
+using namespace fwk;
+
+// TODO: move it to separate file
+Color::Color(Uint8 r, Uint8 g, Uint8 b, Uint8 a) : SDL_Color{r, g, b, a} {}
+
 // ------------------------------------------------------------------------------------------------
 // ------------------------------------- SPAWN TOOL -----------------------------------------------
 
@@ -36,12 +41,12 @@ void FXTester::spawnToolMenu() {
 	ImGui::Text("Spawners: %d", m_spawners.size());
 }
 
-void FXTester::addSpawner(int2 pos) {
+void FXTester::addSpawner(fwk::int2 pos) {
 	auto &tool = *m_spawn_tool;
 	m_spawners.emplace_back(tool.type, m_selected_tile, tool.system_id);
 }
 
-void FXTester::removeSpawner(int2 pos) {
+void FXTester::removeSpawner(fwk::int2 pos) {
 	for(auto &spawner : m_spawners)
 		if(spawner.tile_pos == pos)
 			spawner.kill(m_ps);
@@ -71,8 +76,8 @@ void FXTester::spawnToolInput(CSpan<InputEvent> events) {
 // ----------------------------------- OCCLUSION TOOL ---------------------------------------------
 
 struct FXTester::OcclusionTool {
-	vector<pair<PTexture, string>> textures;
-	vector<pair<int, int2>> occluders;
+	fwk::vector<pair<PTexture, string>> textures;
+	fwk::vector<pair<int, fwk::int2>> occluders;
 	int new_occluder_id = 0;
 };
 
@@ -109,11 +114,11 @@ void FXTester::drawOccluders(Renderer2D &out) const {
 	auto &tool = *m_occlusion_tool;
 
 	float tile_to_screen = m_zoom * tile_size;
-	FRect tile_rect = FRect(float2(tile_to_screen));
+	FRect tile_rect = FRect(fwk::float2(tile_to_screen));
 
 	for(auto &occluder : tool.occluders) {
 		auto tex = tool.textures[occluder.first].first;
-		out.addFilledRect(tile_rect + float2(occluder.second) * tile_to_screen, tex);
+		out.addFilledRect(tile_rect + fwk::float2(occluder.second) * tile_to_screen, tex);
 	}
 }
 
@@ -148,16 +153,16 @@ void FXTester::doMenu() {
 
 	selectEnum("Mode", m_mode);
 	if(ImGui::InputFloat("Zoom", &m_zoom))
-		m_zoom = clamp(m_zoom, 0.25f, 10.0f);
+		m_zoom = fwk::clamp(m_zoom, 0.25f, 10.0f);
 	if(ImGui::InputFloat("Anim speed", &m_animation_speed))
-		m_animation_speed = clamp(m_animation_speed, 0.0f, 100.0f);
+		m_animation_speed = fwk::clamp(m_animation_speed, 0.0f, 100.0f);
 	ImGui::Checkbox("Show cursor", &m_show_cursor);
 
 	if(ImGui::Button("Select background"))
 		ImGui::OpenPopup("select_back");
 	if(ImGui::BeginPopup("select_back")) {
 		if(ImGui::MenuItem("disabled", nullptr, !m_background_id))
-			m_background_id = none;
+			m_background_id = fwk::none;
 		for(int n = 0; n < m_backgrounds.size(); n++) {
 			auto &back = m_backgrounds[n];
 			if(ImGui::MenuItem(back.name.c_str(), nullptr, m_background_id == n))
@@ -181,14 +186,12 @@ void FXTester::doMenu() {
 	}
 
 	m_menu_width = 220;
-	m_menu_size = vmax(m_menu_size, int2(m_menu_width + 20, ImGui::GetCursorPosY()));
+	m_menu_size = vmax(m_menu_size, fwk::int2(m_menu_width + 20, ImGui::GetCursorPosY()));
 
 	ImGui::End();
 }
 
 void FXTester::tick(GfxDevice &device, double time_diff) {
-	FWK_PROFILE("tick");
-
 	m_ps.simulate(time_diff * m_animation_speed);
 
 	auto events = device.inputEvents();
@@ -211,11 +214,12 @@ void FXTester::tick(GfxDevice &device, double time_diff) {
 			m_mode = Mode::occlusion;
 
 		if(event.mouseButtonPressed(InputButton::right))
-			m_view_pos -= float2(event.mouseMove()) * screen_to_tile;
+			m_view_pos -= fwk::float2(event.mouseMove()) * screen_to_tile;
 		if(event.isMouseOverEvent()) {
-			m_selected_tile = int2(m_view_pos + float2(event.mousePos()) * screen_to_tile);
+			m_selected_tile =
+				fwk::int2(m_view_pos + fwk::float2(event.mousePos()) * screen_to_tile);
 			if(int zoom = event.mouseWheel())
-				m_zoom = clamp(m_zoom * (zoom > 0 ? 1.25f : 0.8f), 0.25f, 10.0f);
+				m_zoom = fwk::clamp(m_zoom * (zoom > 0 ? 1.25f : 0.8f), 0.25f, 10.0f);
 		}
 	}
 
@@ -228,7 +232,6 @@ void FXTester::tick(GfxDevice &device, double time_diff) {
 }
 
 void FXTester::render() const {
-	FWK_PROFILE("render");
 	Renderer2D out(m_viewport);
 	out.setViewPos(m_view_pos * float(tile_size) * m_zoom);
 
@@ -237,24 +240,27 @@ void FXTester::render() const {
 
 	if(m_background_id) {
 		auto &back = m_backgrounds[*m_background_id];
-		auto size = float2(back.texture->size()) * tile_to_screen / float(back.tile_size);
+		auto size = fwk::float2(back.texture->size()) * tile_to_screen / float(back.tile_size);
 		out.addFilledRect(FRect(size), back.texture);
 	}
 
 	for(auto &quad : m_ps.genQuads()) {
-		float2 positions[4];
-		for(int n = 0; n < 4; n++)
-			positions[n] = quad.positions[n] * m_zoom;
-		array<FColor, 4> colors{{quad.color, quad.color, quad.color, quad.color}};
-		out.addQuads(positions, quad.tex_coords, colors,
-					 m_particle_materials[quad.particle_def_id]);
+		fwk::float2 positions[4], tex_coords[4];
+		for(int n = 0; n < 4; n++) {
+			positions[n] = {quad.positions[n].x * m_zoom, quad.positions[n].y * m_zoom};
+			tex_coords[n] = {quad.tex_coords[n].x, quad.tex_coords[n].y};
+		}
+		FColor color(IColor(quad.color.r, quad.color.g, quad.color.b, quad.color.a));
+
+		array<FColor, 4> colors{{color, color, color, color}};
+		out.addQuads(positions, tex_coords, colors, m_particle_materials[quad.particle_def_id]);
 	}
 
 	drawOccluders(out);
 
 	if(m_show_cursor) {
-		float2 sel_pos(m_selected_tile);
-		FRect sel_rect = FRect(sel_pos, sel_pos + float2(1)) * tile_to_screen;
+		fwk::float2 sel_pos(m_selected_tile);
+		FRect sel_rect = FRect(sel_pos, sel_pos + fwk::float2(1)) * tile_to_screen;
 		out.addFilledRect(sel_rect, m_marker_tex);
 	}
 
@@ -266,10 +272,7 @@ bool FXTester::mainLoop(GfxDevice &device) {
 	static double last_time = time - 1.0 / 60.0;
 	double time_diff = time - last_time;
 	last_time = time;
-	time_diff = clamp(time_diff, 1 / 240.0, 1 / 5.0);
-
-	if(auto *profiler = Profiler::instance())
-		profiler->updateTimer("mainLoop", time - device.frameTime(), time, false);
+	time_diff = fwk::clamp(time_diff, 1 / 240.0, 1 / 5.0);
 
 	m_viewport = IRect(device.windowSize());
 
@@ -305,7 +308,7 @@ PTexture FXTester::loadTexture(string file_name) {
 extern "C" {
 int main(int argc, char **argv) {
 	double time = getTime();
-	int2 resolution(1300, 800);
+	fwk::int2 resolution(1300, 800);
 	GfxDeviceFlags gfx_flags = GfxDeviceOpt::resizable | GfxDeviceOpt::vsync;
 	Backtrace::t_default_mode = BacktraceMode::full;
 
@@ -313,7 +316,7 @@ int main(int argc, char **argv) {
 		string argument = argv[n];
 		if(argument == "--res") {
 			ASSERT(n + 2 < argc);
-			resolution = int2(fromString<int>(argv[n + 1]), fromString<int>(argv[n + 2]));
+			resolution = fwk::int2(fromString<int>(argv[n + 1]), fromString<int>(argv[n + 2]));
 			ASSERT(resolution.x >= 320 && resolution.y >= 200);
 			n += 2;
 		} else if(argument == "--full-screen") {
@@ -323,7 +326,8 @@ int main(int argc, char **argv) {
 		} else if(argument == "--maximized") {
 			gfx_flags |= GfxDeviceOpt::maximized;
 		} else {
-			FATAL("Unsupported argument: %s", argument.c_str());
+			printf("Unsupported argument: %s\n", argument.c_str());
+			exit(1);
 		}
 	}
 
