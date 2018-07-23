@@ -34,6 +34,7 @@ namespace fx_tester {
 struct FXTester::SpawnTool {
 	SpawnerType type = SpawnerType::single;
 	ParticleSystemDefId system_id = ParticleSystemDefId(0);
+	int selection_id = -1;
 };
 
 void FXTester::spawnToolMenu() {
@@ -45,12 +46,24 @@ void FXTester::spawnToolMenu() {
 	selectIndex("Spawner type", tool.type, {"single", "repeated"});
 
 	ImGui::Text("LMB: add spawner\ndel: remove spawners under cursor");
+	ImGui::Text("LMB + ctrl: select\n");
 	ImGui::Text("Spawners: %d", m_spawners.size());
 }
 
 void FXTester::addSpawner(int2 pos) {
 	auto &tool = *m_spawn_tool;
 	m_spawners.emplace_back(tool.type, m_selected_tile, tool.system_id);
+}
+
+void FXTester::selectSpawner(int2 pos) {
+	auto &tool = *m_spawn_tool;
+	tool.selection_id = -1;
+
+	for(int n = 0; n < m_spawners.size(); n++)
+		if(m_spawners[n].tile_pos == pos) {
+			tool.selection_id = n;
+			break;
+		}
 }
 
 void FXTester::removeSpawner(int2 pos) {
@@ -60,22 +73,36 @@ void FXTester::removeSpawner(int2 pos) {
 }
 
 void FXTester::updateSpawners() {
+	auto &tool = *m_spawn_tool;
+
 	for(auto &spawner : m_spawners)
 		spawner.update(*m_ps);
 	for(int n = 0; n < m_spawners.size(); n++)
 		if(m_spawners[n].is_dead) {
+			if(tool.selection_id == n)
+				tool.selection_id = -1;
+			else if(tool.selection_id > n)
+				tool.selection_id--;
 			m_spawners[n] = m_spawners.back();
 			m_spawners.pop_back();
 			n--;
 		}
+	if(tool.selection_id >= m_spawners.size())
+		tool.selection_id = -1;
 }
 
 void FXTester::spawnToolInput(CSpan<InputEvent> events) {
 	for(auto event : events) {
 		if(event.keyDown(InputKey::del))
 			removeSpawner(m_selected_tile);
-		if(event.mouseButtonDown(InputButton::left))
-			addSpawner(m_selected_tile);
+		if(event.mouseButtonDown(InputButton::left)) {
+			if(event.mods() & InputModifier::lctrl)
+				selectSpawner(m_selected_tile);
+			else {
+				addSpawner(m_selected_tile);
+				selectSpawner(m_selected_tile);
+			}
+		}
 	}
 }
 
@@ -97,6 +124,16 @@ void FXTester::loadOccluders() {
 	}
 }
 
+void FXTester::removeOccluder(int2 pos) {
+	auto &occluders = m_occlusion_tool->occluders;
+	for(int n = 0; n < occluders.size(); n++)
+		if(occluders[n].second == pos) {
+			occluders[n] = occluders.back();
+			occluders.pop_back();
+			n--;
+		}
+}
+
 void FXTester::occlusionToolMenu() {
 	auto &tool = *m_occlusion_tool;
 	auto names = transform(tool.textures, [](const auto &pair) { return pair.second.c_str(); });
@@ -114,6 +151,8 @@ void FXTester::occlusionToolInput(CSpan<InputEvent> events) {
 	for(auto &event : events) {
 		if(event.mouseButtonDown(InputButton::left) && !tool.textures.empty())
 			tool.occluders.emplace_back(tool.new_occluder_id, m_selected_tile);
+		if(event.keyDown(InputKey::del))
+			removeOccluder(m_selected_tile);
 	}
 }
 
@@ -235,6 +274,12 @@ void FXTester::tick(GfxDevice &device, double time_diff) {
 	updateSpawners();
 }
 
+void FXTester::drawCursor(Renderer2D &out, int2 tile_pos, FColor color) const {
+	float2 sel_pos = float2(tile_pos * default_tile_size) - float2(2);
+	auto sel_rect = fwk::FRect(sel_pos, sel_pos + float2(default_tile_size + 4)) * m_zoom;
+	out.addFilledRect(sel_rect, SimpleMaterial(m_cursor_tex, color));
+}
+
 void FXTester::render() const {
 	Renderer2D out(m_viewport);
 	out.setViewPos(m_view_pos * float(default_tile_size) * m_zoom);
@@ -262,11 +307,11 @@ void FXTester::render() const {
 
 	drawOccluders(out);
 
-	if(m_show_cursor) {
-		float2 sel_pos = float2(m_selected_tile * default_tile_size) - float2(2);
-		auto sel_rect = fwk::FRect(sel_pos, sel_pos + float2(default_tile_size + 4)) * m_zoom;
-		out.addFilledRect(sel_rect, SimpleMaterial(m_cursor_tex, FColor(1.0f, 1.0f, 1.0f, 0.2f)));
-	}
+	if(m_show_cursor)
+		drawCursor(out, m_selected_tile, FColor(ColorId::white, 0.2f));
+	if(m_spawn_tool->selection_id != -1)
+		drawCursor(out, m_spawners[m_spawn_tool->selection_id].tile_pos,
+				   FColor(ColorId::blue, 0.2f));
 
 	out.render();
 }

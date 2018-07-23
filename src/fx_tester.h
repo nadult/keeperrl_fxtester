@@ -20,11 +20,13 @@ class FXTester {
 
 	void spawnToolMenu();
 	void spawnToolInput(CSpan<InputEvent>);
-	void addSpawner(int2 pos);
-	void removeSpawner(int2 pos);
+	void selectSpawner(int2);
+	void addSpawner(int2);
+	void removeSpawner(int2);
 	void updateSpawners();
 
 	void loadOccluders();
+	void removeOccluder(int2);
 	void occlusionToolMenu();
 	void occlusionToolInput(CSpan<InputEvent>);
 	void drawOccluders(Renderer2D &) const;
@@ -38,6 +40,7 @@ class FXTester {
 	static bool mainLoop(GfxDevice &device, void *this_ptr);
 
   private:
+	void drawCursor(Renderer2D &, int2, FColor) const;
 	static PTexture loadTexture(string file_name);
 	void loadBackgrounds();
 
