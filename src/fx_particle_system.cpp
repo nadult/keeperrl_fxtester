@@ -18,7 +18,6 @@ void defaultAnimateParticle(AnimationContext &ctx, Particle &pinst) {
 
 	float ptime = pinst.particleTime();
 	float slowdown = 1.0f / (1.0f + pdef.slowdown.sample(ptime));
-	float attract_bottom = pdef.attract_bottom.sample(ptime);
 
 	pinst.pos += pinst.movement * ctx.time_delta;
 	pinst.rot += pinst.rot_speed * ctx.time_delta;
@@ -26,13 +25,6 @@ void defaultAnimateParticle(AnimationContext &ctx, Particle &pinst) {
 		float factor = pow(slowdown, ctx.time_delta);
 		pinst.movement *= factor;
 		pinst.rot_speed *= factor;
-	}
-	if(attract_bottom > 0.0f) {
-		float attract_min = 5.0f, attract_max = 10.0f;
-		if(pinst.pos.y < attract_min) {
-			float dist = attract_min - pinst.pos.y;
-			pinst.movement += FVec2(0.0f, dist * attract_bottom);
-		}
 	}
 	pinst.life += ctx.time_delta;
 }

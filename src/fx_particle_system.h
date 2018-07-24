@@ -38,7 +38,6 @@ struct ParticleDef {
 	Curve<float> alpha;
 	Curve<float> size;
 	Curve<float> slowdown;
-	Curve<float> attract_bottom; // TODO: specjalizacja dla wood splintersów
 	Curve<FVec3> color;
 
 	vector<Curve<float>> scalar_curves;

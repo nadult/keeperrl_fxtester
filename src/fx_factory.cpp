@@ -44,7 +44,16 @@ static void addSplinterEffect(FXManager &mgr) {
 	pdef.size = 8.0f;
 	pdef.slowdown = {{0.0f, 0.1f}, {5.0f, 1000.0f}};
 	pdef.alpha = {{0.0f, 0.8f, 1.0f}, {1.0, 1.0, 0.0}};
-	pdef.attract_bottom = 1.0f;
+
+	auto animate_func = [](AnimationContext &ctx, Particle &pinst) {
+		defaultAnimateParticle(ctx, pinst);
+		float attract_min = 5.0f, attract_max = 10.0f;
+		float attr_strength = 1.0f;
+		if(pinst.pos.y < attract_min) {
+			float dist = attract_min - pinst.pos.y;
+			pinst.movement += FVec2(0.0f, dist * attr_strength);
+		}
+	};
 
 	FColor brown(IColor(120, 87, 46));
 	// Kiedy cząsteczki opadną pod drzewo, robią się w zasięgu cienia
@@ -55,6 +64,7 @@ static void addSplinterEffect(FXManager &mgr) {
 
 	SubSystemDef ssdef(mgr.addDef(pdef), mgr.addDef(edef));
 	ssdef.max_total_particles = 4;
+	ssdef.animate_func = animate_func;
 
 	ParticleSystemDef psdef;
 	psdef.subsystems = {ssdef};
