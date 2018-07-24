@@ -8,37 +8,25 @@ FXManager::FXManager() { addDefaultDefs(); }
 FXManager::~FXManager() = default;
 
 void FXManager::simulate(ParticleSystem &ps, float time_delta) {
-	auto &def = (*this)[ps.def_id];
+	auto &psdef = (*this)[ps.def_id];
 
-	float norm_anim_pos = ps.anim_time / def.anim_length;
+	float norm_anim_time = ps.anim_time / psdef.anim_length;
+	float inv_time_delta = 1.0f / time_delta;
 
 	// Animating live particles
-	for(int ssid = 0; ssid < (int)def.subsystems.size(); ssid++) {
-		auto &pdef = m_particle_defs[def.subsystems[ssid].particle_id];
-		auto &ssinst = ps.subsystems[ssid];
-		float inv_time_delta = 1.0f / time_delta;
+	for(int ssid = 0; ssid < (int)psdef.subsystems.size(); ssid++) {
+		auto &ss = ps[ssid];
+		const auto &ssdef = psdef[ssid];
+		const auto &pdef = (*this)[psdef[ssid].particle_id];
+		const auto &edef = (*this)[psdef[ssid].emitter_id];
+		AnimationContext ctx{ps, ss,   psdef,		 ssdef,			 pdef,		 edef,
+							 {}, ssid, ps.anim_time, norm_anim_time, time_delta, inv_time_delta};
+		ctx.rand.init(ss.random_seed);
 
-		for(auto &pinst : ssinst.particles) {
-			float ptime = pinst.particleTime();
-			float slowdown = 1.0f / (1.0f + pdef.slowdown.sample(ptime));
-			float attract_bottom = pdef.attract_bottom.sample(ptime);
+		for(auto &pinst : ss.particles)
+			ssdef.animate_func(ctx, pinst);
 
-			pinst.pos += pinst.movement * time_delta;
-			pinst.rot += pinst.rot_speed * time_delta;
-			if(slowdown < 1.0f) {
-				float factor = pow(slowdown, time_delta);
-				pinst.movement *= factor;
-				pinst.rot_speed *= factor;
-			}
-			if(attract_bottom > 0.0f) {
-				float attract_min = 5.0f, attract_max = 10.0f;
-				if(pinst.pos.y < attract_min) {
-					float dist = attract_min - pinst.pos.y;
-					pinst.movement += FVec2(0.0f, dist * attract_bottom);
-				}
-			}
-			pinst.life += time_delta;
-		}
+		ss.random_seed = ctx.randomSeed();
 	}
 
 	// Removing dead particles
@@ -53,66 +41,37 @@ void FXManager::simulate(ParticleSystem &ps, float time_delta) {
 		}
 
 	// Emitting new particles
-	for(int ssid = 0; ssid < (int)def.subsystems.size(); ssid++) {
-		auto &ssdef = def.subsystems[ssid];
-		auto &pdef = m_particle_defs[ssdef.particle_id];
-		auto &edef = m_emitter_defs[ssdef.emitter_id];
-		auto &ssinst = ps.subsystems[ssid];
+	for(int ssid = 0; ssid < (int)psdef.subsystems.size(); ssid++) {
+		auto &ss = ps[ssid];
+		const auto &ssdef = psdef[ssid];
+		const auto &pdef = (*this)[psdef[ssid].particle_id];
+		const auto &edef = (*this)[psdef[ssid].emitter_id];
+		AnimationContext ctx{ps, ss,   psdef,		 ssdef,			 pdef,		 edef,
+							 {}, ssid, ps.anim_time, norm_anim_time, time_delta, inv_time_delta};
+		ctx.rand.init(ss.random_seed);
 
-		RandomGen rand;
-		rand.init(ssinst.random_seed);
-
-		float max_life = pdef.life.sample(norm_anim_pos);
-		float freq = edef.frequency.sample(norm_anim_pos);
-		float emission = freq * time_delta + ssinst.emission_fract;
+		EmissionState em;
+		float emission = ssdef.prepare_func(ctx, em) + ss.emission_fract;
 		int num_particles = int(emission);
-		ssinst.emission_fract = emission - float(num_particles);
+		ss.emission_fract = emission - float(num_particles);
 
-		float angle = edef.direction.sample(norm_anim_pos);
-		float angle_spread = edef.direction_spread.sample(norm_anim_pos);
-
-		float strength_min = edef.strength_min.sample(norm_anim_pos);
-		float strength_max = edef.strength_max.sample(norm_anim_pos);
-
-		float rot_speed_min = edef.rotation_speed_min.sample(norm_anim_pos);
-		float rot_speed_max = edef.rotation_speed_max.sample(norm_anim_pos);
-
-		int max_particles = min(ssdef.max_active_particles - (int)ssinst.particles.size(),
-								ssdef.max_total_particles - ssinst.total_particles);
+		int max_particles = min(ssdef.max_active_particles - (int)ss.particles.size(),
+								ssdef.max_total_particles - ss.total_particles);
 		num_particles = min(num_particles, max_particles);
+		ss.total_particles += num_particles;
 
 		for(int n = 0; n < num_particles; n++) {
 			Particle new_inst;
-			new_inst.pos = FVec2();
-			float pangle;
-			if(angle_spread < fconstant::pi)
-				pangle = angle + rand.getDouble(-angle_spread, angle_spread);
-			else
-				pangle = rand.getDouble(0.0f, fconstant::pi * 2.0f);
-			FVec2 pdir = angleToVector(pangle);
-			float strength = rand.getDouble(strength_min, strength_max);
-			float rot_speed = rand.getDouble(rot_speed_min, rot_speed_max);
-			new_inst.movement = pdir * strength;
-			new_inst.rot = rand.getDouble(0.0f, fconstant::pi * 2.0f);
-			new_inst.rot_speed = rot_speed * strength;
-			new_inst.life = 0.0f;
-			new_inst.max_life = max_life;
-
-			if(!(pdef.texture_tiles == IVec2(1, 1))) {
-				IVec2 tex_tile(rand.get(pdef.texture_tiles.x - 1),
-							   rand.get(pdef.texture_tiles.y - 1));
-				new_inst.tex_tile = SVec2(tex_tile);
-			}
-			ssinst.particles.emplace_back(new_inst);
-			ssinst.total_particles++;
+			ssdef.emit_func(ctx, em, new_inst);
+			ss.particles.emplace_back(new_inst);
 		}
-		ssinst.random_seed = rand.getLL() % 1973257861;
+		ss.random_seed = ctx.randomSeed(); // TODO: save random state properly?
 	}
 
 	ps.anim_time += time_delta;
-	if(ps.anim_time > def.anim_length) {
-		if(def.is_looped)
-			ps.anim_time -= def.anim_length;
+	if(ps.anim_time > psdef.anim_length) {
+		if(psdef.is_looped)
+			ps.anim_time -= psdef.anim_length;
 		else
 			ps.kill();
 	}

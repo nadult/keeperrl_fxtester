@@ -120,6 +120,22 @@ static void addRippleEffect(FXManager &mgr) {
 	edef.frequency = 1.5f;
 	edef.initial_spawn_count = 1.0f;
 
+	// First scalar parameter controls how fast the ripples move
+	auto prep_func = [](AnimationContext &ctx, EmissionState &em) {
+		float freq = defaultPrepareEmission(ctx, em);
+		float mod = 1.0f + ctx.ps.params.scalar[0];
+		return freq * mod;
+	};
+
+	auto animate_func = [](AnimationContext &ctx, Particle &pinst) {
+		float ptime = pinst.particleTime();
+		float mod = 1.0f + ctx.ps.params.scalar[0];
+		float time_delta = ctx.time_delta * mod;
+		pinst.pos += pinst.movement * time_delta;
+		pinst.rot += pinst.rot_speed * time_delta;
+		pinst.life += time_delta;
+	};
+
 	ParticleDef pdef;
 	pdef.life = 1.5f;
 	pdef.size = {{10.0f, 50.0f}};
@@ -129,13 +145,16 @@ static void addRippleEffect(FXManager &mgr) {
 	pdef.texture_name = "torus.png";
 
 	SubSystemDef ssdef(mgr.addDef(pdef), mgr.addDef(edef));
-	ssdef.max_active_particles = 4;
+	ssdef.max_active_particles = 10;
+	ssdef.prepare_func = prep_func;
+	ssdef.animate_func = animate_func;
 
 	ParticleSystemDef psdef;
 	psdef.subsystems = {ssdef};
 	psdef.anim_length = 1.0f;
 	psdef.is_looped = true; // TODO: to nie jest brane pod uwagę na razie
 	psdef.name = "ripple";
+
 	mgr.addDef(psdef);
 }
 

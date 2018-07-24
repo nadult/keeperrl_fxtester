@@ -23,6 +23,9 @@ static constexpr int default_tile_size = 24;
 // AT: animation time:
 // PT: particle time: particle.life / particle.max_life
 
+struct Particle;
+struct ParticleSystem;
+
 struct ParticleDef;
 struct EmitterDef;
 struct ParticleSystemDef;
@@ -32,7 +35,6 @@ using EmitterDefId = TagId<EmitterDef>;
 using ParticleSystemDefId = TagId<ParticleSystemDef>;
 
 // Identifies a particluar particle system instance
-// Can be invalid (instances with time can die)
 class ParticleSystemId {
   public:
 	ParticleSystemId() : m_index(-1) {}
@@ -64,6 +66,9 @@ struct ParticleDef {
 	Curve<float> attract_bottom; // TODO: jakoś lepiej to zrobić
 	Curve<FVec3> color;
 
+	vector<Curve<float>> scalar_curves;
+	vector<Curve<FVec3>> color_curves;
+
 	IVec2 texture_tiles = IVec2(1, 1);
 	string texture_name;
 	string name;
@@ -84,6 +89,9 @@ struct EmitterDef {
 	Curve<float> direction, direction_spread; // in radians
 	Curve<float> rotation_speed_min, rotation_speed_max;
 
+	vector<Curve<float>> scalar_curves;
+	vector<Curve<FVec3>> color_curves;
+
 	float initial_spawn_count = 0.0f;
 
 	// TODO: zamiast częstotliwości możemy mieć docelową ilość cząsteczek
@@ -93,12 +101,36 @@ struct EmitterDef {
 	string name;
 };
 
+struct AnimationContext;
+struct EmissionState;
+
+using AnimateParticleFunc = void (*)(AnimationContext &, Particle &);
+
+// Returns number of particles to emit
+// Fractionals will be accumulated over time
+using PrepareEmissionFunc = float (*)(AnimationContext &, EmissionState &);
+using EmitParticleFunc = void (*)(AnimationContext &, EmissionState &, Particle &);
+
+void defaultAnimateParticle(AnimationContext &, Particle &);
+float defaultPrepareEmission(AnimationContext &, EmissionState &);
+void defaultEmitParticle(AnimationContext &, EmissionState &, Particle &);
+
+// TODO: zrobić jeszcze podmienialną funkcję generującą ostateczny quad (bo
+// na tym poziomie też powinno się dać podpinać parametry)
+//
+// TODO: podstawowe funkcje animujące / emitujące powinny się łatwo dać
+// rozbić na mniejsze kawałki i poskładać z drobnymi modyfikacjami
+
 struct ParticleSystemDef {
 	struct SubSystem {
 		SubSystem(ParticleDefId pdef, EmitterDefId edef) : particle_id(pdef), emitter_id(edef) {}
 
 		ParticleDefId particle_id;
 		EmitterDefId emitter_id;
+
+		AnimateParticleFunc animate_func = defaultAnimateParticle;
+		PrepareEmissionFunc prepare_func = defaultPrepareEmission;
+		EmitParticleFunc emit_func = defaultEmitParticle;
 
 		int max_active_particles = INT_MAX;
 		int max_total_particles = INT_MAX;
@@ -142,7 +174,6 @@ struct ParticleSystem {
 	const SubSystem operator[](int ssid) const { return subsystems[ssid]; }
 	SubSystem &operator[](int ssid) { return subsystems[ssid]; }
 
-	// TODO(OPT): this should be small vector?
 	std::vector<SubSystem> subsystems;
 	Params params;
 	FVec2 pos;
@@ -152,4 +183,38 @@ struct ParticleSystem {
 
 	float anim_time = 0.0f;
 	bool is_dead = false;
+};
+
+struct AnimationContext {
+
+	const ParticleSystem &ps;
+	const ParticleSystem::SubSystem &ss;
+
+	const ParticleSystemDef &psdef;
+	const ParticleSystemDef::SubSystem &ssdef;
+
+	const ParticleDef &pdef;
+	const EmitterDef &edef;
+
+	float uniformSpread(float spread);
+	float uniform(float min, float max);
+	int randomSeed();
+	SVec2 randomTexTile();
+
+	RandomGen rand;
+	const int ssid;
+
+	const float anim_time, norm_anim_time;
+	const float time_delta, inv_time_delta;
+};
+
+struct EmissionState {
+	float rot_min, rot_max;
+	float strength_min, strength_max;
+
+	float max_life;
+	float angle, angle_spread;
+	float rot_speed_min, rot_speed_max; // TODO: change to value, value_var or value_spread
+
+	float var[128];
 };

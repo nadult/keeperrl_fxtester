@@ -17,6 +17,9 @@ Ficzery systemu animacji:
 - możliwość odgrywania animacji od środka (z już z kilkoma zrespawnowanymi cząsteczkami
   na odpowiednich pozycjach); To może wymagać całkowania niektórych krzywych i systemów
   akumulacji rotacji, pozycji etc.
+- możliwość używanie cząsteczek z jednego podsystemu jako emiterów do drugiego podsystemu
+  tutaj wystarczy, jeśli funkcje emitujące będą miały odpowiednio szeroki kontekst
+  (w EmitterState jest np. indeks aktualnego podsystemu i referencja do definicji / stanu subsystemu?)
 
 *) Animacja rąbania drewna:
   - kierunkowo drzazgi nie wyglądają za dobrze (dlaczego?)
@@ -40,6 +43,13 @@ Ficzery systemu animacji:
 
 -------------------------------------------------------------------------------
 
+
+Mini todo:
+- bardziej funkcyjne systemy cząstek, które można łatwo parametryzować
+- zoomowanie jest strasznie wkurwiające
+- opcjonalne podłączanie systemów do debugowania & formatowania z libfwk
+- ...
+
 Integracja z Keeperem:
 - włączenie Keepera jako submodule
 - ew. później przeniesiemy klasy psystemów do keepera (na początku na branch)
@@ -50,10 +60,4 @@ Integracja libfwk:
 - Problem: libfwk działa bez wyjątków (kompilacja zakłada, że są wyłączone); Jeśli libfwk
   jest używane tylko do edytora cząsteczek, to nie powinno to stanowić problemu
 
-- Problem: czego używać do assertów i printowania obiektów?
-  TODO: spytać się Michała
-
-  może po prostu zrób plik który zależnie od tego, czy kompilujemy w trybie edytora czy nie
- to uzywa DASSERTów z libfwk albo przerabie je na CHECKi. printy są potrzebne przede wszystkim 
- w trakcie pracy, jak się commituje, to nie muszą działać.
  
