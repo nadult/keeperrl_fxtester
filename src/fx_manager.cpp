@@ -85,12 +85,12 @@ void FXManager::simulate(ParticleSystem &ps, float time_delta) {
 		int max_particles = min(ssdef.max_active_particles - (int)ss.particles.size(),
 								ssdef.max_total_particles - ss.total_particles);
 		num_particles = min(num_particles, max_particles);
-		ss.total_particles += num_particles;
 
 		for(int n = 0; n < num_particles; n++) {
 			Particle new_inst;
 			ssdef.emit_func(ctx, em, new_inst);
 			ss.particles.emplace_back(new_inst);
+			ss.total_particles++;
 		}
 		ss.random_seed = ctx.randomSeed(); // TODO: save random state properly?
 	}

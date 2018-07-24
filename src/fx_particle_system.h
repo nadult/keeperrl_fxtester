@@ -110,7 +110,7 @@ struct Particle {
 
 	// TODO: quantize members ? It may give the particles a pixelated feel
 	FVec2 pos, movement;
-	float size, life, max_life;
+	float size = default_tile_size, life = 0.0f, max_life = 1.0f;
 	float rot = 0.0f, rot_speed = 0.0f;
 	SVec2 tex_tile;
 };

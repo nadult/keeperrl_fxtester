@@ -108,25 +108,6 @@ static void addExplosionEffect(FXManager &mgr) {
 static void addRippleEffect(FXManager &mgr) {
 	EmitterDef edef;
 
-	// Czy chcemy móc definiować PSy całkowicie z pliku?
-
-	// Jak przekazywać parametry do animacji?
-	// - mogą kontrolować pozycję na jakiejś krzywej, która poźniej jest używana do czegoś tam
-	// - mogą być argumentem jakiejś prostej operacji (+,-,*) wykonywanej na jakiejś pośredniej wartości
-	//   (ale na końcowej / początkowej w sumie też?)
-	//
-	// - parametry są trzymane per system;
-	//   a może różne systemy udos
-	//
-	// - Przy definiowaniu efektów możemy podpinać jakoś parametry ?
-	//
-	// - możemy zrobić standardowe shadery:
-	//   - funkcja zwracająca ilość cząsteczek w danej klatce
-	//   - funkcja generująca nowe cząsteczki
-	//   - funkcja animująca już żyjące cząsteczki
-	//
-	// Parametr może być aplikowany globalnie, do subsystemu, zamiast krzywej
-
 	// Ta animacja nie ma sprecyzowanej długości;
 	// Zamiast tego może być włączona / wyłączona albo może się zwięszyć/zmniejszyć jej siła
 	// krzywe które zależą od czasu animacji tracą sens;
@@ -166,8 +147,59 @@ static void addRippleEffect(FXManager &mgr) {
 	ParticleSystemDef psdef;
 	psdef.subsystems = {ssdef};
 	psdef.anim_length = 1.0f;
-	psdef.is_looped = true; // TODO: to nie jest brane pod uwagę na razie
+	psdef.is_looped = true;
 	psdef.name = "ripple";
+
+	mgr.addDef(psdef);
+}
+
+static void addCircularBlast(FXManager &mgr) {
+	EmitterDef edef;
+
+	// TODO: odseparować czas emisji od czasu animacji ?
+	// domyślnie czas emisji jest taki sam, ale można go zmienić
+	//
+	// TODO: odseparować czas subsystemu od czasu całej animacji?
+	edef.frequency = {{0.0f, 0.05f}, {50.0f, 0.0f}};
+	edef.initial_spawn_count = 10.0;
+
+	auto prep_func = [](AnimationContext &ctx, EmissionState &em) {
+		defaultPrepareEmission(ctx, em);
+		return 0.0f;
+	};
+
+	auto emit_func = [](AnimationContext &ctx, EmissionState &em, Particle &new_inst) {
+		new_inst.life = min(em.max_life, float(ctx.ss.total_particles) * 0.01f);
+		new_inst.max_life = em.max_life;
+	};
+
+	auto animate_func = [](AnimationContext &ctx, Particle &pinst) {
+		float ptime = pinst.particleTime();
+		float mod = 1.0f + ctx.ps.params.scalar[0];
+		float time_delta = ctx.time_delta * mod;
+		pinst.life += pinst.movement.x;
+		pinst.movement.x = 0;
+		pinst.life += time_delta;
+	};
+
+	ParticleDef pdef;
+	pdef.life = 0.5f;
+	pdef.size = {{10.0f, 80.0f}, InterpType::cosine};
+	pdef.alpha = {{0.0f, 0.03f, 0.2f, 1.0f}, {0.0f, 0.15f, 0.15f, 0.0f}, InterpType::cosine};
+
+	pdef.color = {{0.5f, 0.8f}, {{1.0f, 1.0f, 1.0f}, {0.5f, 0.5f, 1.0f}}};
+	pdef.texture_name = "torus.png";
+
+	SubSystemDef ssdef(mgr.addDef(pdef), mgr.addDef(edef));
+	ssdef.max_active_particles = 20;
+	ssdef.prepare_func = prep_func;
+	ssdef.animate_func = animate_func;
+	ssdef.emit_func = emit_func;
+
+	ParticleSystemDef psdef;
+	psdef.subsystems = {ssdef};
+	psdef.anim_length = 1.0f;
+	psdef.name = "circular_blast";
 
 	mgr.addDef(psdef);
 }
@@ -177,5 +209,6 @@ void FXManager::addDefaultDefs() {
 	addSplinterEffect(*this);
 	addExplosionEffect(*this);
 	addRippleEffect(*this);
+	addCircularBlast(*this);
 };
 }
