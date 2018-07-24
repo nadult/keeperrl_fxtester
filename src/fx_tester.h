@@ -60,12 +60,18 @@ class FXTester {
 	void drawCursor(Renderer2D &, int2, FColor) const;
 	static PTexture loadTexture(string file_name);
 	void loadBackgrounds();
+	void setZoom(float2 screen_pos, float zoom);
+
+	float2 screenToTile(float2) const;
+	float2 tileToScreen(int2) const;
+	float2 tileToScreen(float2) const;
 
 	int m_menu_width;
 	int2 m_menu_size;
 
 	IRect m_viewport;
-	float2 m_view_pos; // in tiles
+	float2 m_top_left_tile;
+
 	int2 m_selected_tile;
 	float m_zoom = 2.0f;
 	float m_animation_speed = 1.0f;

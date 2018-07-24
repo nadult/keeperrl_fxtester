@@ -46,12 +46,9 @@ Ficzery systemu animacji:
 
 
 Mini todo:
-- bardziej funkcyjne systemy cząstek, które można łatwo parametryzować
-- zmiana nazw plików: fx_
-- dodać fx_base i opcję podłączenia fwk (do testowania)
-- zoomowanie jest strasznie wkurwiające
-- opcjonalne podłączanie systemów do debugowania & formatowania z libfwk
-- ...
+- zapisywanie do pliku & hot reloading
+- dodać jeszcze kilka efektów
+- różne rodzaje spawnerów ?
 
 Integracja z Keeperem:
 - włączenie Keepera jako submodule

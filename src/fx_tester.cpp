@@ -166,13 +166,11 @@ void FXTester::occlusionToolInput(CSpan<InputEvent> events) {
 
 void FXTester::drawOccluders(Renderer2D &out) const {
 	auto &tool = *m_occlusion_tool;
-
-	float tile_to_screen = m_zoom * tile_size;
-	auto tile_rect = FRect(float2(tile_to_screen));
+	auto tile_rect = FRect(tileToScreen(int2(1)));
 
 	for(auto &occluder : tool.occluders) {
 		auto tex = tool.textures[occluder.first].first;
-		out.addFilledRect(tile_rect + float2(occluder.second) * tile_to_screen, tex);
+		out.addFilledRect(tile_rect + tileToScreen(occluder.second), tex);
 	}
 }
 
@@ -198,14 +196,29 @@ FXTester::FXTester() : m_viewport(GfxDevice::instance().windowSize()) {
 	loadOccluders();
 }
 
+float2 FXTester::screenToTile(float2 spos) const { return spos / float(tile_size * m_zoom); }
+float2 FXTester::tileToScreen(int2 tpos) const { return float2(tpos) * float(tile_size) * m_zoom; }
+float2 FXTester::tileToScreen(float2 tpos) const { return tpos * float(tile_size) * m_zoom; }
+
+void FXTester::setZoom(float2 screen_pos, float zoom) {
+	float2 old_pos = screenToTile(screen_pos);
+	m_zoom = clamp(zoom, 0.25f, 10.0f);
+	float2 new_pos = screenToTile(screen_pos);
+	m_top_left_tile += old_pos - new_pos;
+}
+
 void FXTester::doMenu() {
 	ImGui::Begin("FXTester", nullptr,
 				 ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 	ImGui::SetWindowSize(m_menu_size);
 
 	selectEnum("Mode", m_mode);
-	if(ImGui::InputFloat("Zoom", &m_zoom))
-		m_zoom = clamp(m_zoom, 0.25f, 10.0f);
+	{
+		float zoom = m_zoom;
+		if(ImGui::InputFloat("Zoom", &zoom))
+			setZoom(float2(m_viewport.size()) * 0.5f, clamp(zoom, 0.25f, 10.0f));
+	}
+
 	if(ImGui::InputFloat("Anim speed", &m_animation_speed))
 		m_animation_speed = clamp(m_animation_speed, 0.0f, 100.0f);
 	ImGui::Checkbox("Show cursor", &m_show_cursor);
@@ -250,8 +263,6 @@ void FXTester::tick(GfxDevice &device, double time_diff) {
 	doMenu();
 	events = m_imgui->finishFrame(device);
 
-	float screen_to_tile = 1.0f / (m_zoom * tile_size);
-
 	for(auto event : events) {
 		if(event.keyDown(InputKey::f11)) {
 			auto &gfx_device = GfxDevice::instance();
@@ -265,11 +276,12 @@ void FXTester::tick(GfxDevice &device, double time_diff) {
 			m_mode = Mode::occlusion;
 
 		if(event.mouseButtonPressed(InputButton::right))
-			m_view_pos -= float2(event.mouseMove()) * screen_to_tile;
+			m_top_left_tile -= screenToTile(float2(event.mouseMove()));
 		if(event.isMouseOverEvent()) {
-			m_selected_tile = int2(m_view_pos + float2(event.mousePos()) * screen_to_tile);
+			float2 sel_tile = screenToTile((float2)event.mousePos()) + m_top_left_tile;
+			m_selected_tile = (int2)vfloor(sel_tile);
 			if(int zoom = event.mouseWheel())
-				m_zoom = clamp(m_zoom * (zoom > 0 ? 1.25f : 0.8f), 0.25f, 10.0f);
+				setZoom((float2)event.mousePos(), m_zoom * (zoom > 0 ? 1.25f : 0.8f));
 		}
 	}
 
@@ -289,7 +301,7 @@ void FXTester::drawCursor(Renderer2D &out, int2 tile_pos, FColor color) const {
 
 void FXTester::render() const {
 	Renderer2D out(m_viewport);
-	out.setViewPos(m_view_pos * float(tile_size) * m_zoom);
+	out.setViewPos(tileToScreen(m_top_left_tile));
 
 	GfxDevice::clearColor(FColor(0.1, 0.1, 0.1));
 	float tile_to_screen = m_zoom * float(tile_size);
