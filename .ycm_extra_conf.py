@@ -38,6 +38,7 @@ flags = [
 '-Wall', '-Wextra', '-Werror', '-Woverloaded-virtual', '-Wnon-virtual-dtor', '-Werror=return-type', '-Werror=switch',
 '-Wimplicit-fallthrough', '-Wno-reorder', '-Wuninitialized', '-Wno-unused-function', '-Wno-unused-variable',
 '-Wno-unused-parameter', '-Wparentheses', '-Wno-overloaded-virtual', '-Wno-undefined-inline',
+'-DFWK_TESTING_MODE',
 
 '-x', 'c++','-fexceptions', '-std=c++1z',
 

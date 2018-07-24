@@ -9,6 +9,7 @@
 
 namespace fx {
 template <class T> using vector = fwk::vector<T>; // for additional checks
+using fwk::print;
 }
 
 #else
