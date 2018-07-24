@@ -52,4 +52,8 @@ Integracja libfwk:
 
 - Problem: czego używać do assertów i printowania obiektów?
   TODO: spytać się Michała
+
+  może po prostu zrób plik który zależnie od tego, czy kompilujemy w trybie edytora czy nie
+ to uzywa DASSERTów z libfwk albo przerabie je na CHECKi. printy są potrzebne przede wszystkim 
+ w trakcie pracy, jak się commituje, to nie muszą działać.
  

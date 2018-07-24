@@ -19,6 +19,9 @@ void Spawner::update(FXManager &manager) {
 		auto spawn_pos = (FVec2(tile_pos) + FVec2(0.5f)) * default_tile_size;
 		instance_id = manager.addSystem(def_id, {spawn_pos.x, spawn_pos.y});
 	}
+
+	if(!manager.dead(instance_id))
+		manager.get(instance_id).params = params;
 }
 
 void Spawner::kill(FXManager &manager) {

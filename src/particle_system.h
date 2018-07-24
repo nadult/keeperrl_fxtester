@@ -103,10 +103,14 @@ struct ParticleSystemDef {
 		int max_active_particles = INT_MAX;
 		int max_total_particles = INT_MAX;
 	};
+
+	const SubSystem operator[](int ssid) const { return subsystems[ssid]; }
+	SubSystem &operator[](int ssid) { return subsystems[ssid]; }
+
 	std::vector<SubSystem> subsystems;
-	float anim_length;
+	float anim_length = 1.0f;
+	bool is_looped = false;
 	string name;
-	// TODO: co się dzieje jak się kończy animacja? kasujemy instancję, czy wyłączamy emisję?
 };
 
 struct Particle {
@@ -126,12 +130,21 @@ struct ParticleSystem {
 		int total_particles = 0;
 	};
 
+	struct Params {
+		float scalar[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+		FVec3 color[2] = {FVec3(1.0), FVec3(1.0)};
+	};
+
 	ParticleSystem(FVec2 pos, ParticleSystemDefId, int spawn_time, int num_subsystems);
 
 	void kill();
 
-	// TODO: this should be small vector?
+	const SubSystem operator[](int ssid) const { return subsystems[ssid]; }
+	SubSystem &operator[](int ssid) { return subsystems[ssid]; }
+
+	// TODO(OPT): this should be small vector?
 	std::vector<SubSystem> subsystems;
+	Params params;
 	FVec2 pos;
 
 	ParticleSystemDefId def_id;

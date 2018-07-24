@@ -85,12 +85,22 @@ void FXTester::spawnToolMenu() {
 
 	ImGui::Text("LMB: add spawner\ndel: remove spawners under cursor");
 	ImGui::Text("LMB + ctrl: select\n");
-	ImGui::Text("Spawners: %d", tool.spawners.size());
+	ImGui::Separator();
 
 	if(auto *sel = tool.selection()) {
-		ImGui::SliderFloat("Param #1", &sel->param1, 0.0f, 1.0f);
-		ImGui::SliderFloat("Param #2", &sel->param2, 0.0f, 1.0f);
-		ImGui::ColorEdit3("Color", sel->color_param.v);
+		ImGui::Text("Params:");
+		int idx = 0;
+		for(auto &f : sel->params.scalar) {
+			char title[256]; // TODO: proper formatting
+			snprintf(title, sizeof(title), "Scalar #%d", idx++);
+			ImGui::SliderFloat(title, &f, 0.0f, 1.0f);
+		}
+		idx = 0;
+		for(auto &c : sel->params.color) {
+			char title[256]; // TODO: proper formatting
+			snprintf(title, sizeof(title), "Color #%d", idx++);
+			ImGui::ColorEdit3(title, c.v);
+		}
 	}
 }
 

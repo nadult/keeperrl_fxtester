@@ -110,8 +110,12 @@ void FXManager::simulate(ParticleSystem &ps, float time_delta) {
 	}
 
 	ps.anim_time += time_delta;
-	if(ps.anim_time > def.anim_length)
-		ps.kill();
+	if(ps.anim_time > def.anim_length) {
+		if(def.is_looped)
+			ps.anim_time -= def.anim_length;
+		else
+			ps.kill();
+	}
 }
 
 void FXManager::simulate(float delta) {
@@ -146,7 +150,7 @@ std::vector<RenderQuad> FXManager::genQuads() const {
 					tex_rect = (tex_rect + FVec2(pinst.tex_tile)) * inv_tex_tile;
 
 				auto corners = FRect(pos - size, pos + size).corners();
-				FColor color(pdef.color.sample(ptime), alpha);
+				FColor color(pdef.color.sample(ptime) * ps.params.color[0], alpha);
 				for(auto &corner : corners)
 					corner = rotateVector(corner - pos, pinst.rot) + pos;
 				out.emplace_back(

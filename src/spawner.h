@@ -8,6 +8,7 @@ class FXManager;
 
 struct Spawner {
 	using Type = SpawnerType;
+	using Params = ParticleSystem::Params;
 
 	// TODO: dodatkowe parametry
 	Spawner(Type type, IVec2 tile_pos, ParticleSystemDefId);
@@ -22,6 +23,5 @@ struct Spawner {
 	bool is_dead = false;
 	Type type;
 
-	float param1 = 0.0f, param2 = 0.0f;
-	FVec3 color_param = FVec3(1.0f);
+	Params params;
 };

@@ -1,6 +1,8 @@
 #include "fcolor.h"
 #include "fx_manager.h"
 
+using SubSystemDef = ParticleSystemDef::SubSystem;
+
 static void addTestEffect(FXManager &mgr) {
 	EmitterDef edef;
 	edef.strength_min = edef.strength_max = 30.0f;
@@ -47,9 +49,11 @@ static void addSplinterEffect(FXManager &mgr) {
 	pdef.texture_name = "flakes_4x4_borders.png";
 	pdef.texture_tiles = {4, 4};
 
+	SubSystemDef ssdef(mgr.addDef(pdef), mgr.addDef(edef));
+	ssdef.max_total_particles = 4;
+
 	ParticleSystemDef psdef;
-	psdef.subsystems.emplace_back(mgr.addDef(pdef), mgr.addDef(edef));
-	psdef.subsystems.back().max_total_particles = 4;
+	psdef.subsystems = {ssdef};
 	psdef.anim_length = 5.0f;
 	psdef.name = "splinter";
 	mgr.addDef(psdef);
@@ -77,21 +81,42 @@ static void addExplosionEffect(FXManager &mgr) {
 	pdef.texture_name = "clouds_soft_borders_4x4.png";
 	pdef.texture_tiles = {4, 4};
 
-	ParticleSystemDef psdef;
-	psdef.subsystems.emplace_back(mgr.addDef(pdef), mgr.addDef(edef));
-	psdef.subsystems.back().max_total_particles = 20;
+	SubSystemDef ssdef(mgr.addDef(pdef), mgr.addDef(edef));
+	ssdef.max_total_particles = 20;
 
+	ParticleSystemDef psdef;
+	psdef.subsystems = {ssdef};
 	psdef.anim_length = 2.0f;
 	psdef.name = "explosion";
 	mgr.addDef(psdef);
 }
 
-static void addGrowingCirclesEffect(FXManager &mgr) {
+static void addRippleEffect(FXManager &mgr) {
 	EmitterDef edef;
+
+	// Czy chcemy móc definiować PSy całkowicie z pliku?
+
+	// Jak przekazywać parametry do animacji?
+	// - mogą kontrolować pozycję na jakiejś krzywej, która poźniej jest używana do czegoś tam
+	// - mogą być argumentem jakiejś prostej operacji (+,-,*) wykonywanej na jakiejś pośredniej wartości
+	//   (ale na końcowej / początkowej w sumie też?)
+	//
+	// - parametry są trzymane per system;
+	//   a może różne systemy udos
+	//
+	// - Przy definiowaniu efektów możemy podpinać jakoś parametry ?
+	//
+	// - możemy zrobić standardowe shadery:
+	//   - funkcja zwracająca ilość cząsteczek w danej klatce
+	//   - funkcja generująca nowe cząsteczki
+	//   - funkcja animująca już żyjące cząsteczki
+	//
+	// Parametr może być aplikowany globalnie, do subsystemu, zamiast krzywej
 
 	// Ta animacja nie ma sprecyzowanej długości;
 	// Zamiast tego może być włączona / wyłączona albo może się zwięszyć/zmniejszyć jej siła
 	// krzywe które zależą od czasu animacji tracą sens;
+	// animacja może być po prostu zapętlona
 	edef.frequency = 1.5f;
 	edef.initial_spawn_count = 1.0f;
 
@@ -103,11 +128,14 @@ static void addGrowingCirclesEffect(FXManager &mgr) {
 	pdef.color = FVec3(1.0f, 1.0f, 1.0f);
 	pdef.texture_name = "torus.png";
 
+	SubSystemDef ssdef(mgr.addDef(pdef), mgr.addDef(edef));
+	ssdef.max_active_particles = 4;
+
 	ParticleSystemDef psdef;
-	psdef.subsystems.emplace_back(mgr.addDef(pdef), mgr.addDef(edef));
-	psdef.anim_length = 999999.0f;
-	psdef.subsystems.back().max_active_particles = 4;
-	psdef.name = "speed";
+	psdef.subsystems = {ssdef};
+	psdef.anim_length = 1.0f;
+	psdef.is_looped = true; // TODO: to nie jest brane pod uwagę na razie
+	psdef.name = "ripple";
 	mgr.addDef(psdef);
 }
 
@@ -115,5 +143,5 @@ void FXManager::addDefaultDefs() {
 	addTestEffect(*this);
 	addSplinterEffect(*this);
 	addExplosionEffect(*this);
-	addGrowingCirclesEffect(*this);
+	addRippleEffect(*this);
 };
