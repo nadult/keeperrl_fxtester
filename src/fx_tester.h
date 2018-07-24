@@ -37,7 +37,10 @@ class FXTester {
   public:
 	using Mode = FXTesterMode;
 
-	FXTester();
+	FXTester(float zoom);
+
+	bool spawnEffect(string, int2);
+	bool setBackground(string);
 
 	void spawnToolMenu();
 	void spawnToolInput(CSpan<InputEvent>);

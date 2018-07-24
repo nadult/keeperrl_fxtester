@@ -14,6 +14,7 @@
 #include <fwk/gfx/opengl.h>
 #include <fwk/gfx/renderer2d.h>
 #include <fwk/math/box.h>
+#include <fwk/parse.h>
 #include <fwk/sys/backtrace.h>
 #include <fwk/sys/input.h>
 #include <fwk/sys/stream.h>
@@ -177,7 +178,7 @@ void FXTester::drawOccluders(Renderer2D &out) const {
 // ------------------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------------------
 
-FXTester::FXTester() : m_viewport(GfxDevice::instance().windowSize()) {
+FXTester::FXTester(float zoom) : m_viewport(GfxDevice::instance().windowSize()) {
 	m_imgui.emplace(GfxDevice::instance(), ImGuiStyleMode::mini);
 	m_ps.emplace();
 
@@ -194,6 +195,38 @@ FXTester::FXTester() : m_viewport(GfxDevice::instance().windowSize()) {
 	m_cursor_tex = loadTexture("data/cursor.png");
 	loadBackgrounds();
 	loadOccluders();
+
+	setZoom(float2(m_viewport.size()) * 0.25f, zoom);
+}
+
+bool FXTester::spawnEffect(string name, int2 pos) {
+	int id = 0;
+	for(auto &def : m_ps->systemDefs()) {
+		if(def.name == name) {
+			auto old_type = m_spawn_tool->type;
+			m_spawn_tool->type = SpawnerType::repeated;
+			m_spawn_tool->system_id = ParticleSystemDefId(id);
+			m_spawn_tool->add(pos);
+			m_spawn_tool->type = old_type;
+			return true;
+		}
+		id++;
+	}
+
+	return false;
+}
+
+bool FXTester::setBackground(string name) {
+	if(name == "disabled") {
+		m_background_id = fwk::none;
+		return true;
+	}
+	for(int n = 0; n < m_backgrounds.size(); n++)
+		if(m_backgrounds[n].name == name) {
+			m_background_id = n;
+			return true;
+		}
+	return false;
 }
 
 float2 FXTester::screenToTile(float2 spos) const { return spos / float(tile_size * m_zoom); }
@@ -222,16 +255,18 @@ void FXTester::doMenu() {
 	if(ImGui::InputFloat("Anim speed", &m_animation_speed))
 		m_animation_speed = clamp(m_animation_speed, 0.0f, 100.0f);
 	ImGui::Checkbox("Show cursor", &m_show_cursor);
+	ImGui::Text("%s", format("Cursor: %", m_selected_tile).c_str());
 
 	if(ImGui::Button("Select background"))
 		ImGui::OpenPopup("select_back");
 	if(ImGui::BeginPopup("select_back")) {
 		if(ImGui::MenuItem("disabled", nullptr, !m_background_id))
-			m_background_id = {};
+			m_background_id = fwk::none;
 		for(int n = 0; n < m_backgrounds.size(); n++) {
 			auto &back = m_backgrounds[n];
-			if(ImGui::MenuItem(back.name.c_str(), nullptr, m_background_id == n))
+			if(ImGui::MenuItem(back.name.c_str(), nullptr, m_background_id == n)) {
 				m_background_id = n;
+			}
 		}
 		ImGui::EndPopup();
 	}
@@ -380,19 +415,34 @@ int main(int argc, char **argv) {
 	GfxDeviceFlags gfx_flags = GfxDeviceOpt::resizable | GfxDeviceOpt::vsync;
 	Backtrace::t_default_mode = BacktraceMode::full;
 
+	string spawn_effect, background;
+	int2 spawn_pos;
+	float zoom = 2.0f;
+
 	for(int n = 1; n < argc; n++) {
 		string argument = argv[n];
-		if(argument == "--res") {
+		if(argument == "-res") {
 			ASSERT(n + 2 < argc);
-			resolution = int2(fromString<int>(argv[n + 1]), fromString<int>(argv[n + 2]));
+			resolution = int2(fwk::fromString<int>(argv[n + 1]), fwk::fromString<int>(argv[n + 2]));
 			ASSERT(resolution.x >= 320 && resolution.y >= 200);
 			n += 2;
-		} else if(argument == "--full-screen") {
+		} else if(argument == "-full-screen") {
 			gfx_flags |= GfxDeviceOpt::fullscreen;
-		} else if(argument == "--no-vsync") {
+		} else if(argument == "-no-vsync") {
 			gfx_flags &= ~GfxDeviceOpt::vsync;
-		} else if(argument == "--maximized") {
+		} else if(argument == "-maximized") {
 			gfx_flags |= GfxDeviceOpt::maximized;
+		} else if(argument == "-spawn") {
+			ASSERT(n + 3 < argc);
+			spawn_effect = argv[++n];
+			spawn_pos.x = fwk::fromString<int>(argv[++n]);
+			spawn_pos.y = fwk::fromString<int>(argv[++n]);
+		} else if(argument == "-background") {
+			ASSERT(n + 1 < argc);
+			background = argv[++n];
+		} else if(argument == "-zoom") {
+			ASSERT(n + 1 < argc);
+			zoom = fwk::fromString<float>(argv[++n]);
 		} else {
 			printf("Unsupported argument: %s\n", argument.c_str());
 			exit(1);
@@ -402,7 +452,18 @@ int main(int argc, char **argv) {
 	GfxDevice gfx_device;
 	gfx_device.createWindow("FXTester - particle system tester", resolution, gfx_flags);
 
-	FXTester tester;
+	FXTester tester(zoom);
+	if(!spawn_effect.empty())
+		if(!tester.spawnEffect(spawn_effect, spawn_pos)) {
+			printf("Unknown effect: %s\n", spawn_effect.c_str());
+			exit(1);
+		}
+	if(!background.empty())
+		if(!tester.setBackground(background)) {
+			printf("Unknown background: %s\n", background.c_str());
+			exit(1);
+		}
+
 	gfx_device.runMainLoop(FXTester::mainLoop, &tester);
 
 	return 0;

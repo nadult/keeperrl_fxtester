@@ -21,6 +21,8 @@ Ficzery systemu animacji:
   tutaj wystarczy, jeśli funkcje emitujące będą miały odpowiednio szeroki kontekst
   (w EmitterState jest np. indeks aktualnego podsystemu i referencja do definicji / stanu subsystemu?)
 - różne kształty emitera
+- możliwość wyłaczenia animacji w taki sposób, że emitery przestają działać, ale te cząsteczki które
+  już zostały wygenerowane mogą skończyć animację
 
 *) Animacja rąbania drewna:
   - kierunkowo drzazgi nie wyglądają za dobrze (dlaczego?)
