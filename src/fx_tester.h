@@ -9,6 +9,8 @@ class FXManager;
 
 namespace fx_tester {
 
+using FColor = fwk::FColor;
+
 DEFINE_ENUM(FXTesterMode, spawn, occlusion);
 
 class FXTester {

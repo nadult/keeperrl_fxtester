@@ -1,5 +1,7 @@
 #include "particle_system.h"
 
+#include "frect.h"
+
 ParticleSystem::ParticleSystem(FVec2 pos, ParticleSystemDefId def_id, int spawn_time,
 							   int num_subsystems)
 	: pos(pos), def_id(def_id), spawn_time(spawn_time), subsystems(num_subsystems) {}
@@ -82,4 +84,33 @@ void defaultEmitParticle(AnimationContext &ctx, EmissionState &em, Particle &new
 	new_inst.life = 0.0f;
 	new_inst.max_life = em.max_life;
 	new_inst.tex_tile = ctx.randomTexTile();
+}
+
+array<FVec2, 4> DrawContext::quadCorners(FVec2 pos, FVec2 size, float rotation) const {
+	auto corners = FRect(pos - size * 0.5f, pos + size * 0.5f).corners();
+	for(auto &corner : corners)
+		corner = rotateVector(corner - pos, rotation) + pos;
+	return corners;
+}
+
+array<FVec2, 4> DrawContext::texQuadCorners(SVec2 tex_tile) const {
+	FRect tex_rect(FVec2(1));
+	if(!(pdef.texture_tiles == IVec2(1, 1)))
+		tex_rect = (tex_rect + FVec2(tex_tile)) * inv_tex_tile;
+	return tex_rect.corners();
+}
+
+void defaultDrawParticle(DrawContext &ctx, const Particle &pinst, DrawParticle &out) {
+	float ptime = pinst.particleTime();
+	const auto &pdef = ctx.pdef;
+
+	FVec2 pos = pinst.pos + ctx.ps.pos;
+	FVec2 size(pdef.size.sample(ptime));
+	float alpha = pdef.alpha.sample(ptime);
+
+	FColor color(pdef.color.sample(ptime) * ctx.ps.params.color[0],
+				 alpha); // TODO: by default params dont apply ?
+	out.positions = ctx.quadCorners(pos, size, pinst.rot);
+	out.tex_coords = ctx.texQuadCorners(pinst.tex_tile);
+	out.color = IColor(color);
 }

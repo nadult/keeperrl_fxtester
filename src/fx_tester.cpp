@@ -6,9 +6,6 @@
 #include "fx_manager.h"
 #include "spawner.h"
 
-// TODO: move it to separate file
-Color::Color(Uint8 r, Uint8 g, Uint8 b, Uint8 a) : SDL_Color{r, g, b, a} {}
-
 #include "fx_tester.h"
 
 #include "imgui/imgui.h"
@@ -27,6 +24,8 @@ Color::Color(Uint8 r, Uint8 g, Uint8 b, Uint8 a) : SDL_Color{r, g, b, a} {}
 #include <fwk/sys/stream.h>
 
 namespace fx_tester {
+
+using FColor = fwk::FColor;
 
 // ------------------------------------------------------------------------------------------------
 // ------------------------------------- SPAWN TOOL -----------------------------------------------
@@ -229,7 +228,6 @@ void FXTester::doMenu() {
 		ImGui::EndPopup();
 	}
 
-	ImGui::Text("Alive systems: %d", m_ps->aliveSystems().size());
 	ImGui::Separator();
 
 	if(m_mode == Mode::spawn)
@@ -313,7 +311,7 @@ void FXTester::render() const {
 			positions[n] = {quad.positions[n].x * m_zoom, quad.positions[n].y * m_zoom};
 			tex_coords[n] = {quad.tex_coords[n].x, quad.tex_coords[n].y};
 		}
-		FColor color(IColor(quad.color.r, quad.color.g, quad.color.b, quad.color.a));
+		FColor color(fwk::IColor(quad.color.r, quad.color.g, quad.color.b, quad.color.a));
 
 		array<FColor, 4> colors{{color, color, color, color}};
 		out.addQuads(positions, tex_coords, colors, m_particle_materials[quad.particle_def_id]);

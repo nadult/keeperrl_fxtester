@@ -42,7 +42,7 @@ static void addSplinterEffect(FXManager &mgr) {
 	pdef.alpha = {{0.0f, 0.8f, 1.0f}, {1.0, 1.0, 0.0}};
 	pdef.attract_bottom = 1.0f;
 
-	FColor brown(Color(120, 87, 46));
+	FColor brown(IColor(120, 87, 46));
 	// Kiedy cząsteczki opadną pod drzewo, robią się w zasięgu cienia
 	// TODO: lepiej rysować je po prostu pod cieniem
 	pdef.color = {{0.0f, 0.04f, 0.06}, {brown.rgb(), brown.rgb(), brown.rgb() * 0.6f}};
@@ -76,7 +76,7 @@ static void addExplosionEffect(FXManager &mgr) {
 	pdef.size = {{5.0f, 30.0f}};
 	pdef.alpha = {{0.0f, 0.5f, 1.0f}, {0.3, 0.4, 0.0}};
 
-	Color start_color(255, 244, 88), end_color(225, 92, 19);
+	IColor start_color(255, 244, 88), end_color(225, 92, 19);
 	pdef.color = {{FColor(start_color).rgb(), FColor(end_color).rgb()}};
 	pdef.texture_name = "clouds_soft_borders_4x4.png";
 	pdef.texture_tiles = {4, 4};

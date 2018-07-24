@@ -7,6 +7,15 @@
 FXManager::FXManager() { addDefaultDefs(); }
 FXManager::~FXManager() = default;
 
+SubSystemContext FXManager::ssctx(ParticleSystem &ps, int ssid) {
+	auto &ss = ps[ssid];
+	const auto &psdef = (*this)[ps.def_id];
+	const auto &ssdef = psdef[ssid];
+	const auto &pdef = (*this)[psdef[ssid].particle_id];
+	const auto &edef = (*this)[psdef[ssid].emitter_id];
+	return {ps, ss, psdef, ssdef, pdef, edef, ssid};
+}
+
 void FXManager::simulate(ParticleSystem &ps, float time_delta) {
 	auto &psdef = (*this)[ps.def_id];
 
@@ -16,11 +25,10 @@ void FXManager::simulate(ParticleSystem &ps, float time_delta) {
 	// Animating live particles
 	for(int ssid = 0; ssid < (int)psdef.subsystems.size(); ssid++) {
 		auto &ss = ps[ssid];
-		const auto &ssdef = psdef[ssid];
-		const auto &pdef = (*this)[psdef[ssid].particle_id];
-		const auto &edef = (*this)[psdef[ssid].emitter_id];
-		AnimationContext ctx{ps, ss,   psdef,		 ssdef,			 pdef,		 edef,
-							 {}, ssid, ps.anim_time, norm_anim_time, time_delta, inv_time_delta};
+		auto &ssdef = psdef[ssid];
+
+		AnimationContext ctx{ssctx(ps, ssid), {},		  ps.anim_time,
+							 norm_anim_time,  time_delta, inv_time_delta};
 		ctx.rand.init(ss.random_seed);
 
 		for(auto &pinst : ss.particles)
@@ -44,10 +52,9 @@ void FXManager::simulate(ParticleSystem &ps, float time_delta) {
 	for(int ssid = 0; ssid < (int)psdef.subsystems.size(); ssid++) {
 		auto &ss = ps[ssid];
 		const auto &ssdef = psdef[ssid];
-		const auto &pdef = (*this)[psdef[ssid].particle_id];
-		const auto &edef = (*this)[psdef[ssid].emitter_id];
-		AnimationContext ctx{ps, ss,   psdef,		 ssdef,			 pdef,		 edef,
-							 {}, ssid, ps.anim_time, norm_anim_time, time_delta, inv_time_delta};
+
+		AnimationContext ctx{ssctx(ps, ssid), {},		  ps.anim_time,
+							 norm_anim_time,  time_delta, inv_time_delta};
 		ctx.rand.init(ss.random_seed);
 
 		EmissionState em;
@@ -83,37 +90,26 @@ void FXManager::simulate(float delta) {
 			simulate(inst, delta);
 }
 
-std::vector<RenderQuad> FXManager::genQuads() const {
-	std::vector<RenderQuad> out;
+std::vector<DrawParticle> FXManager::genQuads() {
+	std::vector<DrawParticle> out;
+	// TODO(opt): reserve
 
 	for(auto &ps : m_systems) {
 		if(ps.is_dead)
 			continue;
-		auto &def = (*this)[ps.def_id];
+		auto &psdef = (*this)[ps.def_id];
 
-		for(int ssid = 0; ssid < (int)def.subsystems.size(); ssid++) {
-			int part_def_id = def.subsystems[ssid].particle_id;
-			auto &pdef = m_particle_defs[part_def_id];
-			auto &ssinst = ps.subsystems[ssid];
+		for(int ssid = 0; ssid < (int)psdef.subsystems.size(); ssid++) {
+			auto &ss = ps[ssid];
+			auto &ssdef = psdef[ssid];
+			auto &pdef = m_particle_defs[ssdef.particle_id];
+			DrawContext ctx{ssctx(ps, ssid), vinv(FVec2(pdef.texture_tiles))};
 
-			FVec2 inv_tex_tile = vinv(FVec2(pdef.texture_tiles));
-			for(auto &pinst : ssinst.particles) {
-				float ptime = pinst.particleTime();
-
-				FVec2 pos = pinst.pos + ps.pos;
-				FVec2 size(pdef.size.sample(ptime) * 0.5f);
-				float alpha = pdef.alpha.sample(ptime);
-
-				FRect tex_rect(FVec2(1));
-				if(!(pdef.texture_tiles == IVec2(1, 1)))
-					tex_rect = (tex_rect + FVec2(pinst.tex_tile)) * inv_tex_tile;
-
-				auto corners = FRect(pos - size, pos + size).corners();
-				FColor color(pdef.color.sample(ptime) * ps.params.color[0], alpha);
-				for(auto &corner : corners)
-					corner = rotateVector(corner - pos, pinst.rot) + pos;
-				out.emplace_back(
-					RenderQuad{corners, tex_rect.corners(), Color(color), part_def_id});
+			for(auto &pinst : ss.particles) {
+				DrawParticle dparticle;
+				ctx.ssdef.draw_func(ctx, pinst, dparticle);
+				dparticle.particle_def_id = ssdef.particle_id;
+				out.emplace_back(dparticle);
 			}
 		}
 	}
@@ -122,7 +118,7 @@ std::vector<RenderQuad> FXManager::genQuads() const {
 }
 
 bool FXManager::valid(ParticleSystemId id) const {
-	return id >= 0 && id < m_systems.size() && m_systems[id].spawn_time == id.spawnTime();
+	return id >= 0 && id < (int)m_systems.size() && m_systems[id].spawn_time == id.spawnTime();
 }
 
 bool FXManager::dead(ParticleSystemId id) const { return !valid(id) || m_systems[id].is_dead; }
@@ -145,7 +141,7 @@ const ParticleSystem &FXManager::get(ParticleSystemId id) const {
 ParticleSystemId FXManager::addSystem(ParticleSystemDefId def_id, FVec2 pos) {
 	auto &def = (*this)[def_id];
 
-	for(int n = 0; n < m_systems.size(); n++)
+	for(int n = 0; n < (int)m_systems.size(); n++)
 		if(m_systems[n].is_dead) {
 			if(m_systems[n].spawn_time == m_spawn_clock)
 				m_spawn_clock++;
@@ -169,11 +165,11 @@ void FXManager::initialize(const ParticleSystemDef &def, ParticleSystem &ps) {
 	// TODO: initial particles
 }
 
-vector<ParticleSystemId> FXManager::aliveSystems() const {
-	vector<ParticleSystemId> out;
+std::vector<ParticleSystemId> FXManager::aliveSystems() const {
+	std::vector<ParticleSystemId> out;
 	out.reserve(m_systems.size());
 
-	for(int n = 0; n < m_systems.size(); n++)
+	for(int n = 0; n < (int)m_systems.size(); n++)
 		if(!m_systems[n].is_dead)
 			out.emplace_back(ParticleSystemId(n, m_systems[n].spawn_time));
 

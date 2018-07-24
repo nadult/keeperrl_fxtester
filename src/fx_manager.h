@@ -1,15 +1,7 @@
 #pragma once
 
+#include "fcolor.h"
 #include "particle_system.h"
-#include "renderer.h" // TODO: only for Color
-
-struct RenderQuad {
-	// TODO: compress it somehow
-	std::array<FVec2, 4> positions;
-	std::array<FVec2, 4> tex_coords;
-	Color color;
-	int particle_def_id;
-};
 
 class FXManager {
   public:
@@ -53,16 +45,17 @@ class FXManager {
 	EmitterDefId addDef(EmitterDef);
 	ParticleSystemDefId addDef(ParticleSystemDef);
 
-	vector<ParticleSystemId> aliveSystems() const;
+	std::vector<ParticleSystemId> aliveSystems() const;
 	const auto &systems() const { return m_systems; }
 	auto &systems() { return m_systems; }
 
-	std::vector<RenderQuad> genQuads() const;
+	std::vector<DrawParticle> genQuads();
 
   private:
 	void addDefaultDefs();
 	void simulate(ParticleSystem &, float time_delta);
 	void initialize(const ParticleSystemDef &, ParticleSystem &);
+	SubSystemContext ssctx(ParticleSystem &, int);
 
 	std::vector<ParticleDef> m_particle_defs;
 	std::vector<EmitterDef> m_emitter_defs;
@@ -75,7 +68,7 @@ class FXManager {
 	//
 	// TODO: ref-countowane instancje ? możemy też zrobić podobnie jak
 	// we FreeFT: każda instancja ma też licznik spawnu;
-	vector<ParticleSystem> m_systems;
+	std::vector<ParticleSystem> m_systems;
 	RandomGen m_random;
 	int m_spawn_clock = 0;
 };

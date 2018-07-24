@@ -1,8 +1,10 @@
 #pragma once
 
 #include "curve.h"
-
+#include "fcolor.h"
+#include "frect.h"
 #include "tag_id.h"
+#include <limits.h>
 
 static constexpr int default_tile_size = 24;
 
@@ -23,6 +25,7 @@ static constexpr int default_tile_size = 24;
 // AT: animation time:
 // PT: particle time: particle.life / particle.max_life
 
+struct DrawParticle;
 struct Particle;
 struct ParticleSystem;
 
@@ -63,7 +66,7 @@ struct ParticleDef {
 	Curve<float> alpha;
 	Curve<float> size;
 	Curve<float> slowdown;
-	Curve<float> attract_bottom; // TODO: jakoś lepiej to zrobić
+	Curve<float> attract_bottom; // TODO: specjalizacja dla wood splintersów
 	Curve<FVec3> color;
 
 	vector<Curve<float>> scalar_curves;
@@ -101,10 +104,13 @@ struct EmitterDef {
 	string name;
 };
 
+struct SubSystemContext;
+struct DrawContext;
 struct AnimationContext;
 struct EmissionState;
 
 using AnimateParticleFunc = void (*)(AnimationContext &, Particle &);
+using DrawParticleFunc = void (*)(DrawContext &, const Particle &, DrawParticle &);
 
 // Returns number of particles to emit
 // Fractionals will be accumulated over time
@@ -114,6 +120,7 @@ using EmitParticleFunc = void (*)(AnimationContext &, EmissionState &, Particle 
 void defaultAnimateParticle(AnimationContext &, Particle &);
 float defaultPrepareEmission(AnimationContext &, EmissionState &);
 void defaultEmitParticle(AnimationContext &, EmissionState &, Particle &);
+void defaultDrawParticle(DrawContext &, const Particle &, DrawParticle &);
 
 // TODO: zrobić jeszcze podmienialną funkcję generującą ostateczny quad (bo
 // na tym poziomie też powinno się dać podpinać parametry)
@@ -131,12 +138,13 @@ struct ParticleSystemDef {
 		AnimateParticleFunc animate_func = defaultAnimateParticle;
 		PrepareEmissionFunc prepare_func = defaultPrepareEmission;
 		EmitParticleFunc emit_func = defaultEmitParticle;
+		DrawParticleFunc draw_func = defaultDrawParticle;
 
 		int max_active_particles = INT_MAX;
 		int max_total_particles = INT_MAX;
 	};
 
-	const SubSystem operator[](int ssid) const { return subsystems[ssid]; }
+	const SubSystem &operator[](int ssid) const { return subsystems[ssid]; }
 	SubSystem &operator[](int ssid) { return subsystems[ssid]; }
 
 	std::vector<SubSystem> subsystems;
@@ -148,10 +156,19 @@ struct ParticleSystemDef {
 struct Particle {
 	float particleTime() const { return life / max_life; }
 
+	// TODO: quantize members ? It may give the particles a pixelated feel
 	FVec2 pos, movement;
 	float size, life, max_life;
-	float rot, rot_speed;
+	float rot = 0.0f, rot_speed = 0.0f;
 	SVec2 tex_tile;
+};
+
+struct DrawParticle {
+	// TODO: compress it somehow?
+	std::array<FVec2, 4> positions;
+	std::array<FVec2, 4> tex_coords;
+	IColor color;
+	int particle_def_id;
 };
 
 struct ParticleSystem {
@@ -185,8 +202,7 @@ struct ParticleSystem {
 	bool is_dead = false;
 };
 
-struct AnimationContext {
-
+struct SubSystemContext {
 	const ParticleSystem &ps;
 	const ParticleSystem::SubSystem &ss;
 
@@ -196,16 +212,25 @@ struct AnimationContext {
 	const ParticleDef &pdef;
 	const EmitterDef &edef;
 
+	const int ssid;
+};
+
+struct AnimationContext : public SubSystemContext {
 	float uniformSpread(float spread);
 	float uniform(float min, float max);
 	int randomSeed();
 	SVec2 randomTexTile();
 
 	RandomGen rand;
-	const int ssid;
-
 	const float anim_time, norm_anim_time;
 	const float time_delta, inv_time_delta;
+};
+
+struct DrawContext : public SubSystemContext {
+	FVec2 inv_tex_tile;
+
+	array<FVec2, 4> quadCorners(FVec2 pos, FVec2 size, float rotation) const;
+	array<FVec2, 4> texQuadCorners(SVec2 tex_tile) const;
 };
 
 struct EmissionState {
