@@ -43,7 +43,10 @@ struct FXTester::SpawnTool {
 			selection_id = -1;
 	}
 
-	void add(int2 pos) { spawners.emplace_back(type, pos, system_id); }
+	void add(int2 pos) {
+		spawners.emplace_back(type, pos, system_id);
+		selection_id = spawners.size() - 1;
+	}
 
 	void select(int2 pos) {
 		selection_id = -1;
@@ -105,10 +108,8 @@ void FXTester::spawnToolInput(CSpan<InputEvent> events) {
 		if(event.mouseButtonDown(InputButton::left)) {
 			if(event.mods() & InputModifier::lctrl)
 				tool.select(m_selected_tile);
-			else {
+			else
 				tool.add(m_selected_tile);
-				tool.select(m_selected_tile);
-			}
 		}
 	}
 }
