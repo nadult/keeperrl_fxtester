@@ -7,7 +7,7 @@
 #include <fwk/sys/input.h>
 #include <fwk/sys/xml.h>
 
-namespace fx_tester {
+namespace fx::tester {
 
 ImGuiWrapper *ImGuiWrapper::s_instance = nullptr;
 

@@ -1,9 +1,14 @@
 #pragma once
 
-#include "fvec.h"
+#include "fx_vec.h"
 #include "util.h"
 
+// TODO: fix RICH_ENUM so that it will work with namespaces ?
 RICH_ENUM(InterpType, linear, cosine, quadratic, cubic);
+
+namespace fx {
+
+// TODO: move these functions inside curve.cpp ?
 
 template <class T> T interpCosine(const T &a, const T &b, float x) {
 	return lerp(a, b, (1.0f - std::cos(x * fconstant::pi)) * 0.5f);
@@ -30,8 +35,6 @@ template <class T> T interpCubic(const T &y0, const T &y1, const T &y2, const T 
 	return a0 * mu * mu_sq + a1 * mu_sq + a2 * mu + a3;
 }
 
-// TODO: RegularCurve<>
-
 template <class T> struct Curve {
   public:
 	Curve(vector<float> keys, vector<T> values, InterpType = InterpType::linear);
@@ -45,6 +48,7 @@ template <class T> struct Curve {
 
 	void print(float step = 0.05f) const;
 
+	// TODO: keys can be optional, then we're treating it as a regular curve
 	vector<float> m_keys;
 	vector<T> m_values;
 	InterpType m_interp; // TODO: this doesn't have to be here
@@ -53,3 +57,4 @@ template <class T> struct Curve {
 extern template struct Curve<float>;
 extern template struct Curve<FVec2>;
 extern template struct Curve<FVec3>;
+}

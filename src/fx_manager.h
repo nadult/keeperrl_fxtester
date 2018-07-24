@@ -1,7 +1,8 @@
 #pragma once
 
-#include "fcolor.h"
-#include "particle_system.h"
+#include "fx_base.h"
+
+namespace fx {
 
 class FXManager {
   public:
@@ -14,22 +15,13 @@ class FXManager {
 	const auto &emitterDefs() const { return m_emitter_defs; }
 	const auto &systemDefs() const { return m_system_defs; }
 
-	bool valid(ParticleDefId id) const { return id < (int)m_particle_defs.size(); }
-	bool valid(EmitterDefId id) const { return id < (int)m_emitter_defs.size(); }
-	bool valid(ParticleSystemDefId id) const { return id < (int)m_system_defs.size(); }
+	bool valid(ParticleDefId) const;
+	bool valid(EmitterDefId) const;
+	bool valid(ParticleSystemDefId) const;
 
-	const ParticleDef &operator[](ParticleDefId id) const {
-		CHECK(valid(id));
-		return m_particle_defs[id];
-	}
-	const EmitterDef &operator[](EmitterDefId id) const {
-		CHECK(valid(id));
-		return m_emitter_defs[id];
-	}
-	const ParticleSystemDef &operator[](ParticleSystemDefId id) const {
-		CHECK(valid(id));
-		return m_system_defs[id];
-	}
+	const ParticleDef &operator[](ParticleDefId) const;
+	const EmitterDef &operator[](EmitterDefId) const;
+	const ParticleSystemDef &operator[](ParticleSystemDefId) const;
 
 	bool valid(ParticleSystemId) const;
 	bool dead(ParticleSystemId) const; // invalid ids will be dead
@@ -45,11 +37,11 @@ class FXManager {
 	EmitterDefId addDef(EmitterDef);
 	ParticleSystemDefId addDef(ParticleSystemDef);
 
-	std::vector<ParticleSystemId> aliveSystems() const;
+	vector<ParticleSystemId> aliveSystems() const;
 	const auto &systems() const { return m_systems; }
 	auto &systems() { return m_systems; }
 
-	std::vector<DrawParticle> genQuads();
+	vector<DrawParticle> genQuads();
 
   private:
 	void addDefaultDefs();
@@ -57,18 +49,12 @@ class FXManager {
 	void initialize(const ParticleSystemDef &, ParticleSystem &);
 	SubSystemContext ssctx(ParticleSystem &, int);
 
-	std::vector<ParticleDef> m_particle_defs;
-	std::vector<EmitterDef> m_emitter_defs;
-	std::vector<ParticleSystemDef> m_system_defs;
+	vector<ParticleDef> m_particle_defs;
+	vector<EmitterDef> m_emitter_defs;
+	vector<ParticleSystemDef> m_system_defs;
 
 	// TODO: add simple statistics: num particles, instances, etc.
-
-	// TODO: tutaj przydałby się IndexedVector?
-	// (żeby mozna było trzymać indeksy konkretnych instancji)
-	//
-	// TODO: ref-countowane instancje ? możemy też zrobić podobnie jak
-	// we FreeFT: każda instancja ma też licznik spawnu;
-	std::vector<ParticleSystem> m_systems;
-	RandomGen m_random;
-	int m_spawn_clock = 0;
+	vector<ParticleSystem> m_systems;
+	int m_spawn_clock = 0, m_random_seed = 0;
 };
+}

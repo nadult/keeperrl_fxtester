@@ -1,15 +1,17 @@
 #pragma once
 
+#include "fx_base.h"
 #include <type_traits>
-#include "debug.h"
 
-template <class TTag, class Base = unsigned> class TagId {
+namespace fx {
+
+template <class TTag, class Base /*= unsigned*/> class TagId {
   public:
 	using Tag = TTag;
 	static_assert(std::is_unsigned<Base>::value);
 	static_assert(sizeof(Base) <= 4);
 
-	explicit TagId(int idx) : m_idx(idx) { CHECK(idx >= 0); }
+	explicit TagId(int idx) : m_idx(idx) { PASSERT(idx >= 0); }
 
 	explicit operator bool() const = delete;
 	operator int() const { return m_idx; }
@@ -21,3 +23,4 @@ template <class TTag, class Base = unsigned> class TagId {
   private:
 	Base m_idx;
 };
+}

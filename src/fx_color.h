@@ -1,10 +1,10 @@
 #pragma once
 
-#include "fvec.h"
+#include "fx_vec.h"
 
-// TODO: IColor is very similar to Color, but it doesn't require including renderer.h and SDL
-struct IColor;
 struct Color;
+
+namespace fx {
 
 struct FColor {
 	FColor() : r(0.0), g(0.0), b(0.0), a(1.0) {}
@@ -38,6 +38,7 @@ struct FColor {
 	};
 };
 
+// TODO: IColor is very similar to ::Color, but it doesn't require including renderer.h and SDL
 struct IColor {
 	IColor() : IColor(0, 0, 0, 0) {}
 	IColor(int r, int g, int b, int a = 255) : r(r), g(g), b(b), a(a) {} // TODO: clamp or not ?
@@ -49,3 +50,4 @@ struct IColor {
 
 FColor mulAlpha(FColor color, float alpha);
 FColor desaturate(FColor col, float value);
+}

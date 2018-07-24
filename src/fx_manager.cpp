@@ -1,11 +1,31 @@
 #include "fx_manager.h"
 
-#include "fcolor.h"
-#include "fmath.h"
-#include "frect.h"
+#include "fx_color.h"
+#include "fx_math.h"
+#include "fx_particle_system.h"
+#include "fx_rect.h"
+
+namespace fx {
 
 FXManager::FXManager() { addDefaultDefs(); }
 FXManager::~FXManager() = default;
+
+bool FXManager::valid(ParticleDefId id) const { return id < (int)m_particle_defs.size(); }
+bool FXManager::valid(EmitterDefId id) const { return id < (int)m_emitter_defs.size(); }
+bool FXManager::valid(ParticleSystemDefId id) const { return id < (int)m_system_defs.size(); }
+
+const ParticleDef &FXManager::operator[](ParticleDefId id) const {
+	DASSERT(valid(id));
+	return m_particle_defs[id];
+}
+const EmitterDef &FXManager::operator[](EmitterDefId id) const {
+	DASSERT(valid(id));
+	return m_emitter_defs[id];
+}
+const ParticleSystemDef &FXManager::operator[](ParticleSystemDefId id) const {
+	DASSERT(valid(id));
+	return m_system_defs[id];
+}
 
 SubSystemContext FXManager::ssctx(ParticleSystem &ps, int ssid) {
 	auto &ss = ps[ssid];
@@ -90,8 +110,8 @@ void FXManager::simulate(float delta) {
 			simulate(inst, delta);
 }
 
-std::vector<DrawParticle> FXManager::genQuads() {
-	std::vector<DrawParticle> out;
+vector<DrawParticle> FXManager::genQuads() {
+	vector<DrawParticle> out;
 	// TODO(opt): reserve
 
 	for(auto &ps : m_systems) {
@@ -129,12 +149,12 @@ void FXManager::kill(ParticleSystemId id) {
 }
 
 ParticleSystem &FXManager::get(ParticleSystemId id) {
-	CHECK(valid(id));
+	DASSERT(valid(id));
 	return m_systems[id];
 }
 
 const ParticleSystem &FXManager::get(ParticleSystemId id) const {
-	CHECK(valid(id));
+	DASSERT(valid(id));
 	return m_systems[id];
 }
 
@@ -159,14 +179,14 @@ ParticleSystemId FXManager::addSystem(ParticleSystemDefId def_id, FVec2 pos) {
 void FXManager::initialize(const ParticleSystemDef &def, ParticleSystem &ps) {
 	for(int ssid = 0; ssid < (int)ps.subsystems.size(); ssid++) {
 		auto &ss = ps.subsystems[ssid];
-		ss.random_seed = m_random.getLL() % 1973257861;
+		ss.random_seed = m_random_seed++;
 		ss.emission_fract = (*this)[def.subsystems[ssid].emitter_id].initial_spawn_count;
 	}
 	// TODO: initial particles
 }
 
-std::vector<ParticleSystemId> FXManager::aliveSystems() const {
-	std::vector<ParticleSystemId> out;
+vector<ParticleSystemId> FXManager::aliveSystems() const {
+	vector<ParticleSystemId> out;
 	out.reserve(m_systems.size());
 
 	for(int n = 0; n < (int)m_systems.size(); n++)
@@ -189,4 +209,5 @@ EmitterDefId FXManager::addDef(EmitterDef def) {
 ParticleSystemDefId FXManager::addDef(ParticleSystemDef def) {
 	m_system_defs.emplace_back(std::move(def));
 	return ParticleSystemDefId(m_system_defs.size() - 1);
+}
 }

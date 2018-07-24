@@ -1,48 +1,20 @@
 #pragma once
 
-#include "curve.h"
-#include "fcolor.h"
-#include "frect.h"
-#include "tag_id.h"
+#include "fx_base.h"
+#include "fx_color.h"
+#include "fx_curve.h"
+#include "fx_rect.h"
+#include "fx_tag_id.h"
 #include <limits.h>
 
-static constexpr int default_tile_size = 24;
-
-// Najpierw chcemy uzyskać proste efekty:
-// - emiter który jest w stanie emitować ileś tam cząsteczek na sekundę
-// - cząsteczka która może zmieniać kolor, ma kierunek lotu, zmieniającą się alfę i czas życia
-// - mamy też cały system cząstek (najczęściej w ramach pojedyńczego kafla)
-//   - może być parametryzowany: parametry zmieniają trochę konfigurację danego systemu
-//
-// Szablony emiterów i cząsteczek umożliwiają robienie generycznych efektów (z pomocą ścieżek)
-// ale chyba chcielibyśmy też mieć możliwość pisania specjalnych klas do konkretnych efektów
-//
-// Na początku możemy zrobić generyczny system (podobny do tego co mieliśmy w XLIB) a później
-// jeśli generyczny system nie wystarczy, to dodać specjalizacje;
-//
-// Nad specjalizacjami zastanawiamy się w kontekście konkretnego efektu jaki chcemy uzyskać
-
-// AT: animation time:
-// PT: particle time: particle.life / particle.max_life
-
-struct DrawParticle;
-struct Particle;
-struct ParticleSystem;
-
-struct ParticleDef;
-struct EmitterDef;
-struct ParticleSystemDef;
-
-using ParticleDefId = TagId<ParticleDef>;
-using EmitterDefId = TagId<EmitterDef>;
-using ParticleSystemDefId = TagId<ParticleSystemDef>;
+namespace fx {
 
 // Identifies a particluar particle system instance
 class ParticleSystemId {
   public:
 	ParticleSystemId() : m_index(-1) {}
 	ParticleSystemId(int index, int spawn_time) : m_index(index), m_spawn_time(spawn_time) {
-		CHECK(index >= 0 && spawn_time >= 0);
+		PASSERT(index >= 0 && spawn_time >= 0);
 	}
 
 	bool validIndex() const { return m_index >= 0; }
@@ -77,14 +49,6 @@ struct ParticleDef {
 	string name;
 };
 
-// Na jakie sposoby możemy definiować różne wartości:
-// - stała wartość
-// - krzywa w różny sposób interpolowana, regularna lub nie
-// - dwie krzywe (min / max)
-// - ... ?
-// - niektóre parametry powinny być opcjonalne ?
-
-// Różne kształty emitera;
 // Emiterem mogą też być cząsteczki innego subsystemu ?
 struct EmitterDef {
 	Curve<float> frequency; // particles per second
@@ -104,11 +68,6 @@ struct EmitterDef {
 	string name;
 };
 
-struct SubSystemContext;
-struct DrawContext;
-struct AnimationContext;
-struct EmissionState;
-
 using AnimateParticleFunc = void (*)(AnimationContext &, Particle &);
 using DrawParticleFunc = void (*)(DrawContext &, const Particle &, DrawParticle &);
 
@@ -121,12 +80,6 @@ void defaultAnimateParticle(AnimationContext &, Particle &);
 float defaultPrepareEmission(AnimationContext &, EmissionState &);
 void defaultEmitParticle(AnimationContext &, EmissionState &, Particle &);
 void defaultDrawParticle(DrawContext &, const Particle &, DrawParticle &);
-
-// TODO: zrobić jeszcze podmienialną funkcję generującą ostateczny quad (bo
-// na tym poziomie też powinno się dać podpinać parametry)
-//
-// TODO: podstawowe funkcje animujące / emitujące powinny się łatwo dać
-// rozbić na mniejsze kawałki i poskładać z drobnymi modyfikacjami
 
 struct ParticleSystemDef {
 	struct SubSystem {
@@ -147,7 +100,7 @@ struct ParticleSystemDef {
 	const SubSystem &operator[](int ssid) const { return subsystems[ssid]; }
 	SubSystem &operator[](int ssid) { return subsystems[ssid]; }
 
-	std::vector<SubSystem> subsystems;
+	vector<SubSystem> subsystems;
 	float anim_length = 1.0f;
 	bool is_looped = false;
 	string name;
@@ -173,7 +126,7 @@ struct DrawParticle {
 
 struct ParticleSystem {
 	struct SubSystem {
-		std::vector<Particle> particles;
+		vector<Particle> particles;
 		float emission_fract = 0.0f;
 		int random_seed = 123;
 		int total_particles = 0;
@@ -191,7 +144,7 @@ struct ParticleSystem {
 	const SubSystem operator[](int ssid) const { return subsystems[ssid]; }
 	SubSystem &operator[](int ssid) { return subsystems[ssid]; }
 
-	std::vector<SubSystem> subsystems;
+	vector<SubSystem> subsystems;
 	Params params;
 	FVec2 pos;
 
@@ -243,3 +196,4 @@ struct EmissionState {
 
 	float var[128];
 };
+}

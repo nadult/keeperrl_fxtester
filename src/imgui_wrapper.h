@@ -3,7 +3,7 @@
 #include <fwk/gfx_base.h>
 #include <fwk_vector.h>
 
-namespace fx_tester {
+namespace fx::tester {
 
 using namespace fwk;
 

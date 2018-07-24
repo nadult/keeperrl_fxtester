@@ -1,12 +1,7 @@
-#include "fx_tester_base.h"
-
-#undef FATAL
-#undef CHECK
+#include "fx_tester.h"
 
 #include "fx_manager.h"
-#include "spawner.h"
-
-#include "fx_tester.h"
+#include "fx_spawner.h"
 
 #include "imgui/imgui.h"
 #include "imgui_funcs.h"
@@ -23,9 +18,9 @@
 #include <fwk/sys/input.h>
 #include <fwk/sys/stream.h>
 
-namespace fx_tester {
+namespace fx::tester {
 
-using FColor = fwk::FColor;
+static constexpr int tile_size = default_tile_size;
 
 // ------------------------------------------------------------------------------------------------
 // ------------------------------------- SPAWN TOOL -----------------------------------------------
@@ -67,7 +62,7 @@ struct FXTester::SpawnTool {
 				spawner.kill(mgr);
 	}
 
-	fwk::vector<Spawner> spawners;
+	vector<Spawner> spawners;
 	int selection_id = -1;
 
 	SpawnerType type = SpawnerType::single;
@@ -77,8 +72,7 @@ struct FXTester::SpawnTool {
 void FXTester::spawnToolMenu() {
 	auto &tool = *m_spawn_tool;
 
-	auto names = transform(m_ps->systemDefs(),
-						   [](const ParticleSystemDef &def) { return def.name.c_str(); });
+	auto names = transform(m_ps->systemDefs(), [](const auto &def) { return def.name.c_str(); });
 	selectIndex("New system", tool.system_id, names);
 	selectIndex("Spawner type", tool.type, {"single", "repeated"});
 
@@ -123,8 +117,8 @@ void FXTester::spawnToolInput(CSpan<InputEvent> events) {
 // ----------------------------------- OCCLUSION TOOL ---------------------------------------------
 
 struct FXTester::OcclusionTool {
-	fwk::vector<pair<PTexture, string>> textures;
-	fwk::vector<pair<int, int2>> occluders;
+	vector<pair<PTexture, string>> textures;
+	vector<pair<int, int2>> occluders;
 	int new_occluder_id = 0;
 };
 
@@ -172,8 +166,8 @@ void FXTester::occlusionToolInput(CSpan<InputEvent> events) {
 void FXTester::drawOccluders(Renderer2D &out) const {
 	auto &tool = *m_occlusion_tool;
 
-	float tile_to_screen = m_zoom * default_tile_size;
-	auto tile_rect = fwk::FRect(float2(tile_to_screen));
+	float tile_to_screen = m_zoom * tile_size;
+	auto tile_rect = FRect(float2(tile_to_screen));
 
 	for(auto &occluder : tool.occluders) {
 		auto tex = tool.textures[occluder.first].first;
@@ -210,9 +204,9 @@ void FXTester::doMenu() {
 
 	selectEnum("Mode", m_mode);
 	if(ImGui::InputFloat("Zoom", &m_zoom))
-		m_zoom = fwk::clamp(m_zoom, 0.25f, 10.0f);
+		m_zoom = clamp(m_zoom, 0.25f, 10.0f);
 	if(ImGui::InputFloat("Anim speed", &m_animation_speed))
-		m_animation_speed = fwk::clamp(m_animation_speed, 0.0f, 100.0f);
+		m_animation_speed = clamp(m_animation_speed, 0.0f, 100.0f);
 	ImGui::Checkbox("Show cursor", &m_show_cursor);
 
 	if(ImGui::Button("Select background"))
@@ -255,7 +249,7 @@ void FXTester::tick(GfxDevice &device, double time_diff) {
 	doMenu();
 	events = m_imgui->finishFrame(device);
 
-	float screen_to_tile = 1.0f / (m_zoom * default_tile_size);
+	float screen_to_tile = 1.0f / (m_zoom * tile_size);
 
 	for(auto event : events) {
 		if(event.keyDown(InputKey::f11)) {
@@ -274,7 +268,7 @@ void FXTester::tick(GfxDevice &device, double time_diff) {
 		if(event.isMouseOverEvent()) {
 			m_selected_tile = int2(m_view_pos + float2(event.mousePos()) * screen_to_tile);
 			if(int zoom = event.mouseWheel())
-				m_zoom = fwk::clamp(m_zoom * (zoom > 0 ? 1.25f : 0.8f), 0.25f, 10.0f);
+				m_zoom = clamp(m_zoom * (zoom > 0 ? 1.25f : 0.8f), 0.25f, 10.0f);
 		}
 	}
 
@@ -287,22 +281,22 @@ void FXTester::tick(GfxDevice &device, double time_diff) {
 }
 
 void FXTester::drawCursor(Renderer2D &out, int2 tile_pos, FColor color) const {
-	float2 sel_pos = float2(tile_pos * default_tile_size) - float2(2);
-	auto sel_rect = fwk::FRect(sel_pos, sel_pos + float2(default_tile_size + 4)) * m_zoom;
+	float2 sel_pos = float2(tile_pos * tile_size) - float2(2);
+	auto sel_rect = FRect(sel_pos, sel_pos + float2(tile_size + 4)) * m_zoom;
 	out.addFilledRect(sel_rect, SimpleMaterial(m_cursor_tex, color));
 }
 
 void FXTester::render() const {
 	Renderer2D out(m_viewport);
-	out.setViewPos(m_view_pos * float(default_tile_size) * m_zoom);
+	out.setViewPos(m_view_pos * float(tile_size) * m_zoom);
 
 	GfxDevice::clearColor(FColor(0.1, 0.1, 0.1));
-	float tile_to_screen = m_zoom * float(default_tile_size);
+	float tile_to_screen = m_zoom * float(tile_size);
 
 	if(m_background_id) {
 		auto &back = m_backgrounds[*m_background_id];
 		auto size = float2(back.texture->size()) * tile_to_screen / float(back.tile_size);
-		out.addFilledRect(fwk::FRect(size), back.texture);
+		out.addFilledRect(FRect(size), back.texture);
 	}
 
 	for(auto &quad : m_ps->genQuads()) {
@@ -333,9 +327,9 @@ bool FXTester::mainLoop(GfxDevice &device) {
 	static double last_time = time - 1.0 / 60.0;
 	double time_diff = time - last_time;
 	last_time = time;
-	time_diff = fwk::clamp(time_diff, 1 / 240.0, 1 / 5.0);
+	time_diff = clamp(time_diff, 1 / 240.0, 1 / 5.0);
 
-	m_viewport = fwk::IRect(device.windowSize());
+	m_viewport = IRect(device.windowSize());
 
 	tick(device, time_diff);
 	render();

@@ -1,5 +1,9 @@
-#include "fcolor.h"
 #include "fx_manager.h"
+
+#include "fx_color.h"
+#include "fx_particle_system.h"
+
+namespace fx {
 
 using SubSystemDef = ParticleSystemDef::SubSystem;
 
@@ -164,3 +168,4 @@ void FXManager::addDefaultDefs() {
 	addExplosionEffect(*this);
 	addRippleEffect(*this);
 };
+}

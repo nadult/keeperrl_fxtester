@@ -18,10 +18,10 @@ _dummy := $(shell [ -d $(BUILD_DIR) ] || mkdir -p $(BUILD_DIR))
 _dummy := $(shell [ -d $(BUILD_DIR)/imgui ] || mkdir -p $(BUILD_DIR)/imgui)
 _dummy := $(shell [ -d $(BUILD_DIR)/keeperrl ] || mkdir -p $(BUILD_DIR)/keeperrl)
 
-SHARED_SRC=curve particle_system fx_factory fx_manager spawner\
+SHARED_SRC=fx_color fx_vec fx_math fx_curve \
+		   fx_particle_system fx_factory fx_manager fx_spawner \
 		   keeperrl/debug keeperrl/util \
-		   imgui/imgui imgui/imgui_draw imgui/imgui_demo imgui_wrapper \
-		   fcolor fvec fmath\
+		   imgui/imgui imgui/imgui_draw imgui/imgui_demo imgui_wrapper
 
 PROGRAM_SRC=fx_tester
 
@@ -58,6 +58,7 @@ INCLUDES=-Isrc/ -Ikeeperrl/ -Ikeeperrl/extern/ $(FWK_INCLUDES)
 NICE_FLAGS=-Wall -Wextra -Woverloaded-virtual -Wnon-virtual-dtor -Werror=return-type -Werror=switch -Wimplicit-fallthrough\
 		   -Wno-reorder -Wuninitialized -Wno-unused-function -Wno-unused-variable -Wno-unused-parameter -Werror=format \
 		   -Wparentheses -Wno-overloaded-virtual -Wno-undefined-inline #-Werror
+FLAGS += -DFWK_TESTING_MODE
 ifdef CLANG
 LINUX_FLAGS+=-Wconstant-conversion
 LINUX_LIBS+=-pthread
@@ -113,16 +114,16 @@ $(MINGW_PROGRAMS): %.exe: $(MINGW_SHARED_OBJECTS) $(BUILD_DIR)/%_.o $(MINGW_FWK_
 
 DEPS:=$(ALL_SRC:%=$(BUILD_DIR)/%.d) $(ALL_SRC:%=$(BUILD_DIR)/%_.d) $(PCH_FILE_H).d
 
-program-clean:
+clean:
 	-rm -f $(LINUX_OBJECTS) $(LINUX_DWO) $(MINGW_OBJECTS) $(LINUX_PROGRAMS) $(MINGW_PROGRAMS) \
 		   $(DEPS) $(PCH_FILE_GCH) $(PCH_FILE_PCH) $(PCH_FILE_H)
 	-rmdir output
 	find $(BUILD_DIR) -type d -empty -delete
 
-clean: program-clean
+full-clean: clean
 	$(MAKE) -C $(FWK_DIR) clean
 
-.PHONY: program-clean clean
+.PHONY: full-clean clean
 
 -include $(DEPS)
 

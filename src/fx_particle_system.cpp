@@ -1,6 +1,8 @@
-#include "particle_system.h"
+#include "fx_particle_system.h"
 
-#include "frect.h"
+#include "fx_rect.h"
+
+namespace fx {
 
 ParticleSystem::ParticleSystem(FVec2 pos, ParticleSystemDefId def_id, int spawn_time,
 							   int num_subsystems)
@@ -113,4 +115,5 @@ void defaultDrawParticle(DrawContext &ctx, const Particle &pinst, DrawParticle &
 	out.positions = ctx.quadCorners(pos, size, pinst.rot);
 	out.tex_coords = ctx.texQuadCorners(pinst.tex_tile);
 	out.color = IColor(color);
+}
 }

@@ -1,15 +1,35 @@
 #pragma once
 
-#include "fx_tester_base.h"
+#define FWK_VEC2_CONVERSIONS                                                                       \
+	vec2(const fwk::vec2<T> &rhs) : x(rhs.x), y(rhs.y) {}                                          \
+	operator fwk::vec2<T>() const { return {x, y}; }
+
+#define FWK_VEC3_CONVERSIONS                                                                       \
+	vec3(const fwk::vec3<T> &rhs) : x(rhs.x), y(rhs.y), z(rhs.z) {}                                \
+	operator fwk::vec3<T>() const { return {x, y, z}; }
+
+#include <fwk/gfx/color.h>
 #include <fwk/gfx_base.h>
+#include <fwk/math/box.h>
 #include <fwk/sys/immutable_ptr.h>
 #include <fwk/sys/unique_ptr.h>
+#include <fwk_vector.h>
 
-class FXManager;
+#undef CHECK
 
-namespace fx_tester {
+#include "fx_base.h"
 
+namespace fx::tester {
+
+class ImGuiWrapper;
+using FRect = fwk::FRect;
+using IRect = fwk::IRect;
 using FColor = fwk::FColor;
+using IColor = fwk::IColor;
+template <class T> using vector = fwk::vector<T>;
+using fwk::clamp;
+
+using namespace fwk;
 
 DEFINE_ENUM(FXTesterMode, spawn, occlusion);
 
@@ -44,7 +64,7 @@ class FXTester {
 	int m_menu_width;
 	int2 m_menu_size;
 
-	fwk::IRect m_viewport;
+	IRect m_viewport;
 	float2 m_view_pos; // in tiles
 	int2 m_selected_tile;
 	float m_zoom = 2.0f;
@@ -61,8 +81,8 @@ class FXTester {
 
 	UniquePtr<FXManager> m_ps;
 
-	fwk::vector<PTexture> m_particle_textures;
-	fwk::vector<SimpleMaterial> m_particle_materials;
+	vector<PTexture> m_particle_textures;
+	vector<SimpleMaterial> m_particle_materials;
 	PTexture m_cursor_tex;
 
 	struct Background {
@@ -71,7 +91,7 @@ class FXTester {
 		string name;
 	};
 
-	fwk::vector<Background> m_backgrounds;
+	vector<Background> m_backgrounds;
 	Maybe<int> m_background_id;
 };
 }

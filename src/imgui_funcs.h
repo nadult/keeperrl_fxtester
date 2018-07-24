@@ -1,7 +1,7 @@
 #include "imgui/imgui.h"
 #include <fwk/format.h>
 
-namespace fx_tester {
+namespace fx::tester {
 
 using namespace fwk;
 

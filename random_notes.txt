@@ -20,6 +20,7 @@ Ficzery systemu animacji:
 - możliwość używanie cząsteczek z jednego podsystemu jako emiterów do drugiego podsystemu
   tutaj wystarczy, jeśli funkcje emitujące będą miały odpowiednio szeroki kontekst
   (w EmitterState jest np. indeks aktualnego podsystemu i referencja do definicji / stanu subsystemu?)
+- różne kształty emitera
 
 *) Animacja rąbania drewna:
   - kierunkowo drzazgi nie wyglądają za dobrze (dlaczego?)

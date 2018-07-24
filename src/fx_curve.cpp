@@ -1,4 +1,6 @@
-#include "curve.h"
+#include "fx_curve.h"
+
+namespace fx {
 
 template <class T> Curve<T>::Curve() = default;
 template <class T> Curve<T>::~Curve() = default;
@@ -10,37 +12,37 @@ template <class T>
 Curve<T>::Curve(vector<T> values, InterpType interp)
 	: m_values(std::move(values)), m_interp(interp) {
 	m_keys.resize(m_values.size());
-	for(int n = 0; n < m_keys.size(); n++)
+	for(int n = 0; n < (int)m_keys.size(); n++)
 		m_keys[n] = float(n) / float(m_keys.size() - 1);
 }
 
 template <class T>
 Curve<T>::Curve(vector<float> keys, vector<T> values, InterpType interp)
 	: m_keys(std::move(keys)), m_values(std::move(values)), m_interp(interp) {
-	CHECK(m_keys.size() == m_values.size());
-	for(int n = 0; n < m_keys.size(); n++) {
-		CHECK(m_keys[n] >= 0.0f && m_keys[n] <= 1.0f);
+	DASSERT(m_keys.size() == m_values.size());
+	for(int n = 0; n < (int)m_keys.size(); n++) {
+		DASSERT(m_keys[n] >= 0.0f && m_keys[n] <= 1.0f);
 		if(n > 0)
-			CHECK(m_keys[n] >= m_keys[n - 1]);
+			DASSERT(m_keys[n] >= m_keys[n - 1]);
 	}
 }
 
 // TODO: add sampleLooped
 template <class T> T Curve<T>::sample(float position) const {
-	CHECK(position >= 0.0f && position <= 1.0f);
+	PASSERT(position >= 0.0f && position <= 1.0f);
 	if(m_values.size() <= 1)
 		return m_values.empty() ? T() : m_values.front();
 
 	int id = 0;
-	while(id < m_keys.size() && m_keys[id] < position)
+	while(id < (int)m_keys.size() && m_keys[id] < position)
 		id++;
 	id = id == 0 ? 0 : id - 1;
 
 	int ids[4] = {id == 0 ? 0 : id - 1, id, id + 1, id + 2};
 
-	if(ids[2] == m_keys.size())
+	if(ids[2] == (int)m_keys.size())
 		ids[2] = ids[3] = id;
-	else if(ids[3] == m_keys.size())
+	else if(ids[3] == (int)m_keys.size())
 		ids[3] = id + 1;
 
 	float key1 = m_keys[ids[1]], key2 = m_keys[ids[2]];
@@ -72,3 +74,4 @@ template <class T> void Curve<T>::print(float step) const {
 template struct Curve<float>;
 template struct Curve<FVec2>;
 template struct Curve<FVec3>;
+}

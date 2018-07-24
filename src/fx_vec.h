@@ -1,6 +1,9 @@
 #pragma once
 
-#include "fmath.h"
+#include "fx_base.h"
+#include "fx_math.h"
+
+namespace fx {
 
 #ifndef FWK_VEC2_CONVERSIONS
 #define FWK_VEC2_CONVERSIONS
@@ -11,16 +14,6 @@
 #endif
 
 // TODO: better name to differentiate from Vec2 ?
-template <class T> struct vec2;
-template <class T> struct vec3;
-
-using SVec2 = vec2<short>;
-using SVec3 = vec3<short>;
-using IVec2 = vec2<int>;
-using IVec3 = vec3<int>;
-using FVec2 = vec2<float>;
-using FVec3 = vec3<float>;
-
 template <class T> struct vec2 {
 	using Scalar = T;
 	enum { vec_size = 2 };
@@ -177,3 +170,4 @@ template <class T> vec2<T> perpendicular(const vec2<T> &v) { return {-v[1], v[0]
 float vectorToAngle(const FVec2 &normalized_vector);
 FVec2 angleToVector(float radians);
 FVec2 rotateVector(const FVec2 &vec, float radians);
+}

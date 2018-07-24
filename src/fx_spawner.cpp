@@ -1,6 +1,8 @@
-#include "spawner.h"
+#include "fx_spawner.h"
 
 #include "fx_manager.h"
+
+namespace fx {
 
 Spawner::Spawner(Type type, IVec2 tile_pos, ParticleSystemDefId def_id)
 	: type(type), tile_pos(tile_pos), def_id(def_id) {}
@@ -27,4 +29,5 @@ void Spawner::update(FXManager &manager) {
 void Spawner::kill(FXManager &manager) {
 	manager.kill(instance_id);
 	is_dead = true;
+}
 }

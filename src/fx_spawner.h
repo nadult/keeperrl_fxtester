@@ -1,8 +1,10 @@
 #pragma once
 
-#include "particle_system.h"
+#include "fx_particle_system.h"
 
 RICH_ENUM(SpawnerType, single, repeated);
+
+namespace fx {
 
 class FXManager;
 
@@ -25,3 +27,4 @@ struct Spawner {
 
 	Params params;
 };
+}

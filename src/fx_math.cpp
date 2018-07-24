@@ -1,5 +1,7 @@
-#include "fmath.h"
+#include "fx_math.h"
 #include <algorithm>
+
+namespace fx {
 
 std::pair<float, float> sincos(float radians) {
 	std::pair<float, float> out;
@@ -34,4 +36,5 @@ float normalizeAngle(float angle) {
 	if(angle < 0.0f)
 		angle += 2.0f * fconstant::pi;
 	return angle;
+}
 }

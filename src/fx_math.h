@@ -4,15 +4,18 @@
 #include <limits>
 #include <utility>
 
+namespace fx {
+
 struct NoAssertsTag {};
 static constexpr NoAssertsTag no_asserts_tag;
 
+// TODO: rename
 namespace fconstant {
-static constexpr const float pi = 3.14159265358979323846f;
-static constexpr const float e = 2.7182818284590452354f;
-static constexpr const float epsilon = 0.0001f;
-static constexpr const float isect_epsilon = 0.000000001f;
-static const float inf = std::numeric_limits<float>::infinity();
+	static constexpr const float pi = 3.14159265358979323846f;
+	static constexpr const float e = 2.7182818284590452354f;
+	static constexpr const float epsilon = 0.0001f;
+	static constexpr const float isect_epsilon = 0.000000001f;
+	static const float inf = std::numeric_limits<float>::infinity();
 }
 
 inline double inv(double s) { return 1.0 / s; }
@@ -41,3 +44,4 @@ float blendAngles(float initial, float target, float step);
 
 // Returns angle in range <0, 2 * PI)
 float normalizeAngle(float angle);
+}

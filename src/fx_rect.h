@@ -1,10 +1,13 @@
 #pragma once
 
-#include "fvec.h"
+#include "fx_vec.h"
 #include <memory>
+
+namespace fx {
 
 // Axis-aligned rect
 // Invariant: min <= max (use validRange)
+// TODO: specialize with scalar
 template <class T> class Rect {
 	Rect(T min, T max, NoAssertsTag) : m_min(min), m_max(max) {}
 
@@ -34,7 +37,7 @@ template <class T> class Rect {
 	Rect(Scalar min_x, Scalar min_y, Scalar max_x, Scalar max_y)
 		: Rect({min_x, min_y}, {max_x, max_y}) {}
 
-	Rect(Point min, Point max) : m_min(min), m_max(max) { CHECK(validRange(min, max)); }
+	Rect(Point min, Point max) : m_min(min), m_max(max) { PASSERT(validRange(min, max)); }
 	explicit Rect(T size) : Rect(T(), size) {}
 	Rect() : m_min(), m_max() {}
 
@@ -51,15 +54,15 @@ template <class T> class Rect {
 
 	void setMin(const T &min) {
 		m_min = min;
-		CHECK(validRange(m_min, m_max));
+		PASSERT(validRange(m_min, m_max));
 	}
 	void setMax(const T &max) {
 		m_max = max;
-		CHECK(validRange(m_min, m_max));
+		PASSERT(validRange(m_min, m_max));
 	}
 	void setSize(const T &size) {
 		m_max = m_min + size;
-		CHECK(validRange(m_min, m_max));
+		PASSERT(validRange(m_min, m_max));
 	}
 
 	Scalar x() const { return m_min[0]; }
@@ -127,12 +130,14 @@ template <class T> class Rect {
 
 	Point closestPoint(const Point &point) const { return vmin(vmax(point, m_min), m_max); }
 
-	Scalar distanceSq(const Point &point) const { return ::distanceSq(point, closestPoint(point)); }
+	Scalar distanceSq(const Point &point) const {
+		return fx::distanceSq(point, closestPoint(point));
+	}
 
 	auto distanceSq(const Rect &rhs) const {
 		Point p1 = vclamp(rhs.center(), m_min, m_max);
 		Point p2 = vclamp(p1, rhs.m_min, rhs.m_max);
-		return ::distanceSq(p1, p2);
+		return fx::distanceSq(p1, p2);
 	}
 
 	auto distance(const Point &point) const { return std::sqrt(distanceSq(point)); }
@@ -162,3 +167,4 @@ template <class T> class Rect {
 
 using FRect = Rect<FVec2>;
 using IRect = Rect<IVec2>;
+}
