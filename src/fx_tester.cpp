@@ -36,8 +36,8 @@ struct FXTester::SpawnTool {
 			if(spawners[n].is_dead) {
 				if(selection_id == n)
 					selection_id = -1;
-				else if(selection_id > n)
-					selection_id--;
+				if(selection_id == (int)spawners.size() - 1)
+					selection_id = n;
 				spawners[n] = spawners.back();
 				spawners.pop_back();
 				n--;
@@ -87,6 +87,21 @@ void FXTester::spawnToolMenu() {
 	ImGui::Separator();
 
 	if(auto *sel = tool.selection()) {
+		float anim_time = 0.0f;
+		int num_active = 0, num_total = 0;
+
+		if(m_ps->alive(sel->instance_id)) {
+			auto &ps = m_ps->get(sel->instance_id);
+			num_active = ps.numActiveParticles();
+			num_total = ps.numTotalParticles();
+			anim_time = ps.anim_time;
+		}
+
+		ImGui::Text("Animation time: %f", anim_time);
+		ImGui::Text("Active particles: %d", num_active);
+		ImGui::Text("Total particles: %d\n", num_total);
+		ImGui::Separator();
+
 		ImGui::Text("Params:");
 		int idx = 0;
 		for(auto &f : sel->params.scalar) {
