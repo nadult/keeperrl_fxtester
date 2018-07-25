@@ -24,32 +24,69 @@ Ficzery systemu animacji:
 - możliwość wyłaczenia animacji w taki sposób, że emitery przestają działać, ale te cząsteczki które
   już zostały wygenerowane mogą skończyć animację
 
-*) Animacja rąbania drewna:
-  - kierunkowo drzazgi nie wyglądają za dobrze (dlaczego?)
-  - drzazgi (przynajmniej niektóre) mogłyby się chować za drzewo
-    cząsteczki mogą mieć parametr: layer, który może być losowany
-  - można zrobić lepszą teksturkę (tak, żeby bardziej wyglądała jak drewno)
-  - atraktor do podłogi ?
-    TODO: zrobić bardziej generyczne i opcjonalne atraktory 
+Potencjalny problem:
+- jak dobrze uniezależnić efekty od FPSów ?
 
+---- Pomysły na efekty:
 
-*) Animacja do kopania tuneli:
-  - tutaj może zamiast kawałków drewna dać iskry ?
-  - ale jak to dobrze skomponować z tłem?
+	Niektóre efekty można animować tylko w momencie zaaplikowania
+	(tak, żeby w przypadku dużej ilości efektów nie było za dużo fxów)
+	FXy widoczne tylko w momencie aplikacji efektu:
+    DAM_BONUS, 	 		   //
+    DEF_BONUS,  		   //
+    POISON_RESISTANT,	   //
+    FIRE_RESISTANT,  	   //
+	SLEEP_RESISTANT,
+    MAGIC_RESISTANCE,
+    MELEE_RESISTANCE,
+    RANGED_RESISTANCE,
+    MAGIC_VULNERABILITY,
+    MELEE_VULNERABILITY,
+    RANGED_VULNERABILITY,
 
-*) Animacja wybuchu (circular blast):
-  - ...
+	Efekty o stanie umysłu: jakieś particle nad głową
+    PANIC,        // jakiś symbol oznaczający strach i panikę ?
+    INSANITY,     // pioruny nad głową (coś jak berserk w innych grach)
+    PEACEFULNESS, // ???
+    SLEEP,        // ZZZ
 
-*) ...
+	Efekty w pobliżu stóp:
+    SLOWED,     // 
+    SPEED,      // 
+    FLYING,     // 
 
+    RAGE,         // krwawy kolor
+    BLEEDING,     // generowanie śladów krwi na tile-ach (im dłużej się jest na danym kaflu tym większa plama)
+    HALLU,        // ???
+    BLIND,        // pulsujący kołowy efekt nad głową postaci
+    INVISIBLE,    // bez efektu: postać jest przezroczysta ?
+    POISON,       // zielony overlay postaci ?
+    ENTANGLED,    // jakieś fajne particle bluszczu
+    TIED_UP,      // czym to się różni od entangled ?
+    STUNNED,      // podobnie jak blind, trochę inny efekt
+    REGENERATION, // 
+    WARNING,
+    TELEPATHY,
+    SUMMONED
 
+	Brak wizualizacji:
+    COLLAPSED,
+    SATIATED,
+    LIGHT_SOURCE,
+    DARKNESS_SOURCE,
+    ELF_VISION,
+    NIGHT_VISION,
+    SUNLIGHT_VULNERABLE,
+    PREGNANT,
+    RESTED,
 
 -------------------------------------------------------------------------------
 
 
 Mini todo:
-- zapisywanie do pliku & hot reloading
 - dodać jeszcze kilka efektów
+- jakoś opisać udostępniane przez efekty parametry ?
+- zapisywanie do pliku & hot reloading
 - różne rodzaje spawnerów ?
 - update dokumentu na google docsach
 

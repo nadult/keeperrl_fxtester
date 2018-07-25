@@ -25,7 +25,7 @@ static void addTestEffect(FXManager &mgr) {
 	ParticleSystemDef psdef;
 	psdef.subsystems.emplace_back(mgr.addDef(pdef), mgr.addDef(edef));
 	psdef.anim_length = 10.0f;
-	psdef.name = "fountain";
+	psdef.name = "test_effect";
 	mgr.addDef(psdef);
 }
 
@@ -40,7 +40,7 @@ static void addWoodSplinters(FXManager &mgr) {
 	edef.frequency = 999.0f;
 
 	ParticleDef pdef;
-	pdef.life = 5.0f; // life min-max ?
+	pdef.life = 5.0f;
 	pdef.size = 4.0f;
 	pdef.slowdown = {{0.0f, 0.1f}, {5.0f, 1000.0f}};
 	pdef.alpha = {{0.0f, 0.8f, 1.0f}, {1.0, 1.0, 0.0}};
@@ -109,8 +109,53 @@ static void addRockSplinters(FXManager &mgr) {
 
 	ParticleSystemDef psdef;
 	psdef.subsystems = {ssdef};
+	// Animacja może trwać dopóki są jakieś cząsteczki i emiter jeszcze żyje
+	// TODO:
+	// - cząsteczki mogą mieć różny czas życia
+	// - emiter musi mieć parametr długości emisji (a może nawet początek i koniec)
 	psdef.anim_length = 5.0f;
 	psdef.name = "rock_splinters";
+	mgr.addDef(psdef);
+}
+
+static void addRockCloud(FXManager &mgr) {
+	// Spawnujemy kilka chmurek w ramach kafla;
+	// mogą być większe lub mniejsze
+	//
+	// czy zostawiają po sobie jakieś ślady?
+	// może niech zostają ślady po splinterach, ale po chmurach nie?
+	EmitterDef edef;
+	edef.source = FRect(-7.0f, -7.0f, 7.0f, 7.0f);
+	edef.strength_min = 5.0f;
+	edef.strength_max = 8.0f;
+	edef.direction = 0.0f;
+	edef.direction_spread = fconstant::pi;
+
+	// TODO: możliwość precyzowania czasu emisji tutaj też się przyda
+	// TODO: czas emisji w klatkach ? Chyba lepiej nie, bo animacja może różnie wyglądać
+	// zależnie od fpsów...; chyba, że system fxów wykrywałby dropnięte klatki i
+	// ew. odpalał simulate kilka razy ?
+	edef.frequency = {{0.0f, 0.1f}, {60.0f, 0.0f}};
+
+	ParticleDef pdef;
+	pdef.life = 3.5f;
+	pdef.size = {{0.0f, 0.1f, 1.0f}, {15.0f, 30.0f, 38.0f}};
+	pdef.alpha = {{0.0f, 0.05f, 0.2f, 1.0f}, {0.0f, 0.3f, 0.4f, 0.0f}};
+	pdef.slowdown = {{0.0f, 0.2f}, {0.0f, 10.0f}};
+
+	FVec3 start_color(0.6), end_color(0.4);
+	pdef.color = {{start_color, end_color}};
+	pdef.texture_name = "clouds_soft_4x4.png";
+	pdef.texture_tiles = {4, 4};
+
+	SubSystemDef ssdef(mgr.addDef(pdef), mgr.addDef(edef));
+	// TODO: różna liczba początkowych cząsteczek
+	ssdef.max_total_particles = 5;
+
+	ParticleSystemDef psdef;
+	psdef.subsystems = {ssdef};
+	psdef.anim_length = 5.0f;
+	psdef.name = "rock_clouds";
 	mgr.addDef(psdef);
 }
 
@@ -246,6 +291,7 @@ void FXManager::addDefaultDefs() {
 	addTestEffect(*this);
 	addWoodSplinters(*this);
 	addRockSplinters(*this);
+	addRockCloud(*this);
 	addExplosionEffect(*this);
 	addRippleEffect(*this);
 	addCircularBlast(*this);

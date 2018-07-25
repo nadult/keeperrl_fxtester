@@ -4,6 +4,25 @@
 
 namespace fx {
 
+FVec2 EmissionSource::sample(RandomGen &rand) const {
+	// TODO: random get float as well
+	switch(m_type) {
+	case Type::point:
+		return m_pos;
+	case Type::rect:
+		return m_pos +
+			   FVec2(rand.getDouble(-m_param.x, m_param.x), rand.getDouble(-m_param.x, m_param.x));
+	case Type::sphere: {
+		FVec2 spoint(rand.getDouble(-1.0f, 1.0f), rand.getDouble(-1.0f, 1.0f));
+		while(spoint.x * spoint.x + spoint.y * spoint.y > 1.0f)
+			spoint = FVec2(rand.getDouble(-1.0f, 1.0f), rand.getDouble(-1.0f, 1.0f));
+		return m_pos + spoint * m_param.x;
+	}
+	}
+
+	return {};
+}
+
 ParticleSystem::ParticleSystem(FVec2 pos, ParticleSystemDefId def_id, int spawn_time,
 							   int num_subsystems)
 	: pos(pos), def_id(def_id), spawn_time(spawn_time), subsystems(num_subsystems) {}
@@ -62,7 +81,7 @@ SVec2 AnimationContext::randomTexTile() {
 }
 
 void defaultEmitParticle(AnimationContext &ctx, EmissionState &em, Particle &new_inst) {
-	new_inst.pos = FVec2();
+	new_inst.pos = ctx.edef.source.sample(ctx.rand);
 	float pangle;
 	if(em.angle_spread < fconstant::pi)
 		pangle = em.angle + ctx.uniformSpread(em.angle_spread);
@@ -99,7 +118,7 @@ void defaultDrawParticle(DrawContext &ctx, const Particle &pinst, DrawParticle &
 	const auto &pdef = ctx.pdef;
 
 	FVec2 pos = pinst.pos + ctx.ps.pos;
-	FVec2 size(pdef.size.sample(ptime));
+	FVec2 size(pdef.size.sample(ptime) * pinst.size);
 	float alpha = pdef.alpha.sample(ptime);
 
 	FColor color(pdef.color.sample(ptime) * ctx.ps.params.color[0],

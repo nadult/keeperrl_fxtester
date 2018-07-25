@@ -7,6 +7,8 @@
 #include "fx_tag_id.h"
 #include <limits.h>
 
+RICH_ENUM(EmissionSourceType, point, rect, sphere);
+
 namespace fx {
 
 // Identifies a particluar particle system instance
@@ -48,8 +50,40 @@ struct ParticleDef {
 	string name;
 };
 
+// TODO: move to separate file
+class EmissionSource {
+  public:
+	using Type = EmissionSourceType;
+
+	EmissionSource() : m_type(Type::point) {}
+	EmissionSource(FVec2 pos) : m_type(Type::point), m_pos(pos) {}
+	EmissionSource(FRect rect)
+		: m_type(Type::rect), m_pos(rect.center()), m_param(rect.size() * 0.5f) {}
+	EmissionSource(FVec2 pos, float radius)
+		: m_type(Type::sphere), m_pos(pos), m_param(radius, 0.0f) {}
+
+	Type type() const { return m_type; }
+	FVec2 pos() const { return m_pos; }
+	FRect rect() const {
+		PASSERT(m_type == Type::rect);
+		return {m_pos - m_param, m_pos + m_param};
+	}
+	float sphereRadius() const {
+		PASSERT(m_type == Type::sphere);
+		return m_param.x;
+	}
+
+	// TODO(opt): sample multiple points at once
+	FVec2 sample(RandomGen &) const;
+
+  private:
+	FVec2 m_pos, m_param;
+	Type m_type;
+};
+
 // Emiterem mogą też być cząsteczki innego subsystemu ?
 struct EmitterDef {
+	EmissionSource source;
 	Curve<float> frequency; // particles per second
 	Curve<float> strength_min, strength_max;
 	Curve<float> direction, direction_spread; // in radians
@@ -110,7 +144,7 @@ struct Particle {
 
 	// TODO: quantize members ? It may give the particles a pixelated feel
 	FVec2 pos, movement;
-	float size = default_tile_size, life = 0.0f, max_life = 1.0f;
+	float size = 1.0f, life = 0.0f, max_life = 1.0f;
 	float rot = 0.0f, rot_speed = 0.0f;
 	SVec2 tex_tile;
 };
