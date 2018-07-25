@@ -32,6 +32,9 @@ class ParticleSystemId {
 };
 
 struct ParticleDef {
+	void serialize(IArchive &, unsigned int);
+	void serialize(OArchive &, unsigned int) const;
+
 	// Defines spawned particle life in seconds for given AT
 	Curve<float> life;
 
@@ -76,6 +79,9 @@ class EmissionSource {
 	// TODO(opt): sample multiple points at once
 	FVec2 sample(RandomGen &) const;
 
+	void serialize(IArchive &, unsigned int);
+	void serialize(OArchive &, unsigned int) const;
+
   private:
 	FVec2 m_pos, m_param;
 	Type m_type;
@@ -83,6 +89,9 @@ class EmissionSource {
 
 // Emiterem mogą też być cząsteczki innego subsystemu ?
 struct EmitterDef {
+	void serialize(IArchive &, unsigned int);
+	void serialize(OArchive &, unsigned int) const;
+
 	EmissionSource source;
 	Curve<float> frequency; // particles per second
 	Curve<float> strength_min, strength_max;
@@ -129,6 +138,9 @@ struct ParticleSystemDef {
 		int max_active_particles = INT_MAX;
 		int max_total_particles = INT_MAX;
 	};
+
+	void serialize(IArchive &, unsigned int);
+	void serialize(OArchive &, unsigned int) const;
 
 	const SubSystem &operator[](int ssid) const { return subsystems[ssid]; }
 	SubSystem &operator[](int ssid) { return subsystems[ssid]; }

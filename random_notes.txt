@@ -29,6 +29,13 @@ Potencjalny problem:
 
 ---- Pomysły na efekty:
 
+Animacja kręgów na wodzie:
+- to chyba nie ma sensu, jeśli sama woda nie jest animowana
+- zamiast tego możemy zrobić splash, to powinno sie lepiej komponować
+  ze statyczną teksturą wody
+  Chyba, że byśmy zanimowali wodę...
+
+
 	Niektóre efekty można animować tylko w momencie zaaplikowania
 	(tak, żeby w przypadku dużej ilości efektów nie było za dużo fxów)
 	FXy widoczne tylko w momencie aplikacji efektu:
@@ -84,21 +91,26 @@ Potencjalny problem:
 
 
 Mini todo:
-- dodać jeszcze kilka efektów
-- możliwośc wizualizacji krzywych chyba jednak się przyda
-- jakoś opisać udostępniane przez efekty parametry ?
 - zapisywanie do pliku & hot reloading
+- zainspirować się efektami z innych gier
+- jakoś opisać udostępniane przez efekty parametry ?
+- możliwość wizualizacji krzywych chyba jednak się przyda
 - różne rodzaje spawnerów ?
+- efekty bazujące na blockerach
 - update dokumentu na google docsach
-
-Integracja z Keeperem:
-- włączenie Keepera jako submodule
-- ew. później przeniesiemy klasy psystemów do keepera (na początku na branch)
-- pozostałe klasy edytora zostają tak jak były
-
 
 Integracja libfwk:
 - Problem: libfwk działa bez wyjątków (kompilacja zakłada, że są wyłączone); Jeśli libfwk
   jest używane tylko do edytora cząsteczek, to nie powinno to stanowić problemu
 
  
+Zapisywanie do pliku:
+- chcemy zapisywać w wygodnej formie tekstowej, którą można łatwo edytować
+- możemy użyć Cereal i zapisać do XMLa
+- Opcja: cereal
+
+- Jak chcielibyśmy, żeby to było zapisane ?
+
+  to chyba jednak najłatwiej się definiuje z kodu...
+  zrobienie parsera trochę czasu zajmie;
+  najszybciej by chyba było z cerealem i xmlem / jsonem...

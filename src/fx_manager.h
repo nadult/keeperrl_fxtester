@@ -9,6 +9,8 @@ class FXManager {
 	FXManager();
 	~FXManager();
 
+	void saveDefs() const;
+
 	void simulate(float time_delta);
 
 	const auto &particleDefs() const { return m_particle_defs; }

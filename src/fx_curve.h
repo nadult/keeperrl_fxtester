@@ -43,6 +43,9 @@ template <class T> struct Curve {
 	Curve();
 	~Curve();
 
+	void serialize(IArchive &, unsigned int);
+	void serialize(OArchive &, unsigned int) const;
+
 	// Position is always within range: <0, 1>
 	T sample(float position) const;
 

@@ -29,7 +29,17 @@ template <class T> using vector = std::vector<T>;
 
 #endif
 
+namespace cereal {
+template <class T> class NameValuePair;
+class JSONOutputArchive;
+class JSONInputArchive;
+}
+
 namespace fx {
+
+template <class T> using NVP = cereal::NameValuePair<T>;
+using IArchive = cereal::JSONInputArchive;
+using OArchive = cereal::JSONOutputArchive;
 
 static constexpr int default_tile_size = 24;
 
