@@ -167,7 +167,6 @@ static void addRockCloud(FXManager &mgr) {
 	pdef.texture_name = "clouds_soft_4x4.png";
 	pdef.texture_tiles = {4, 4};
 
-	// TODO: sprawdzić, czy przy dropniętych klatkach nie będzie problemów z emiterami
 	SubSystemDef ssdef(mgr.addDef(pdef), mgr.addDef(edef), 0.0f, 0.1f);
 
 	// TODO: różna liczba początkowych cząsteczek
@@ -258,11 +257,6 @@ static void addRippleEffect(FXManager &mgr) {
 
 static void addCircularBlast(FXManager &mgr) {
 	EmitterDef edef;
-
-	// TODO: odseparować czas emisji od czasu animacji ?
-	// domyślnie czas emisji jest taki sam, ale można go zmienić
-	//
-	// TODO: odseparować czas subsystemu od czasu całej animacji?
 	edef.frequency = 50.0f;
 	edef.initial_spawn_count = 10.0;
 
@@ -323,11 +317,6 @@ static void addFeetDustEffect(FXManager &mgr) {
 	edef.strength_max = 25.0f;
 	edef.direction = 0.0f;
 	edef.direction_spread = 0.0f;
-
-	// TODO: możliwość precyzowania czasu emisji tutaj też się przyda
-	// TODO: czas emisji w klatkach ? Chyba lepiej nie, bo animacja może różnie wyglądać
-	// zależnie od fpsów...; chyba, że system fxów wykrywałby dropnięte klatki i
-	// ew. odpalał simulate kilka razy ?
 	edef.frequency = 60.0f;
 
 	ParticleDef pdef;

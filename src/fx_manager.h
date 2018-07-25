@@ -11,6 +11,9 @@ class FXManager {
 
 	void saveDefs() const;
 
+	// Animations will look correct even when FPS is low
+	// The downside is that more simulation steps are required
+	void simulateStable(double time_delta, int desired_fps = 60);
 	void simulate(float time_delta);
 
 	const auto &particleDefs() const { return m_particle_defs; }
@@ -59,5 +62,6 @@ class FXManager {
 	// TODO: add simple statistics: num particles, instances, etc.
 	vector<ParticleSystem> m_systems;
 	int m_spawn_clock = 0, m_random_seed = 0;
+	double m_accum_frame_time = 0.0f;
 };
 }

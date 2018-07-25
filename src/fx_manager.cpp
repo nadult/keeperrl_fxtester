@@ -41,6 +41,30 @@ SubSystemContext FXManager::ssctx(ParticleSystem &ps, int ssid) {
 	return {ps, ss, psdef, ssdef, pdef, edef, ssid};
 }
 
+void FXManager::simulateStable(double time_delta, int desired_fps) {
+	time_delta += m_accum_frame_time;
+
+	double desired_delta = 1.0 / desired_fps;
+	int num_steps = 0;
+
+	// TODO: czy chcemy jakoś przewidywać klatki?
+	while(time_delta > desired_delta) {
+		simulate(desired_delta);
+		time_delta -= desired_delta;
+		num_steps++;
+	}
+
+	if(time_delta > desired_delta * 0.1) {
+		num_steps++;
+		simulate(time_delta);
+		m_accum_frame_time = 0.0;
+	} else {
+		m_accum_frame_time = time_delta;
+	}
+
+	//print("steps: %\n", num_steps);
+}
+
 void FXManager::simulate(ParticleSystem &ps, float time_delta) {
 	auto &psdef = (*this)[ps.def_id];
 

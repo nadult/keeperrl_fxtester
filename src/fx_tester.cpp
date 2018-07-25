@@ -314,7 +314,7 @@ void FXTester::doMenu() {
 }
 
 void FXTester::tick(GfxDevice &device, double time_diff) {
-	m_ps->simulate(time_diff * m_animation_speed);
+	m_ps->simulateStable(time_diff * m_animation_speed);
 
 	auto events = device.inputEvents();
 	m_imgui->beginFrame(device);
