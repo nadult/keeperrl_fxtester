@@ -2,12 +2,9 @@
 
 #include "fx_base.h"
 #include "fx_color.h"
-#include "fx_curve.h"
-#include "fx_rect.h"
 #include "fx_tag_id.h"
+#include "util.h"
 #include <limits.h>
-
-RICH_ENUM(EmissionSourceType, point, rect, sphere);
 
 namespace fx {
 
@@ -31,85 +28,6 @@ class ParticleSystemId {
 	int m_spawn_time;
 };
 
-struct ParticleDef {
-	void serialize(IArchive &, unsigned int);
-	void serialize(OArchive &, unsigned int) const;
-
-	// Defines spawned particle life in seconds for given AT
-	Curve<float> life;
-
-	// These curves modify particle appearance based on
-	// particle time
-	Curve<float> alpha;
-	Curve<float> size;
-	Curve<float> slowdown;
-	Curve<FVec3> color;
-
-	vector<Curve<float>> scalar_curves;
-	vector<Curve<FVec3>> color_curves;
-
-	IVec2 texture_tiles = IVec2(1, 1);
-	string texture_name;
-	string name;
-};
-
-// TODO: move to separate file
-class EmissionSource {
-  public:
-	using Type = EmissionSourceType;
-
-	EmissionSource() : m_type(Type::point) {}
-	EmissionSource(FVec2 pos) : m_type(Type::point), m_pos(pos) {}
-	EmissionSource(FRect rect)
-		: m_type(Type::rect), m_pos(rect.center()), m_param(rect.size() * 0.5f) {}
-	EmissionSource(FVec2 pos, float radius)
-		: m_type(Type::sphere), m_pos(pos), m_param(radius, 0.0f) {}
-
-	Type type() const { return m_type; }
-	FVec2 pos() const { return m_pos; }
-	FRect rect() const {
-		PASSERT(m_type == Type::rect);
-		return {m_pos - m_param, m_pos + m_param};
-	}
-	float sphereRadius() const {
-		PASSERT(m_type == Type::sphere);
-		return m_param.x;
-	}
-
-	// TODO(opt): sample multiple points at once
-	FVec2 sample(RandomGen &) const;
-
-	void serialize(IArchive &, unsigned int);
-	void serialize(OArchive &, unsigned int) const;
-
-  private:
-	FVec2 m_pos, m_param;
-	Type m_type;
-};
-
-// Emiterem mogą też być cząsteczki innego subsystemu ?
-struct EmitterDef {
-	void serialize(IArchive &, unsigned int);
-	void serialize(OArchive &, unsigned int) const;
-
-	EmissionSource source;
-	Curve<float> frequency; // particles per second
-	Curve<float> strength_min, strength_max;
-	Curve<float> direction, direction_spread; // in radians
-	Curve<float> rotation_speed_min, rotation_speed_max;
-
-	vector<Curve<float>> scalar_curves;
-	vector<Curve<FVec3>> color_curves;
-
-	float initial_spawn_count = 0.0f;
-
-	// TODO: zamiast częstotliwości możemy mieć docelową ilość cząsteczek
-	// (danego rodzaju?) w danym momencie
-	// TODO: całkowanie niektórych krzywych?
-
-	string name;
-};
-
 using AnimateParticleFunc = void (*)(AnimationContext &, Particle &);
 using DrawParticleFunc = void (*)(DrawContext &, const Particle &, DrawParticle &);
 
@@ -124,6 +42,9 @@ void defaultEmitParticle(AnimationContext &, EmissionState &, Particle &);
 void defaultDrawParticle(DrawContext &, const Particle &, DrawParticle &);
 
 struct ParticleSystemDef {
+	// TODO: is it really useful to separate particle, emitter & system definitions?
+	// maybe let's just merge it into single structure? We're not reusing anything anyways...
+
 	struct SubSystem {
 		SubSystem(ParticleDefId pdef, EmitterDefId edef) : particle_id(pdef), emitter_id(edef) {}
 

@@ -69,10 +69,9 @@ Animacja kręgów na wodzie:
 
 
 Mini todo:
-- zapisywanie do pliku & hot reloading
 - zainspirować się efektami z innych gier
 - jakoś opisać udostępniane przez efekty parametry ?
 - możliwość wizualizacji krzywych chyba jednak się przyda
 - różne rodzaje spawnerów ?
 - efekty bazujące na blockerach
-- update dokumentu na google docsach
+- zapisywanie do pliku & hot reloading

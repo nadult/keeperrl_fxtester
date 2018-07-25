@@ -1,20 +1,17 @@
 #include "fx_manager.h"
 
 #include "fx_color.h"
+#include "fx_emitter_def.h"
 #include "fx_math.h"
+#include "fx_particle_def.h"
 #include "fx_particle_system.h"
 #include "fx_rect.h"
-
-#include "cereal/archives/json.hpp"
-#include "cereal/cereal.hpp"
-#include "serialization.h"
-#include <iostream>
 
 namespace fx {
 
 FXManager::FXManager() {
 	addDefaultDefs();
-	saveDefs();
+	//saveDefs();
 }
 FXManager::~FXManager() = default;
 
@@ -42,22 +39,6 @@ SubSystemContext FXManager::ssctx(ParticleSystem &ps, int ssid) {
 	const auto &pdef = (*this)[psdef[ssid].particle_id];
 	const auto &edef = (*this)[psdef[ssid].emitter_id];
 	return {ps, ss, psdef, ssdef, pdef, edef, ssid};
-}
-
-void FXManager::saveDefs() const {
-	std::ofstream stream("effects.json");
-	OArchive ar(stream, OArchive::Options::Default());
-
-	for(int n = 0; n < (int)m_particle_defs.size(); n++) {
-		char name[256];
-		snprintf(name, sizeof(name), "particle_%d", n);
-		ar << cereal::make_nvp(name, m_particle_defs[n]);
-	}
-	for(int n = 0; n < (int)m_emitter_defs.size(); n++) {
-		char name[256];
-		snprintf(name, sizeof(name), "emitter_%d", n);
-		ar << cereal::make_nvp(name, m_emitter_defs[n]);
-	}
 }
 
 void FXManager::simulate(ParticleSystem &ps, float time_delta) {

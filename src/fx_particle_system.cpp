@@ -1,27 +1,10 @@
 #include "fx_particle_system.h"
 
+#include "fx_emitter_def.h"
+#include "fx_particle_def.h"
 #include "fx_rect.h"
 
 namespace fx {
-
-FVec2 EmissionSource::sample(RandomGen &rand) const {
-	// TODO: random get float as well
-	switch(m_type) {
-	case Type::point:
-		return m_pos;
-	case Type::rect:
-		return m_pos +
-			   FVec2(rand.getDouble(-m_param.x, m_param.x), rand.getDouble(-m_param.x, m_param.x));
-	case Type::sphere: {
-		FVec2 spoint(rand.getDouble(-1.0f, 1.0f), rand.getDouble(-1.0f, 1.0f));
-		while(spoint.x * spoint.x + spoint.y * spoint.y > 1.0f)
-			spoint = FVec2(rand.getDouble(-1.0f, 1.0f), rand.getDouble(-1.0f, 1.0f));
-		return m_pos + spoint * m_param.x;
-	}
-	}
-
-	return {};
-}
 
 ParticleSystem::ParticleSystem(FVec2 pos, ParticleSystemDefId def_id, int spawn_time,
 							   int num_subsystems)
