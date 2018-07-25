@@ -26,6 +26,7 @@ class FXManager {
 	const ParticleSystemDef &operator[](ParticleSystemDefId) const;
 
 	bool valid(ParticleSystemId) const;
+	bool alive(ParticleSystemId) const;
 	bool dead(ParticleSystemId) const; // invalid ids will be dead
 	void kill(ParticleSystemId);
 

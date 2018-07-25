@@ -41,15 +41,19 @@ float defaultPrepareEmission(AnimationContext &, EmissionState &);
 void defaultEmitParticle(AnimationContext &, EmissionState &, Particle &);
 void defaultDrawParticle(DrawContext &, const Particle &, DrawParticle &);
 
+// Defines behaviour of a whole particle system
 struct ParticleSystemDef {
 	// TODO: is it really useful to separate particle, emitter & system definitions?
 	// maybe let's just merge it into single structure? We're not reusing anything anyways...
 
 	struct SubSystem {
-		SubSystem(ParticleDefId pdef, EmitterDefId edef) : particle_id(pdef), emitter_id(edef) {}
+		SubSystem(ParticleDefId pdef, EmitterDefId edef, float estart, float eend)
+			: particle_id(pdef), emitter_id(edef), emission_start(estart), emission_end(eend) {}
 
 		ParticleDefId particle_id;
 		EmitterDefId emitter_id;
+
+		float emission_start, emission_end;
 
 		AnimateParticleFunc animate_func = defaultAnimateParticle;
 		PrepareEmissionFunc prepare_func = defaultPrepareEmission;
@@ -57,7 +61,7 @@ struct ParticleSystemDef {
 		DrawParticleFunc draw_func = defaultDrawParticle;
 
 		int max_active_particles = INT_MAX;
-		int max_total_particles = INT_MAX;
+		int max_total_particles = INT_MAX; // TODO: how should we treat it in looped animations?
 	};
 
 	void serialize(IArchive &, unsigned int);
@@ -67,7 +71,7 @@ struct ParticleSystemDef {
 	SubSystem &operator[](int ssid) { return subsystems[ssid]; }
 
 	vector<SubSystem> subsystems;
-	float anim_length = 1.0f;
+	optional<float> anim_length;
 	bool is_looped = false;
 	string name;
 };
@@ -105,6 +109,9 @@ struct ParticleSystem {
 
 	ParticleSystem(FVec2 pos, ParticleSystemDefId, int spawn_time, int num_subsystems);
 
+	int numActiveParticles() const;
+	int numTotalParticles() const;
+
 	void kill();
 
 	const SubSystem operator[](int ssid) const { return subsystems[ssid]; }
@@ -141,7 +148,7 @@ struct AnimationContext : public SubSystemContext {
 	SVec2 randomTexTile();
 
 	RandomGen rand;
-	const float anim_time, norm_anim_time;
+	const float anim_time;
 	const float time_delta, inv_time_delta;
 };
 
@@ -153,6 +160,9 @@ struct DrawContext : public SubSystemContext {
 };
 
 struct EmissionState {
+	EmissionState(float time) : time(time) {}
+	const float time;
+
 	float rot_min, rot_max;
 	float strength_min, strength_max;
 

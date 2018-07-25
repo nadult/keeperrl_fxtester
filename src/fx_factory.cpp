@@ -26,8 +26,7 @@ static void addTestEffect(FXManager &mgr) {
 	pdef.texture_name = "circular.png";
 
 	ParticleSystemDef psdef;
-	psdef.subsystems.emplace_back(mgr.addDef(pdef), mgr.addDef(edef));
-	psdef.anim_length = 10.0f;
+	psdef.subsystems.emplace_back(mgr.addDef(pdef), mgr.addDef(edef), 0.0f, 5.0f);
 	psdef.name = "test_effect";
 	mgr.addDef(psdef);
 }
@@ -65,18 +64,14 @@ static void addWoodSplinters(FXManager &mgr) {
 	pdef.texture_name = "flakes_4x4_borders.png";
 	pdef.texture_tiles = {4, 4};
 
-	SubSystemDef ssdef(mgr.addDef(pdef), mgr.addDef(edef));
+	SubSystemDef ssdef(mgr.addDef(pdef), mgr.addDef(edef), 0.0f, 0.1f);
 	ssdef.max_total_particles = 4;
 	ssdef.animate_func = animate_func;
 
 	ParticleSystemDef psdef;
 	psdef.subsystems = {ssdef};
-	psdef.anim_length = 5.0f;
 	psdef.name = "wood_splinters";
 	mgr.addDef(psdef);
-
-	// Kierunkowo to wygląda słabo, może lepiej genereować we wszystkich kierunkach
-	// i najlepiej, jakby drzazgi lądowały pod drzewem!
 }
 
 static void addRockSplinters(FXManager &mgr) {
@@ -107,16 +102,12 @@ static void addRockSplinters(FXManager &mgr) {
 	pdef.texture_name = "flakes_4x4_borders.png";
 	pdef.texture_tiles = {4, 4};
 
-	SubSystemDef ssdef(mgr.addDef(pdef), mgr.addDef(edef));
+	SubSystemDef ssdef(mgr.addDef(pdef), mgr.addDef(edef), 0.0f, 0.1f);
 	ssdef.max_total_particles = 5;
 
 	ParticleSystemDef psdef;
 	psdef.subsystems = {ssdef};
-	// Animacja może trwać dopóki są jakieś cząsteczki i emiter jeszcze żyje
-	// TODO:
-	// - cząsteczki mogą mieć różny czas życia
-	// - emiter musi mieć parametr długości emisji (a może nawet początek i koniec)
-	psdef.anim_length = 5.0f;
+	// TODO: cząsteczki mogą mieć różny czas życia
 	psdef.name = "rock_splinters";
 	mgr.addDef(psdef);
 }
@@ -133,12 +124,7 @@ static void addRockCloud(FXManager &mgr) {
 	edef.strength_max = 8.0f;
 	edef.direction = 0.0f;
 	edef.direction_spread = fconstant::pi;
-
-	// TODO: możliwość precyzowania czasu emisji tutaj też się przyda
-	// TODO: czas emisji w klatkach ? Chyba lepiej nie, bo animacja może różnie wyglądać
-	// zależnie od fpsów...; chyba, że system fxów wykrywałby dropnięte klatki i
-	// ew. odpalał simulate kilka razy ?
-	edef.frequency = {{0.0f, 0.1f}, {60.0f, 0.0f}};
+	edef.frequency = 60.0f;
 
 	ParticleDef pdef;
 	pdef.life = 3.5f;
@@ -151,13 +137,14 @@ static void addRockCloud(FXManager &mgr) {
 	pdef.texture_name = "clouds_soft_4x4.png";
 	pdef.texture_tiles = {4, 4};
 
-	SubSystemDef ssdef(mgr.addDef(pdef), mgr.addDef(edef));
+	// TODO: sprawdzić, czy przy dropniętych klatkach nie będzie problemów z emiterami
+	SubSystemDef ssdef(mgr.addDef(pdef), mgr.addDef(edef), 0.0f, 0.1f);
+
 	// TODO: różna liczba początkowych cząsteczek
 	ssdef.max_total_particles = 5;
 
 	ParticleSystemDef psdef;
 	psdef.subsystems = {ssdef};
-	psdef.anim_length = 5.0f;
 	psdef.name = "rock_clouds";
 	mgr.addDef(psdef);
 }
@@ -181,12 +168,11 @@ static void addExplosionEffect(FXManager &mgr) {
 	pdef.texture_name = "clouds_soft_borders_4x4.png";
 	pdef.texture_tiles = {4, 4};
 
-	SubSystemDef ssdef(mgr.addDef(pdef), mgr.addDef(edef));
+	SubSystemDef ssdef(mgr.addDef(pdef), mgr.addDef(edef), 0.0f, 0.5f);
 	ssdef.max_total_particles = 20;
 
 	ParticleSystemDef psdef;
 	psdef.subsystems = {ssdef};
-	psdef.anim_length = 2.0f;
 	psdef.name = "explosion";
 	mgr.addDef(psdef);
 }
@@ -225,7 +211,8 @@ static void addRippleEffect(FXManager &mgr) {
 	pdef.color = FVec3(1.0f, 1.0f, 1.0f);
 	pdef.texture_name = "torus.png";
 
-	SubSystemDef ssdef(mgr.addDef(pdef), mgr.addDef(edef));
+	// TODO: możliwośc nie podawania czasu emisji (etedy emituje przez całą długośc animacji)?
+	SubSystemDef ssdef(mgr.addDef(pdef), mgr.addDef(edef), 0.0f, 1.0f);
 	ssdef.max_active_particles = 10;
 	ssdef.prepare_func = prep_func;
 	ssdef.animate_func = animate_func;
@@ -246,7 +233,7 @@ static void addCircularBlast(FXManager &mgr) {
 	// domyślnie czas emisji jest taki sam, ale można go zmienić
 	//
 	// TODO: odseparować czas subsystemu od czasu całej animacji?
-	edef.frequency = {{0.0f, 0.05f}, {50.0f, 0.0f}};
+	edef.frequency = 50.0f;
 	edef.initial_spawn_count = 10.0;
 
 	auto prep_func = [](AnimationContext &ctx, EmissionState &em) {
@@ -276,7 +263,7 @@ static void addCircularBlast(FXManager &mgr) {
 	pdef.color = {{0.5f, 0.8f}, {{1.0f, 1.0f, 1.0f}, {0.5f, 0.5f, 1.0f}}};
 	pdef.texture_name = "torus.png";
 
-	SubSystemDef ssdef(mgr.addDef(pdef), mgr.addDef(edef));
+	SubSystemDef ssdef(mgr.addDef(pdef), mgr.addDef(edef), 0.0f, 0.1f);
 	ssdef.max_active_particles = 20;
 	ssdef.prepare_func = prep_func;
 	ssdef.animate_func = animate_func;
@@ -284,7 +271,6 @@ static void addCircularBlast(FXManager &mgr) {
 
 	ParticleSystemDef psdef;
 	psdef.subsystems = {ssdef};
-	psdef.anim_length = 1.0f;
 	psdef.name = "circular_blast";
 
 	mgr.addDef(psdef);
@@ -312,7 +298,7 @@ static void addFeetDustEffect(FXManager &mgr) {
 	// TODO: czas emisji w klatkach ? Chyba lepiej nie, bo animacja może różnie wyglądać
 	// zależnie od fpsów...; chyba, że system fxów wykrywałby dropnięte klatki i
 	// ew. odpalał simulate kilka razy ?
-	edef.frequency = {{0.0f, 0.1f}, {60.0f, 0.0f}};
+	edef.frequency = 60.0f;
 
 	ParticleDef pdef;
 	pdef.life = 1.25f;
@@ -325,7 +311,7 @@ static void addFeetDustEffect(FXManager &mgr) {
 	pdef.texture_name = "clouds_soft_4x4.png";
 	pdef.texture_tiles = {4, 4};
 
-	SubSystemDef ssdef(mgr.addDef(pdef), mgr.addDef(edef));
+	SubSystemDef ssdef(mgr.addDef(pdef), mgr.addDef(edef), 0.0f, 0.2f);
 	// TODO: różna liczba początkowych cząsteczek
 	ssdef.max_total_particles = 3;
 
@@ -337,7 +323,6 @@ static void addFeetDustEffect(FXManager &mgr) {
 
 	ParticleSystemDef psdef;
 	psdef.subsystems = {ssdef};
-	psdef.anim_length = 1.5f;
 	psdef.name = "feet_dust";
 	mgr.addDef(psdef);
 }

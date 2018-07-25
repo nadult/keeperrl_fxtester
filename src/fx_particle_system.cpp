@@ -15,6 +15,20 @@ void ParticleSystem::kill() {
 	is_dead = true;
 }
 
+int ParticleSystem::numActiveParticles() const {
+	int out = 0;
+	for(auto &ss : subsystems)
+		out += (int)ss.particles.size();
+	return out;
+}
+
+int ParticleSystem::numTotalParticles() const {
+	int out = 0;
+	for(auto &ss : subsystems)
+		out += (int)ss.total_particles;
+	return out;
+}
+
 void defaultAnimateParticle(AnimationContext &ctx, Particle &pinst) {
 	const auto &pdef = ctx.pdef;
 
@@ -34,20 +48,19 @@ void defaultAnimateParticle(AnimationContext &ctx, Particle &pinst) {
 float defaultPrepareEmission(AnimationContext &ctx, EmissionState &em) {
 	auto &pdef = ctx.pdef;
 	auto &edef = ctx.edef;
-	float anim_pos = ctx.norm_anim_time;
 
-	em.max_life = pdef.life.sample(anim_pos);
+	em.max_life = pdef.life.sample(em.time);
 
-	em.angle = edef.direction.sample(anim_pos);
-	em.angle_spread = edef.direction_spread.sample(anim_pos);
+	em.angle = edef.direction.sample(em.time);
+	em.angle_spread = edef.direction_spread.sample(em.time);
 
-	em.strength_min = edef.strength_min.sample(anim_pos);
-	em.strength_max = edef.strength_max.sample(anim_pos);
+	em.strength_min = edef.strength_min.sample(em.time);
+	em.strength_max = edef.strength_max.sample(em.time);
 
-	em.rot_speed_min = edef.rotation_speed_min.sample(anim_pos);
-	em.rot_speed_max = edef.rotation_speed_max.sample(anim_pos);
+	em.rot_speed_min = edef.rotation_speed_min.sample(em.time);
+	em.rot_speed_max = edef.rotation_speed_max.sample(em.time);
 
-	return edef.frequency.sample(anim_pos) * ctx.time_delta;
+	return edef.frequency.sample(em.time) * ctx.time_delta;
 }
 
 float AnimationContext::uniformSpread(float spread) { return rand.getDouble(-spread, spread); }

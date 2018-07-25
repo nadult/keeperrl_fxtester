@@ -44,7 +44,6 @@ SubSystemContext FXManager::ssctx(ParticleSystem &ps, int ssid) {
 void FXManager::simulate(ParticleSystem &ps, float time_delta) {
 	auto &psdef = (*this)[ps.def_id];
 
-	float norm_anim_time = ps.anim_time / psdef.anim_length;
 	float inv_time_delta = 1.0f / time_delta;
 
 	// Animating live particles
@@ -52,8 +51,7 @@ void FXManager::simulate(ParticleSystem &ps, float time_delta) {
 		auto &ss = ps[ssid];
 		auto &ssdef = psdef[ssid];
 
-		AnimationContext ctx{ssctx(ps, ssid), {},		  ps.anim_time,
-							 norm_anim_time,  time_delta, inv_time_delta};
+		AnimationContext ctx{ssctx(ps, ssid), {}, ps.anim_time, time_delta, inv_time_delta};
 		ctx.rand.init(ss.random_seed);
 
 		for(auto &pinst : ss.particles)
@@ -75,14 +73,18 @@ void FXManager::simulate(ParticleSystem &ps, float time_delta) {
 
 	// Emitting new particles
 	for(int ssid = 0; ssid < (int)psdef.subsystems.size(); ssid++) {
-		auto &ss = ps[ssid];
 		const auto &ssdef = psdef[ssid];
 
-		AnimationContext ctx{ssctx(ps, ssid), {},		  ps.anim_time,
-							 norm_anim_time,  time_delta, inv_time_delta};
-		ctx.rand.init(ss.random_seed);
+		float emission_time_span = ssdef.emission_end - ssdef.emission_start;
+		float emission_time = (ps.anim_time - ssdef.emission_start) / emission_time_span;
+		if(emission_time < 0.0f || emission_time > 1.0f)
+			continue;
 
-		EmissionState em;
+		auto &ss = ps[ssid];
+		AnimationContext ctx{ssctx(ps, ssid), {}, ps.anim_time, time_delta, inv_time_delta};
+		ctx.rand.init(ss.random_seed);
+		EmissionState em{emission_time};
+
 		float emission = ssdef.prepare_func(ctx, em) + ss.emission_fract;
 		int num_particles = int(emission);
 		ss.emission_fract = emission - float(num_particles);
@@ -101,9 +103,28 @@ void FXManager::simulate(ParticleSystem &ps, float time_delta) {
 	}
 
 	ps.anim_time += time_delta;
-	if(ps.anim_time > psdef.anim_length) {
+
+	bool finished_anim = false;
+
+	if(psdef.anim_length) {
+		finished_anim = ps.anim_time >= *psdef.anim_length;
+	} else {
+		float end_emission_time = 0.0f;
+		int num_active = 0;
+
+		for(int ssid = 0; ssid < (int)psdef.subsystems.size(); ssid++) {
+			auto &ss = ps[ssid];
+			num_active += (int)ps[ssid].particles.size();
+			end_emission_time = max(end_emission_time, psdef[ssid].emission_end);
+		}
+
+		finished_anim = num_active == 0 && ps.anim_time >= end_emission_time;
+	}
+
+	if(finished_anim) {
+		// TODO: accurate animation loop
 		if(psdef.is_looped)
-			ps.anim_time -= psdef.anim_length;
+			ps.anim_time = 0.0f;
 		else
 			ps.kill();
 	}
@@ -147,6 +168,7 @@ bool FXManager::valid(ParticleSystemId id) const {
 }
 
 bool FXManager::dead(ParticleSystemId id) const { return !valid(id) || m_systems[id].is_dead; }
+bool FXManager::alive(ParticleSystemId id) const { return valid(id) && !m_systems[id].is_dead; }
 
 void FXManager::kill(ParticleSystemId id) {
 	if(!dead(id))
