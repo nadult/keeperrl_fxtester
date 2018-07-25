@@ -287,6 +287,58 @@ static void addCircularBlast(FXManager &mgr) {
 	mgr.addDef(psdef);
 }
 
+static void addFeetDustEffect(FXManager &mgr) {
+	// Ten efekt musi zaznaczać fakt, że postać się porusza w jakimś kierunku
+	// To musi byc kontrolowalne za pomocą parametru
+	//
+	// FX jest odpalany w momencie gdy postać wychodzi z kafla ?
+	//
+	// TODO: Parametrem efektu powinien być enum: kierunek ruchu
+	// zależnie od tego mamy różne kierunki generacji i inny punkt startowy
+	// drugim parametrem jest kolor (choć chyba będzie uzywany tylko na piasku?)
+	// TODO: particle size powinno być vec2 ?
+
+	EmitterDef edef;
+	edef.source = FVec2(-5, 5);
+	edef.strength_min = 15.0f;
+	edef.strength_max = 25.0f;
+	edef.direction = 0.0f;
+	edef.direction_spread = 0.0f;
+
+	// TODO: możliwość precyzowania czasu emisji tutaj też się przyda
+	// TODO: czas emisji w klatkach ? Chyba lepiej nie, bo animacja może różnie wyglądać
+	// zależnie od fpsów...; chyba, że system fxów wykrywałby dropnięte klatki i
+	// ew. odpalał simulate kilka razy ?
+	edef.frequency = {{0.0f, 0.1f}, {60.0f, 0.0f}};
+
+	ParticleDef pdef;
+	pdef.life = 1.25f;
+	pdef.size = {{0.0f, 0.1f, 1.0f}, {5.0f, 14.0f, 20.0f}, InterpType::quadratic};
+	pdef.alpha = {{0.0f, 0.05f, 0.2f, 1.0f}, {0.0f, 0.2f, 0.3f, 0.0f}};
+	pdef.slowdown = {{0.0f, 0.2f}, {0.0f, 10.0f}};
+
+	FVec3 start_color(0.9), end_color(0.7);
+	pdef.color = {{start_color, end_color}};
+	pdef.texture_name = "clouds_soft_4x4.png";
+	pdef.texture_tiles = {4, 4};
+
+	SubSystemDef ssdef(mgr.addDef(pdef), mgr.addDef(edef));
+	// TODO: różna liczba początkowych cząsteczek
+	ssdef.max_total_particles = 3;
+
+	ssdef.emit_func = [](AnimationContext &ctx, EmissionState &em, Particle &pinst) {
+		defaultEmitParticle(ctx, em, pinst);
+		pinst.rot = 0.0f;
+		pinst.size = FVec2(1.2f, 0.6f);
+	};
+
+	ParticleSystemDef psdef;
+	psdef.subsystems = {ssdef};
+	psdef.anim_length = 1.5f;
+	psdef.name = "feet_dust";
+	mgr.addDef(psdef);
+}
+
 void FXManager::addDefaultDefs() {
 	addTestEffect(*this);
 	addWoodSplinters(*this);
@@ -295,5 +347,6 @@ void FXManager::addDefaultDefs() {
 	addExplosionEffect(*this);
 	addRippleEffect(*this);
 	addCircularBlast(*this);
+	addFeetDustEffect(*this);
 };
 }

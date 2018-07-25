@@ -85,6 +85,7 @@ Potencjalny problem:
 
 Mini todo:
 - dodać jeszcze kilka efektów
+- możliwośc wizualizacji krzywych chyba jednak się przyda
 - jakoś opisać udostępniane przez efekty parametry ?
 - zapisywanie do pliku & hot reloading
 - różne rodzaje spawnerów ?
