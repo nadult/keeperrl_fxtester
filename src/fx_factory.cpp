@@ -8,13 +8,15 @@
 
 namespace fx {
 
+static const FVec2 dir_vecs[8] = {{0.0, -1.0}, {0.0, 1.0},   {1.0, 0.0}, {-1.0, 0.0},
+								  {1.0, -1.0}, {-1.0, -1.0}, {1.0, 1.0}, {-1.0, 1.0}};
+FVec2 dirToVec(Dir dir) { return dir_vecs[(int)dir]; }
+
 using SubSystemDef = ParticleSystemDef::SubSystem;
 
 static void addTestSimpleEffect(FXManager &mgr) {
 	EmitterDef edef;
 	edef.strength_min = edef.strength_max = 30.0f;
-	edef.direction = 0.0f;
-	edef.direction_spread = fconstant::pi;
 	edef.frequency = {{10.0f, 55.0f, 0.0f, 0.0}, InterpType::cosine};
 
 	ParticleDef pdef;
@@ -34,8 +36,6 @@ static void addTestSimpleEffect(FXManager &mgr) {
 static void addTestMultiEffect(FXManager &mgr) {
 	EmitterDef edef;
 	edef.strength_min = edef.strength_max = 30.0f;
-	edef.direction = 0.0f;
-	edef.direction_spread = fconstant::pi;
 	edef.frequency = {{10.0f, 55.0f, 0.0f, 0.0}, InterpType::cosine};
 
 	FVec3 colors[5] = {{0.7f, 0.2, 0.2f},
@@ -65,8 +65,6 @@ static void addWoodSplinters(FXManager &mgr) {
 	EmitterDef edef;
 	edef.strength_min = 20.0f;
 	edef.strength_max = 60.0f;
-	edef.direction = 0.0f;
-	edef.direction_spread = fconstant::pi;
 	edef.rotation_speed_min = -0.5f;
 	edef.rotation_speed_max = 0.5f;
 	edef.frequency = 999.0f;
@@ -116,8 +114,6 @@ static void addRockSplinters(FXManager &mgr) {
 	EmitterDef edef;
 	edef.strength_min = 20.0f;
 	edef.strength_max = 60.0f;
-	edef.direction = 0.0f;
-	edef.direction_spread = fconstant::pi;
 	edef.rotation_speed_min = -0.5f;
 	edef.rotation_speed_max = 0.5f;
 	edef.frequency = 999.0f;
@@ -152,8 +148,6 @@ static void addRockCloud(FXManager &mgr) {
 	edef.source = FRect(-7.0f, -7.0f, 7.0f, 7.0f);
 	edef.strength_min = 5.0f;
 	edef.strength_max = 8.0f;
-	edef.direction = 0.0f;
-	edef.direction_spread = fconstant::pi;
 	edef.frequency = 60.0f;
 
 	ParticleDef pdef;
@@ -183,8 +177,6 @@ static void addExplosionEffect(FXManager &mgr) {
 	// zaczynały z innym kolorem
 	EmitterDef edef;
 	edef.strength_min = edef.strength_max = 15.0f;
-	edef.direction = 0.0f;
-	edef.direction_spread = fconstant::pi;
 	edef.frequency = 60.0f;
 
 	ParticleDef pdef;
@@ -303,20 +295,16 @@ static void addCircularBlast(FXManager &mgr) {
 static void addFeetDustEffect(FXManager &mgr) {
 	// Ten efekt musi zaznaczać fakt, że postać się porusza w jakimś kierunku
 	// To musi byc kontrolowalne za pomocą parametru
-	//
 	// FX jest odpalany w momencie gdy postać wychodzi z kafla ?
 	//
 	// TODO: Parametrem efektu powinien być enum: kierunek ruchu
 	// zależnie od tego mamy różne kierunki generacji i inny punkt startowy
 	// drugim parametrem jest kolor (choć chyba będzie uzywany tylko na piasku?)
-	// TODO: particle size powinno być vec2 ?
 
 	EmitterDef edef;
 	edef.source = FVec2(-5, 5);
 	edef.strength_min = 15.0f;
 	edef.strength_max = 25.0f;
-	edef.direction = 0.0f;
-	edef.direction_spread = 0.0f;
 	edef.frequency = 60.0f;
 
 	ParticleDef pdef;
@@ -338,6 +326,13 @@ static void addFeetDustEffect(FXManager &mgr) {
 		defaultEmitParticle(ctx, em, pinst);
 		pinst.rot = 0.0f;
 		pinst.size = FVec2(1.2f, 0.6f);
+	};
+	ssdef.prepare_func = [](AnimationContext &ctx, EmissionState &em) {
+		auto ret = defaultPrepareEmission(ctx, em);
+		auto vec = normalize(dirToVec(ctx.ps.params.dir[0]));
+		em.angle = vectorToAngle(vec);
+		em.angle_spread = 0.0f;
+		return ret;
 	};
 
 	ParticleSystemDef psdef;

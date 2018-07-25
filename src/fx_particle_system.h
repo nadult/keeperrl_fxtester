@@ -105,6 +105,7 @@ struct ParticleSystem {
 	struct Params {
 		float scalar[4] = {0.0f, 0.0f, 0.0f, 0.0f};
 		FVec3 color[2] = {FVec3(1.0), FVec3(1.0)};
+		Dir dir[2] = {Dir::N, Dir::N};
 	};
 
 	ParticleSystem(FVec2 pos, ParticleSystemDefId, int spawn_time, int num_subsystems);

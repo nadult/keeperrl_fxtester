@@ -115,6 +115,16 @@ void FXTester::spawnToolMenu() {
 			snprintf(title, sizeof(title), "Color #%d", idx++);
 			ImGui::ColorEdit3(title, c.v);
 		}
+
+		const char *dir_names[8] = {
+			"North (0,-1)",		  "South (0,+1)",		"E (+1,0)",			  "W (-1,0)",
+			"North east (+1,-1)", "North west (-1,-1)", "South east (+1,+1)", "South west (-1,+1)"};
+		idx = 0;
+		for(auto &d : sel->params.dir) {
+			char title[256]; // TODO: proper formatting
+			snprintf(title, sizeof(title), "Dir #%d", idx++);
+			selectIndex(title, d, dir_names);
+		}
 	}
 }
 

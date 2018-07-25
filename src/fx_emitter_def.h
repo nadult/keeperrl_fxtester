@@ -12,7 +12,7 @@ struct EmitterDef {
 	EmissionSource source;
 	Curve<float> frequency; // particles per second
 	Curve<float> strength_min, strength_max;
-	Curve<float> direction, direction_spread; // in radians
+	Curve<float> angle = 0.0f, angle_spread = fconstant::pi; // in radians
 	Curve<float> rotation_speed_min, rotation_speed_max;
 
 	vector<Curve<float>> scalar_curves;

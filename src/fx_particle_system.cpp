@@ -51,8 +51,8 @@ float defaultPrepareEmission(AnimationContext &ctx, EmissionState &em) {
 
 	em.max_life = pdef.life.sample(em.time);
 
-	em.angle = edef.direction.sample(em.time);
-	em.angle_spread = edef.direction_spread.sample(em.time);
+	em.angle = edef.angle.sample(em.time);
+	em.angle_spread = edef.angle_spread.sample(em.time);
 
 	em.strength_min = edef.strength_min.sample(em.time);
 	em.strength_max = edef.strength_max.sample(em.time);
