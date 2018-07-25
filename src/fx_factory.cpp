@@ -10,7 +10,7 @@ namespace fx {
 
 using SubSystemDef = ParticleSystemDef::SubSystem;
 
-static void addTestEffect(FXManager &mgr) {
+static void addTestSimpleEffect(FXManager &mgr) {
 	EmitterDef edef;
 	edef.strength_min = edef.strength_max = 30.0f;
 	edef.direction = 0.0f;
@@ -27,7 +27,37 @@ static void addTestEffect(FXManager &mgr) {
 
 	ParticleSystemDef psdef;
 	psdef.subsystems.emplace_back(mgr.addDef(pdef), mgr.addDef(edef), 0.0f, 5.0f);
-	psdef.name = "test_effect";
+	psdef.name = "test_simple";
+	mgr.addDef(psdef);
+}
+
+static void addTestMultiEffect(FXManager &mgr) {
+	EmitterDef edef;
+	edef.strength_min = edef.strength_max = 30.0f;
+	edef.direction = 0.0f;
+	edef.direction_spread = fconstant::pi;
+	edef.frequency = {{10.0f, 55.0f, 0.0f, 0.0}, InterpType::cosine};
+
+	FVec3 colors[5] = {{0.7f, 0.2, 0.2f},
+					   {0.2f, 0.7f, 0.2f},
+					   {0.2f, 0.2f, 0.7f},
+					   {0.9f, 0.2, 0.9f},
+					   {0.3f, 0.9f, 0.4f}};
+
+	ParticleDef pdefs[5];
+	for(int n = 0; n < 5; n++) {
+		pdefs[n].life = 1.0f;
+		pdefs[n].size = 32.0f;
+		pdefs[n].alpha = {{0.0f, 0.1, 0.8f, 1.0f}, {0.0, 1.0, 1.0, 0.0}, InterpType::linear};
+		pdefs[n].color = {colors[n]};
+		pdefs[n].texture_name = "circular.png";
+	}
+
+	ParticleSystemDef psdef;
+	psdef.name = "test_multi";
+	for(int n = 0; n < 5; n++)
+		psdef.subsystems.emplace_back(mgr.addDef(pdefs[n]), mgr.addDef(edef), float(n) * 0.5f,
+									  float(n) * 1.5f + 2.0f);
 	mgr.addDef(psdef);
 }
 
@@ -328,7 +358,8 @@ static void addFeetDustEffect(FXManager &mgr) {
 }
 
 void FXManager::addDefaultDefs() {
-	addTestEffect(*this);
+	addTestSimpleEffect(*this);
+	addTestMultiEffect(*this);
 	addWoodSplinters(*this);
 	addRockSplinters(*this);
 	addRockCloud(*this);
