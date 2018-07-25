@@ -5,28 +5,6 @@ Wymiary kafli: 24x24 (dwukrotnie powiększone)
   niektóre sprite-y na kaflach wystają poza region samego kafla
   np. drzewka albo niektóre postacie wystają trochę z góry
 
-Ficzery systemu animacji:
-- Są różne rodzaje spawnowalnych efektów:
-  - relatywne: magiczny efekt podpięty do jakiejś postaci; jak postać się
-    przesuwa, to particle przesuwają się wraz z nią
-  - absolutne: jeśli zmienimy pozycję efektu, to stare cząsteczki zostają
-    na swoim miejscu
-  - to można zrobić per-sub-system
-- niektóre efekty mogą być w ciekawy sposób animowane przez czas ich trwania
-  ale mogą mieć inną animację pojawiania się i znikania?
-- możliwość odgrywania animacji od środka (z już z kilkoma zrespawnowanymi cząsteczkami
-  na odpowiednich pozycjach); To może wymagać całkowania niektórych krzywych i systemów
-  akumulacji rotacji, pozycji etc.
-- możliwość używanie cząsteczek z jednego podsystemu jako emiterów do drugiego podsystemu
-  tutaj wystarczy, jeśli funkcje emitujące będą miały odpowiednio szeroki kontekst
-  (w EmitterState jest np. indeks aktualnego podsystemu i referencja do definicji / stanu subsystemu?)
-- różne kształty emitera
-- możliwość wyłaczenia animacji w taki sposób, że emitery przestają działać, ale te cząsteczki które
-  już zostały wygenerowane mogą skończyć animację
-
-Potencjalny problem:
-- jak dobrze uniezależnić efekty od FPSów ?
-
 ---- Pomysły na efekty:
 
 Animacja kręgów na wodzie:
@@ -98,19 +76,3 @@ Mini todo:
 - różne rodzaje spawnerów ?
 - efekty bazujące na blockerach
 - update dokumentu na google docsach
-
-Integracja libfwk:
-- Problem: libfwk działa bez wyjątków (kompilacja zakłada, że są wyłączone); Jeśli libfwk
-  jest używane tylko do edytora cząsteczek, to nie powinno to stanowić problemu
-
- 
-Zapisywanie do pliku:
-- chcemy zapisywać w wygodnej formie tekstowej, którą można łatwo edytować
-- możemy użyć Cereal i zapisać do XMLa
-- Opcja: cereal
-
-- Jak chcielibyśmy, żeby to było zapisane ?
-
-  to chyba jednak najłatwiej się definiuje z kodu...
-  zrobienie parsera trochę czasu zajmie;
-  najszybciej by chyba było z cerealem i xmlem / jsonem...
