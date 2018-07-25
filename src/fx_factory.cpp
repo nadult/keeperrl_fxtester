@@ -29,7 +29,7 @@ static void addTestEffect(FXManager &mgr) {
 	mgr.addDef(psdef);
 }
 
-static void addSplinterEffect(FXManager &mgr) {
+static void addWoodSplinters(FXManager &mgr) {
 	EmitterDef edef;
 	edef.strength_min = 20.0f;
 	edef.strength_max = 60.0f;
@@ -41,18 +41,18 @@ static void addSplinterEffect(FXManager &mgr) {
 
 	ParticleDef pdef;
 	pdef.life = 5.0f; // life min-max ?
-	pdef.size = 8.0f;
+	pdef.size = 4.0f;
 	pdef.slowdown = {{0.0f, 0.1f}, {5.0f, 1000.0f}};
 	pdef.alpha = {{0.0f, 0.8f, 1.0f}, {1.0, 1.0, 0.0}};
 
 	auto animate_func = [](AnimationContext &ctx, Particle &pinst) {
 		defaultAnimateParticle(ctx, pinst);
-		float attract_min = 5.0f, attract_max = 10.0f;
-		float attr_strength = 1.0f;
-		if(pinst.pos.y < attract_min) {
-			float dist = attract_min - pinst.pos.y;
-			pinst.movement += FVec2(0.0f, dist * attr_strength);
+		float shadow_min = 5.0f, shadow_max = 10.0f;
+		if(pinst.pos.y < shadow_min) {
+			float dist = shadow_min - pinst.pos.y;
+			pinst.movement += FVec2(0.0f, dist);
 		}
+		pinst.pos.y = min(pinst.pos.y, shadow_max);
 	};
 
 	FColor brown(IColor(120, 87, 46));
@@ -69,11 +69,49 @@ static void addSplinterEffect(FXManager &mgr) {
 	ParticleSystemDef psdef;
 	psdef.subsystems = {ssdef};
 	psdef.anim_length = 5.0f;
-	psdef.name = "splinter";
+	psdef.name = "wood_splinters";
 	mgr.addDef(psdef);
 
 	// Kierunkowo to wygląda słabo, może lepiej genereować we wszystkich kierunkach
 	// i najlepiej, jakby drzazgi lądowały pod drzewem!
+}
+
+static void addRockSplinters(FXManager &mgr) {
+	// Opcja: spawnowanie splinterów na tym samym kaflu co minion:
+	// - Problem: Te particle powinny się spawnować na tym samym tile-u co imp
+	//   i spadać mu pod nogi, tak jak drewnianie drzazgi; Tylko jak to
+	//   zrobić w przypadku kafli po diagonalach ?
+	// - Problem: czy te particle wyświetlają się nad czy pod impem?
+	//
+	// Chyba prościej jest po prostu wyświetlać te particle na kaflu z rozwalanym
+	// murem; Zresztą jest to bardziej spójne z particlami dla drzew
+	EmitterDef edef;
+	edef.strength_min = 20.0f;
+	edef.strength_max = 60.0f;
+	edef.direction = 0.0f;
+	edef.direction_spread = fconstant::pi;
+	edef.rotation_speed_min = -0.5f;
+	edef.rotation_speed_max = 0.5f;
+	edef.frequency = 999.0f;
+
+	ParticleDef pdef;
+	pdef.life = 5.0f;
+	pdef.size = 4.0f;
+	pdef.slowdown = {{0.0f, 0.1f}, {5.0f, 1000.0f}};
+	pdef.alpha = {{0.0f, 0.8f, 1.0f}, {1.0, 1.0, 0.0}};
+
+	pdef.color = FVec3(0.4, 0.4, 0.4);
+	pdef.texture_name = "flakes_4x4_borders.png";
+	pdef.texture_tiles = {4, 4};
+
+	SubSystemDef ssdef(mgr.addDef(pdef), mgr.addDef(edef));
+	ssdef.max_total_particles = 5;
+
+	ParticleSystemDef psdef;
+	psdef.subsystems = {ssdef};
+	psdef.anim_length = 5.0f;
+	psdef.name = "rock_splinters";
+	mgr.addDef(psdef);
 }
 
 static void addExplosionEffect(FXManager &mgr) {
@@ -206,7 +244,8 @@ static void addCircularBlast(FXManager &mgr) {
 
 void FXManager::addDefaultDefs() {
 	addTestEffect(*this);
-	addSplinterEffect(*this);
+	addWoodSplinters(*this);
+	addRockSplinters(*this);
 	addExplosionEffect(*this);
 	addRippleEffect(*this);
 	addCircularBlast(*this);

@@ -51,6 +51,7 @@ Mini todo:
 - zapisywanie do pliku & hot reloading
 - dodać jeszcze kilka efektów
 - różne rodzaje spawnerów ?
+- update dokumentu na google docsach
 
 Integracja z Keeperem:
 - włączenie Keepera jako submodule
