@@ -37,7 +37,7 @@ class FXTester {
   public:
 	using Mode = FXTesterMode;
 
-	FXTester(float zoom);
+	FXTester(float zoom, Maybe<int> fixed_fps = none);
 
 	bool spawnEffect(string, int2);
 	bool setBackground(string);
@@ -102,5 +102,6 @@ class FXTester {
 
 	vector<Background> m_backgrounds;
 	Maybe<int> m_background_id;
+	Maybe<int> m_fixed_fps;
 };
 }

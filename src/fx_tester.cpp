@@ -195,7 +195,8 @@ void FXTester::drawOccluders(Renderer2D &out) const {
 // ------------------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------------------
 
-FXTester::FXTester(float zoom) : m_viewport(GfxDevice::instance().windowSize()) {
+FXTester::FXTester(float zoom, Maybe<int> fixed_fps)
+	: m_viewport(GfxDevice::instance().windowSize()), m_fixed_fps(fixed_fps) {
 	m_imgui.emplace(GfxDevice::instance(), ImGuiStyleMode::mini);
 	m_ps.emplace();
 
@@ -261,6 +262,11 @@ void FXTester::doMenu() {
 	ImGui::Begin("FXTester", nullptr,
 				 ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 	ImGui::SetWindowSize(m_menu_size);
+	static bool initialized = false;
+	if(!initialized) {
+		ImGui::SetWindowPos(ImVec2(5, 5));
+		initialized = true;
+	}
 
 	selectEnum("Mode", m_mode);
 	{
@@ -392,7 +398,17 @@ bool FXTester::mainLoop(GfxDevice &device) {
 	static double last_time = time - 1.0 / 60.0;
 	double time_diff = time - last_time;
 	last_time = time;
-	time_diff = clamp(time_diff, 1 / 240.0, 1 / 5.0);
+
+	if(m_fixed_fps) {
+		double desired_frame_time = 1.0 / double(*m_fixed_fps);
+		if(time_diff < desired_frame_time) {
+			fwk::sleep(desired_frame_time - time_diff);
+			last_time = getTime();
+		}
+		time_diff = desired_frame_time;
+	} else {
+		time_diff = clamp(time_diff, 1 / 240.0, 1 / 5.0);
+	}
 
 	m_viewport = IRect(device.windowSize());
 
@@ -435,6 +451,7 @@ int main(int argc, char **argv) {
 	string spawn_effect, background;
 	int2 spawn_pos;
 	float zoom = 2.0f;
+	Maybe<int> fixed_fps;
 
 	for(int n = 1; n < argc; n++) {
 		string argument = argv[n];
@@ -460,6 +477,10 @@ int main(int argc, char **argv) {
 		} else if(argument == "-zoom") {
 			ASSERT(n + 1 < argc);
 			zoom = fwk::fromString<float>(argv[++n]);
+		} else if(argument == "-fixed-fps") {
+			ASSERT(n + 1 < argc);
+			fixed_fps = fwk::fromString<int>(argv[++n]);
+			ASSERT(fixed_fps >= 1 && fixed_fps <= 60);
 		} else {
 			printf("Unsupported argument: %s\n", argument.c_str());
 			exit(1);
@@ -469,7 +490,7 @@ int main(int argc, char **argv) {
 	GfxDevice gfx_device;
 	gfx_device.createWindow("FXTester - particle system tester", resolution, gfx_flags);
 
-	FXTester tester(zoom);
+	FXTester tester(zoom, fixed_fps);
 	if(!spawn_effect.empty())
 		if(!tester.spawnEffect(spawn_effect, spawn_pos)) {
 			printf("Unknown effect: %s\n", spawn_effect.c_str());
