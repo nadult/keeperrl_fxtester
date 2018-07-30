@@ -70,6 +70,7 @@ Animacja kręgów na wodzie:
 
 Mini todo:
 - podpięcie systemu efektów do keepera
+- problem: niektóre efekty powinny rysować się pod spodem tile-i które są przed efektem
 - zainspirować się efektami z innych gier
 - jakoś opisać udostępniane przez efekty parametry ?
 - możliwość wizualizacji krzywych chyba jednak się przyda
