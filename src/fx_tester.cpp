@@ -1,9 +1,9 @@
 #include "fx_tester.h"
 
-#include "fx_emitter_def.h"
-#include "fx_manager.h"
-#include "fx_particle_def.h"
-#include "fx_spawner.h"
+#include "keeperrl/fx_emitter_def.h"
+#include "keeperrl/fx_manager.h"
+#include "keeperrl/fx_particle_def.h"
+#include "keeperrl/fx_spawner.h"
 
 #include "imgui/imgui.h"
 #include "imgui_funcs.h"
@@ -20,6 +20,16 @@
 #include <fwk/sys/backtrace.h>
 #include <fwk/sys/input.h>
 #include <fwk/sys/stream.h>
+
+namespace SDL {
+	typedef unsigned int	GLenum;
+	typedef unsigned int	GLuint;
+}
+
+#include "keeperrl/renderer.h"
+
+// TODO: move Color to separate file
+Color::Color(Uint8 r, Uint8 g, Uint8 b, Uint8 a) : SDL_Color{r, g, b, a} {}
 
 namespace fx::tester {
 

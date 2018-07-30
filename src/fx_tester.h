@@ -17,7 +17,7 @@
 
 #undef CHECK
 
-#include "fx_base.h"
+#include "keeperrl/fx_base.h"
 
 namespace fx::tester {
 

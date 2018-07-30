@@ -10,7 +10,7 @@ endif
 
 ifneq (,$(findstring clang,$(LINUX_CXX)))
 	CLANG=yes
-	LINUX_LINK+=-fuse-ld=lld
+	#LINUX_LINK+=-fuse-ld=lld
 endif
 
 _dummy := $(shell [ -d output ] || mkdir -p output)
@@ -18,8 +18,9 @@ _dummy := $(shell [ -d $(BUILD_DIR) ] || mkdir -p $(BUILD_DIR))
 _dummy := $(shell [ -d $(BUILD_DIR)/imgui ] || mkdir -p $(BUILD_DIR)/imgui)
 _dummy := $(shell [ -d $(BUILD_DIR)/keeperrl ] || mkdir -p $(BUILD_DIR)/keeperrl)
 
-SHARED_SRC=fx_color fx_vec fx_math fx_curve fx_serialize fx_emission_source \
-		   fx_particle_system fx_factory fx_manager fx_spawner \
+SHARED_SRC=keeperrl/fx_color keeperrl/fx_vec keeperrl/fx_math keeperrl/fx_curve keeperrl/fx_serialize \
+		   keeperrl/fx_emission_source keeperrl/fx_particle_system keeperrl/fx_factory keeperrl/fx_manager \
+		   keeperrl/fx_spawner \
 		   keeperrl/debug keeperrl/util \
 		   imgui/imgui imgui/imgui_draw imgui/imgui_demo imgui_wrapper
 

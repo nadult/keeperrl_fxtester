@@ -69,6 +69,7 @@ Animacja kręgów na wodzie:
 
 
 Mini todo:
+- podpięcie systemu efektów do keepera
 - zainspirować się efektami z innych gier
 - jakoś opisać udostępniane przez efekty parametry ?
 - możliwość wizualizacji krzywych chyba jednak się przyda
