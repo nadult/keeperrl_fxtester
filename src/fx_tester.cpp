@@ -245,12 +245,17 @@ bool FXTester::spawnEffect(string name, int2 pos) {
       m_spawn_tool->system_id = ParticleSystemDefId(id);
       m_spawn_tool->add(pos);
       m_spawn_tool->type = old_type;
+
       return true;
     }
     id++;
   }
 
   return false;
+}
+
+void FXTester::focusOn(int2 pos) {
+  m_top_left_tile = float2(pos - int2(screenToTile(float2(m_viewport.size())) * 0.5));
 }
 
 bool FXTester::setBackground(string name) {
@@ -505,11 +510,14 @@ int main(int argc, char **argv) {
   gfx_device.createWindow("FXTester - particle system tester", resolution, gfx_flags);
 
   FXTester tester(zoom, fixed_fps);
-  if(!spawn_effect.empty())
+  if(!spawn_effect.empty()) {
     if(!tester.spawnEffect(spawn_effect, spawn_pos)) {
       printf("Unknown effect: %s\n", spawn_effect.c_str());
       exit(1);
     }
+    tester.focusOn(spawn_pos);
+  }
+
   if(!background.empty())
     if(!tester.setBackground(background)) {
       printf("Unknown background: %s\n", background.c_str());

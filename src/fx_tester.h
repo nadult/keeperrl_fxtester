@@ -40,6 +40,7 @@ public:
   FXTester(float zoom, Maybe<int> fixed_fps = none);
 
   bool spawnEffect(string, int2);
+  void focusOn(int2);
   bool setBackground(string);
 
   void spawnToolMenu();
