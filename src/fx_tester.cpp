@@ -33,7 +33,7 @@ Color::Color(Uint8 r, Uint8 g, Uint8 b, Uint8 a) : SDL_Color{r, g, b, a} {}
 
 namespace fx::tester {
 
-static constexpr int tile_size = default_tile_size;
+static constexpr int tile_size = Renderer::nominal_size;
 
 // ------------------------------------------------------------------------------------------------
 // ------------------------------------- SPAWN TOOL -----------------------------------------------
