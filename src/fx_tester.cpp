@@ -56,8 +56,8 @@ struct FXTester::SpawnTool {
       selection_id = -1;
   }
 
-  void add(int2 pos) {
-    spawners.emplace_back(type, pos, system_id);
+  void add(int2 pos, float2 off = float2()) {
+    spawners.emplace_back(type, pos, off, system_id);
     selection_id = spawners.size() - 1;
   }
 
@@ -220,6 +220,11 @@ FXTester::FXTester(float zoom, Maybe<int> fixed_fps)
   m_ps.emplace();
 
   for(auto &pdef : m_ps->particleDefs()) {
+	  if(pdef.texture_name.empty()) {
+		  m_particle_textures.emplace_back(PTexture());
+		  m_particle_materials.emplace_back(ColorId::purple);
+		  continue;
+	  }
     string file_name = "data/particles/" + pdef.texture_name;
     Loader loader(file_name);
     m_particle_textures.emplace_back(make_immutable<DTexture>(pdef.texture_name, loader));
@@ -236,14 +241,14 @@ FXTester::FXTester(float zoom, Maybe<int> fixed_fps)
   setZoom(float2(m_viewport.size()) * 0.25f, zoom);
 }
 
-bool FXTester::spawnEffect(string name, int2 pos) {
+bool FXTester::spawnEffect(string name, int2 pos, int2 toff) {
   int id = 0;
   for(auto &def : m_ps->systemDefs()) {
     if(def.name == name) {
       auto old_type = m_spawn_tool->type;
       m_spawn_tool->type = SpawnerType::repeated;
       m_spawn_tool->system_id = ParticleSystemDefId(id);
-      m_spawn_tool->add(pos);
+      m_spawn_tool->add(pos, float2(toff));
       m_spawn_tool->type = old_type;
 
       return true;
@@ -468,7 +473,8 @@ int main(int argc, char **argv) {
   Backtrace::t_default_mode = BacktraceMode::full;
 
   string spawn_effect, background;
-  int2 spawn_pos;
+  int2 spawn_pos, spawn_target_off;
+
   float zoom = 2.0f;
   Maybe<int> fixed_fps;
 
@@ -490,6 +496,14 @@ int main(int argc, char **argv) {
       spawn_effect = argv[++n];
       spawn_pos.x = fwk::fromString<int>(argv[++n]);
       spawn_pos.y = fwk::fromString<int>(argv[++n]);
+    } else if(argument == "-spawn-to") {
+      ASSERT(n + 5 < argc);
+      spawn_effect = argv[++n];
+      spawn_pos.x = fwk::fromString<int>(argv[++n]);
+      spawn_pos.y = fwk::fromString<int>(argv[++n]);
+	  spawn_target_off.x = fwk::fromString<int>(argv[++n]);
+	  spawn_target_off.y = fwk::fromString<int>(argv[++n]);
+	  spawn_target_off -= spawn_pos;
     } else if(argument == "-background") {
       ASSERT(n + 1 < argc);
       background = argv[++n];
@@ -511,7 +525,7 @@ int main(int argc, char **argv) {
 
   FXTester tester(zoom, fixed_fps);
   if(!spawn_effect.empty()) {
-    if(!tester.spawnEffect(spawn_effect, spawn_pos)) {
+    if(!tester.spawnEffect(spawn_effect, spawn_pos, spawn_target_off)) {
       printf("Unknown effect: %s\n", spawn_effect.c_str());
       exit(1);
     }
