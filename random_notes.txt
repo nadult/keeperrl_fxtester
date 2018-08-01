@@ -32,7 +32,8 @@ Animacja kręgów na wodzie:
 	Efekty o stanie umysłu: jakieś particle nad głową
     PANIC,        // jakiś symbol oznaczający strach i panikę ?
     INSANITY,     // pioruny nad głową (coś jak berserk w innych grach)
-    PEACEFULNESS, // ???
+    PEACEFULNESS, // ???  
+    LOVE,         // TO samo co peacefulness
     SLEEP,        // ZZZ
 
 	Efekty w pobliżu stóp:
