@@ -43,7 +43,7 @@ struct FXTester::SpawnTool {
     for(auto &spawner : spawners)
       spawner.update(mgr);
     for(int n = 0; n < spawners.size(); n++)
-      if(spawners[n].is_dead) {
+      if (spawners[n].isDead) {
         if(selection_id == n)
           selection_id = -1;
         if(selection_id == (int)spawners.size() - 1)
@@ -64,7 +64,7 @@ struct FXTester::SpawnTool {
   void select(int2 pos) {
     selection_id = -1;
     for(int n = 0; n < spawners.size(); n++)
-      if(spawners[n].tile_pos == pos) {
+      if (spawners[n].tilePos == pos) {
         selection_id = n;
         break;
       }
@@ -74,7 +74,7 @@ struct FXTester::SpawnTool {
 
   void remove(FXManager &mgr, int2 pos) {
     for(auto &spawner : spawners)
-      if(spawner.tile_pos == pos)
+      if (spawner.tilePos == pos)
         spawner.kill(mgr);
   }
 
@@ -86,7 +86,7 @@ struct FXTester::SpawnTool {
 };
 
 void FXTester::spawnToolMenu() {
-  auto &tool = *m_spawn_tool;
+  auto &tool = *m_spawnTool;
 
   auto names = transform(m_ps->systemDefs(), [](const auto &def) { return def.name.c_str(); });
   selectIndex("New system", tool.system_id, names);
@@ -100,11 +100,11 @@ void FXTester::spawnToolMenu() {
     float anim_time = 0.0f;
     int num_active = 0, num_total = 0;
 
-    if(m_ps->alive(sel->instance_id)) {
-      auto &ps = m_ps->get(sel->instance_id);
+    if (m_ps->alive(sel->instanceId)) {
+      auto &ps = m_ps->get(sel->instanceId);
       num_active = ps.numActiveParticles();
       num_total = ps.numTotalParticles();
-      anim_time = ps.anim_time;
+      anim_time = ps.animTime;
     }
 
     ImGui::Text("Animation time: %f", anim_time);
@@ -138,15 +138,15 @@ void FXTester::spawnToolMenu() {
 }
 
 void FXTester::spawnToolInput(CSpan<InputEvent> events) {
-  auto &tool = *m_spawn_tool;
+  auto &tool = *m_spawnTool;
   for(auto event : events) {
     if(event.keyDown(InputKey::del))
-      tool.remove(*m_ps, m_selected_tile);
+      tool.remove(*m_ps, m_selectedTile);
     if(event.mouseButtonDown(InputButton::left)) {
       if(event.mods() & InputModifier::lctrl)
-        tool.select(m_selected_tile);
+        tool.select(m_selectedTile);
       else
-        tool.add(m_selected_tile);
+        tool.add(m_selectedTile);
     }
   }
 }
@@ -161,7 +161,7 @@ struct FXTester::OcclusionTool {
 };
 
 void FXTester::loadOccluders() {
-  auto &tool = *m_occlusion_tool;
+  auto &tool = *m_occlusionTool;
   auto occ_dir = "data/occluders/", occ_suffix = ".png";
   for(auto element : findFiles(occ_dir, occ_suffix)) {
     string file_name = occ_dir + element + occ_suffix;
@@ -170,7 +170,7 @@ void FXTester::loadOccluders() {
 }
 
 void FXTester::removeOccluder(int2 pos) {
-  auto &occluders = m_occlusion_tool->occluders;
+  auto &occluders = m_occlusionTool->occluders;
   for(int n = 0; n < occluders.size(); n++)
     if(occluders[n].second == pos) {
       occluders[n] = occluders.back();
@@ -180,7 +180,7 @@ void FXTester::removeOccluder(int2 pos) {
 }
 
 void FXTester::occlusionToolMenu() {
-  auto &tool = *m_occlusion_tool;
+  auto &tool = *m_occlusionTool;
   auto names = transform(tool.textures, [](const auto &pair) { return pair.second.c_str(); });
   selectIndex("New occluder", tool.new_occluder_id, names);
 
@@ -191,18 +191,18 @@ void FXTester::occlusionToolMenu() {
 }
 
 void FXTester::occlusionToolInput(CSpan<InputEvent> events) {
-  auto &tool = *m_occlusion_tool;
+  auto &tool = *m_occlusionTool;
 
   for(auto &event : events) {
     if(event.mouseButtonDown(InputButton::left) && !tool.textures.empty())
-      tool.occluders.emplace_back(tool.new_occluder_id, m_selected_tile);
+      tool.occluders.emplace_back(tool.new_occluder_id, m_selectedTile);
     if(event.keyDown(InputKey::del))
-      removeOccluder(m_selected_tile);
+      removeOccluder(m_selectedTile);
   }
 }
 
 void FXTester::drawOccluders(Renderer2D &out) const {
-  auto &tool = *m_occlusion_tool;
+  auto &tool = *m_occlusionTool;
   auto tile_rect = FRect(tileToScreen(int2(1)));
 
   for(auto &occluder : tool.occluders) {
@@ -214,25 +214,25 @@ void FXTester::drawOccluders(Renderer2D &out) const {
 // ------------------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------------------
 
-FXTester::FXTester(float zoom, Maybe<int> fixed_fps)
-    : m_viewport(GfxDevice::instance().windowSize()), m_fixed_fps(fixed_fps) {
+FXTester::FXTester(float zoom, Maybe<int> fixedFps)
+    : m_viewport(GfxDevice::instance().windowSize()), m_fixedFps(fixedFps) {
   m_imgui.emplace(GfxDevice::instance(), ImGuiStyleMode::mini);
   m_ps.emplace();
 
   for(auto &pdef : m_ps->particleDefs()) {
-	  if(pdef.texture_name.empty()) {
-		  m_particle_textures.emplace_back(PTexture());
-		  m_particle_materials.emplace_back(ColorId::purple);
-		  continue;
+    if (pdef.textureName.empty()) {
+      m_particleTextures.emplace_back(PTexture());
+      m_particleMaterials.emplace_back(ColorId::purple);
+      continue;
 	  }
-    string file_name = "data/particles/" + pdef.texture_name;
+    string file_name = "data/particles/" + pdef.textureName;
     Loader loader(file_name);
-    m_particle_textures.emplace_back(make_immutable<DTexture>(pdef.texture_name, loader));
-    m_particle_materials.emplace_back(m_particle_textures.back());
+    m_particleTextures.emplace_back(make_immutable<DTexture>(pdef.textureName, loader));
+    m_particleMaterials.emplace_back(m_particleTextures.back());
   }
 
-  m_spawn_tool.emplace();
-  m_occlusion_tool.emplace();
+  m_spawnTool.emplace();
+  m_occlusionTool.emplace();
 
   m_cursor_tex = loadTexture("data/cursor.png");
   loadBackgrounds();
@@ -245,11 +245,11 @@ bool FXTester::spawnEffect(string name, int2 pos, int2 toff) {
   int id = 0;
   for(auto &def : m_ps->systemDefs()) {
     if(def.name == name) {
-      auto old_type = m_spawn_tool->type;
-      m_spawn_tool->type = SpawnerType::repeated;
-      m_spawn_tool->system_id = ParticleSystemDefId(id);
-      m_spawn_tool->add(pos, float2(toff));
-      m_spawn_tool->type = old_type;
+      auto old_type = m_spawnTool->type;
+      m_spawnTool->type = SpawnerType::repeated;
+      m_spawnTool->system_id = ParticleSystemDefId(id);
+      m_spawnTool->add(pos, float2(toff));
+      m_spawnTool->type = old_type;
 
       return true;
     }
@@ -259,18 +259,16 @@ bool FXTester::spawnEffect(string name, int2 pos, int2 toff) {
   return false;
 }
 
-void FXTester::focusOn(int2 pos) {
-  m_top_left_tile = float2(pos - int2(screenToTile(float2(m_viewport.size())) * 0.5));
-}
+void FXTester::focusOn(int2 pos) { m_topLeftTile = float2(pos - int2(screenToTile(float2(m_viewport.size())) * 0.5)); }
 
 bool FXTester::setBackground(string name) {
   if(name == "disabled") {
-    m_background_id = fwk::none;
+    m_backgroundId = fwk::none;
     return true;
   }
   for(int n = 0; n < m_backgrounds.size(); n++)
     if(m_backgrounds[n].name == name) {
-      m_background_id = n;
+      m_backgroundId = n;
       return true;
     }
   return false;
@@ -280,16 +278,16 @@ float2 FXTester::screenToTile(float2 spos) const { return spos / float(tile_size
 float2 FXTester::tileToScreen(int2 tpos) const { return float2(tpos) * float(tile_size) * m_zoom; }
 float2 FXTester::tileToScreen(float2 tpos) const { return tpos * float(tile_size) * m_zoom; }
 
-void FXTester::setZoom(float2 screen_pos, float zoom) {
-  float2 old_pos = screenToTile(screen_pos);
+void FXTester::setZoom(float2 screenPos, float zoom) {
+  float2 oldPos = screenToTile(screenPos);
   m_zoom = clamp(zoom, 0.25f, 10.0f);
-  float2 new_pos = screenToTile(screen_pos);
-  m_top_left_tile += old_pos - new_pos;
+  float2 new_pos = screenToTile(screenPos);
+  m_topLeftTile += oldPos - new_pos;
 }
 
 void FXTester::doMenu() {
   ImGui::Begin("FXTester", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
-  ImGui::SetWindowSize(m_menu_size);
+  ImGui::SetWindowSize(m_menuSize);
   static bool initialized = false;
   if(!initialized) {
     ImGui::SetWindowPos(ImVec2(5, 5));
@@ -303,20 +301,20 @@ void FXTester::doMenu() {
       setZoom(float2(m_viewport.size()) * 0.5f, clamp(zoom, 0.25f, 10.0f));
   }
 
-  if(ImGui::InputFloat("Anim speed", &m_animation_speed))
-    m_animation_speed = clamp(m_animation_speed, 0.0f, 100.0f);
-  ImGui::Checkbox("Show cursor", &m_show_cursor);
-  ImGui::Text("%s", format("Cursor: %", m_selected_tile).c_str());
+  if (ImGui::InputFloat("Anim speed", &m_animationSpeed))
+    m_animationSpeed = clamp(m_animationSpeed, 0.0f, 100.0f);
+  ImGui::Checkbox("Show cursor", &m_showCursor);
+  ImGui::Text("%s", format("Cursor: %", m_selectedTile).c_str());
 
   if(ImGui::Button("Select background"))
     ImGui::OpenPopup("select_back");
   if(ImGui::BeginPopup("select_back")) {
-    if(ImGui::MenuItem("disabled", nullptr, !m_background_id))
-      m_background_id = fwk::none;
+    if (ImGui::MenuItem("disabled", nullptr, !m_backgroundId))
+      m_backgroundId = fwk::none;
     for(int n = 0; n < m_backgrounds.size(); n++) {
       auto &back = m_backgrounds[n];
-      if(ImGui::MenuItem(back.name.c_str(), nullptr, m_background_id == n)) {
-        m_background_id = n;
+      if (ImGui::MenuItem(back.name.c_str(), nullptr, m_backgroundId == n)) {
+        m_backgroundId = n;
       }
     }
     ImGui::EndPopup();
@@ -329,20 +327,20 @@ void FXTester::doMenu() {
   else
     occlusionToolMenu();
 
-  static bool show_test_window = 0;
-  if(show_test_window) {
+  static bool showTestWindow = 0;
+  if (showTestWindow) {
     ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiSetCond_FirstUseEver);
-    ImGui::ShowTestWindow(&show_test_window);
+    ImGui::ShowTestWindow(&showTestWindow);
   }
 
-  m_menu_width = 220;
-  m_menu_size = vmax(m_menu_size, int2(m_menu_width + 20, ImGui::GetCursorPosY()));
+  m_menuWidth = 220;
+  m_menuSize = vmax(m_menuSize, int2(m_menuWidth + 20, ImGui::GetCursorPosY()));
 
   ImGui::End();
 }
 
-void FXTester::tick(GfxDevice &device, double time_diff) {
-  m_ps->simulateStable(time_diff * m_animation_speed);
+void FXTester::tick(GfxDevice &device, double timeDiff) {
+  m_ps->simulateStable(timeDiff * m_animationSpeed);
 
   auto events = device.inputEvents();
   m_imgui->beginFrame(device);
@@ -361,10 +359,10 @@ void FXTester::tick(GfxDevice &device, double time_diff) {
       m_mode = Mode::occlusion;
 
     if(event.mouseButtonPressed(InputButton::right))
-      m_top_left_tile -= screenToTile(float2(event.mouseMove()));
+      m_topLeftTile -= screenToTile(float2(event.mouseMove()));
     if(event.isMouseOverEvent()) {
-      float2 sel_tile = screenToTile((float2)event.mousePos()) + m_top_left_tile;
-      m_selected_tile = (int2)vfloor(sel_tile);
+      float2 sel_tile = screenToTile((float2)event.mousePos()) + m_topLeftTile;
+      m_selectedTile = (int2)vfloor(sel_tile);
       if(int zoom = event.mouseWheel())
         setZoom((float2)event.mousePos(), m_zoom * (zoom > 0 ? 1.25f : 0.8f));
     }
@@ -375,7 +373,7 @@ void FXTester::tick(GfxDevice &device, double time_diff) {
   else if(m_mode == Mode::occlusion)
     occlusionToolInput(events);
 
-  m_spawn_tool->update(*m_ps);
+  m_spawnTool->update(*m_ps);
 }
 
 void FXTester::drawCursor(Renderer2D &out, int2 tile_pos, FColor color) const {
@@ -386,59 +384,59 @@ void FXTester::drawCursor(Renderer2D &out, int2 tile_pos, FColor color) const {
 
 void FXTester::render() const {
   Renderer2D out(m_viewport);
-  out.setViewPos(tileToScreen(m_top_left_tile));
+  out.setViewPos(tileToScreen(m_topLeftTile));
 
   GfxDevice::clearColor(FColor(0.1, 0.1, 0.1));
   float tile_to_screen = m_zoom * float(tile_size);
 
-  if(m_background_id) {
-    auto &back = m_backgrounds[*m_background_id];
+  if (m_backgroundId) {
+    auto &back = m_backgrounds[*m_backgroundId];
     auto size = float2(back.texture->size()) * tile_to_screen / float(back.tile_size);
     out.addFilledRect(FRect(size), back.texture);
   }
 
   for(auto &quad : m_ps->genQuads()) {
-    float2 positions[4], tex_coords[4];
+    float2 positions[4], texCoords[4];
     for(int n = 0; n < 4; n++) {
       positions[n] = {quad.positions[n].x * m_zoom, quad.positions[n].y * m_zoom};
-      tex_coords[n] = {quad.tex_coords[n].x, quad.tex_coords[n].y};
+      texCoords[n] = {quad.texCoords[n].x, quad.texCoords[n].y};
     }
     FColor color(fwk::IColor(quad.color.r, quad.color.g, quad.color.b, quad.color.a));
 
     array<FColor, 4> colors{{color, color, color, color}};
-    out.addQuads(positions, tex_coords, colors, m_particle_materials[quad.particle_def_id]);
+    out.addQuads(positions, texCoords, colors, m_particleMaterials[quad.particleDefId]);
   }
 
   drawOccluders(out);
 
-  if(m_show_cursor)
-    drawCursor(out, m_selected_tile, FColor(ColorId::white, 0.2f));
-  if(m_spawn_tool->selection_id != -1)
-    drawCursor(out, m_spawn_tool->spawners[m_spawn_tool->selection_id].tile_pos, FColor(ColorId::blue, 0.2f));
+  if (m_showCursor)
+    drawCursor(out, m_selectedTile, FColor(ColorId::white, 0.2f));
+  if (m_spawnTool->selection_id != -1)
+    drawCursor(out, m_spawnTool->spawners[m_spawnTool->selection_id].tilePos, FColor(ColorId::blue, 0.2f));
 
   out.render();
 }
 
 bool FXTester::mainLoop(GfxDevice &device) {
   double time = getTime();
-  static double last_time = time - 1.0 / 60.0;
-  double time_diff = time - last_time;
-  last_time = time;
+  static double lastTime = time - 1.0 / 60.0;
+  double timeDiff = time - lastTime;
+  lastTime = time;
 
-  if(m_fixed_fps) {
-    double desired_frame_time = 1.0 / double(*m_fixed_fps);
-    if(time_diff < desired_frame_time) {
-      fwk::sleep(desired_frame_time - time_diff);
-      last_time = getTime();
+  if (m_fixedFps) {
+    double desiredFrameTime = 1.0 / double(*m_fixedFps);
+    if (timeDiff < desiredFrameTime) {
+      fwk::sleep(desiredFrameTime - timeDiff);
+      lastTime = getTime();
     }
-    time_diff = desired_frame_time;
+    timeDiff = desiredFrameTime;
   } else {
-    time_diff = clamp(time_diff, 1 / 240.0, 1 / 5.0);
+    timeDiff = clamp(timeDiff, 1 / 240.0, 1 / 5.0);
   }
 
   m_viewport = IRect(device.windowSize());
 
-  tick(device, time_diff);
+  tick(device, timeDiff);
   render();
   m_imgui->drawFrame(GfxDevice::instance());
 
@@ -455,7 +453,7 @@ void FXTester::loadBackgrounds() {
     m_backgrounds.emplace_back(loadTexture(file_name), tile_size, element);
   }
   if(!m_backgrounds.empty())
-    m_background_id = 0;
+    m_backgroundId = 0;
 }
 
 bool FXTester::mainLoop(GfxDevice &device, void *this_ptr) { return ((FXTester *)this_ptr)->mainLoop(device); }
@@ -476,7 +474,7 @@ int main(int argc, char **argv) {
   int2 spawn_pos, spawn_target_off;
 
   float zoom = 2.0f;
-  Maybe<int> fixed_fps;
+  Maybe<int> fixedFps;
 
   for(int n = 1; n < argc; n++) {
     string argument = argv[n];
@@ -512,8 +510,8 @@ int main(int argc, char **argv) {
       zoom = fwk::fromString<float>(argv[++n]);
     } else if(argument == "-fixed-fps") {
       ASSERT(n + 1 < argc);
-      fixed_fps = fwk::fromString<int>(argv[++n]);
-      ASSERT(fixed_fps >= 1 && fixed_fps <= 60);
+      fixedFps = fwk::fromString<int>(argv[++n]);
+      ASSERT(fixedFps >= 1 && fixedFps <= 60);
     } else {
       printf("Unsupported argument: %s\n", argument.c_str());
       exit(1);
@@ -523,7 +521,7 @@ int main(int argc, char **argv) {
   GfxDevice gfx_device;
   gfx_device.createWindow("FXTester - particle system tester", resolution, gfx_flags);
 
-  FXTester tester(zoom, fixed_fps);
+  FXTester tester(zoom, fixedFps);
   if(!spawn_effect.empty()) {
     if(!tester.spawnEffect(spawn_effect, spawn_pos, spawn_target_off)) {
       printf("Unknown effect: %s\n", spawn_effect.c_str());

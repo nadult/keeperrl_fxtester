@@ -77,7 +77,7 @@ Mini todo:
 - warstwowe rysowanie sprite-ów i efektów
 - ustaw sobie w Vimie, żeby nie używał tabów
 - możliwość wizualizacji krzywych chyba jednak się przyda?
-- pamiętaj o stylu styl nazewnictwa commitów
+- pamiętaj o stylu nazewnictwa commitów & zmiennych
 - zainspirować się efektami z innych gier
 - hook do gita, który weryfikuje, że wszystko jest sformatowane jak należy
   (choć przydałaby się też możliwość zignorowania go)

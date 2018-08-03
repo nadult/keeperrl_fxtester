@@ -37,7 +37,7 @@ class FXTester {
 public:
   using Mode = FXTesterMode;
 
-  FXTester(float zoom, Maybe<int> fixed_fps = none);
+  FXTester(float zoom, Maybe<int> fixedFps = none);
 
   bool spawnEffect(string, int2, int2);
   void focusOn(int2);
@@ -54,7 +54,7 @@ public:
 
   void doMenu();
 
-  void tick(GfxDevice &device, double time_diff);
+  void tick(GfxDevice &device, double timeDiff);
   void render() const;
 
   bool mainLoop(GfxDevice &device);
@@ -64,35 +64,35 @@ private:
   void drawCursor(Renderer2D &, int2, FColor) const;
   static PTexture loadTexture(string file_name);
   void loadBackgrounds();
-  void setZoom(float2 screen_pos, float zoom);
+  void setZoom(float2 screenPos, float zoom);
 
   float2 screenToTile(float2) const;
   float2 tileToScreen(int2) const;
   float2 tileToScreen(float2) const;
 
-  int m_menu_width;
-  int2 m_menu_size;
+  int m_menuWidth;
+  int2 m_menuSize;
 
   IRect m_viewport;
-  float2 m_top_left_tile;
+  float2 m_topLeftTile;
 
-  int2 m_selected_tile;
+  int2 m_selectedTile;
   float m_zoom = 2.0f;
-  float m_animation_speed = 1.0f;
-  bool m_show_cursor = false;
+  float m_animationSpeed = 1.0f;
+  bool m_showCursor = false;
 
   struct SpawnTool;
   struct OcclusionTool;
 
   Mode m_mode = Mode::spawn;
-  UniquePtr<SpawnTool> m_spawn_tool;
-  UniquePtr<OcclusionTool> m_occlusion_tool;
+  UniquePtr<SpawnTool> m_spawnTool;
+  UniquePtr<OcclusionTool> m_occlusionTool;
   UniquePtr<ImGuiWrapper> m_imgui;
 
   UniquePtr<FXManager> m_ps;
 
-  vector<PTexture> m_particle_textures;
-  vector<SimpleMaterial> m_particle_materials;
+  vector<PTexture> m_particleTextures;
+  vector<SimpleMaterial> m_particleMaterials;
   PTexture m_cursor_tex;
 
   struct Background {
@@ -102,7 +102,7 @@ private:
   };
 
   vector<Background> m_backgrounds;
-  Maybe<int> m_background_id;
-  Maybe<int> m_fixed_fps;
+  Maybe<int> m_backgroundId;
+  Maybe<int> m_fixedFps;
 };
 }
