@@ -95,6 +95,7 @@ Mini todo:
   albo jakoś inaczej zrobić generowanie rotacji? może generyczna krzywa nie jest tuaj potrzebna ?
 - możliwość skasowania efektu bez natychmiastowego zabijania cząstek 
   stopEmission ?
+- efekt powinien poruszać się razem z postacią
 
 - niektóre okienka i sposoby wybierania opcji na mapie są modalne; to psuje animacje
   (nie tylko FXów, ale też np. wody)
