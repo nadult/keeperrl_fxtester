@@ -41,7 +41,7 @@ Animacja kręgów na wodzie:
     SPEED,      // 
     FLYING,     // 
 
-    RAGE,         // krwawy kolor
+    RAGE,         // krwawy kolor; jak odróżnić od insanity ?
     BLEEDING,     // generowanie śladów krwi na tile-ach (im dłużej się jest na danym kaflu tym większa plama)
     HALLU,        // ???
     BLIND,        // pulsujący kołowy efekt nad głową postaci
@@ -66,11 +66,35 @@ Animacja kręgów na wodzie:
     PREGNANT,
     RESTED,
 
+
+Panic:
+- trzęsące się symbole nad głową ?
+- ale jaki symbol ? może cś z unikodu ?
+- a może po prostu pojawiają się w losowych miejscach nad aureolą gracza ?
+- po pojawieniu się mogą się trząść
+
+Peacefullness:
+- podobnie tylko inny symbol i zachowanie: nie trzęsą się, ale spokojnie blend-outują lecąc do góry
+- może na razie zróbmy z symbolami, które jako tako pasują, a później spróbujemy coś lespzego doapsować?
+
+Wyświetlane symbole mogłyby też być abstrakcyjne
+
+Rózne:
+- do płomieni można dodać małe ogniki/iskierki, które mogą lecieć w różne strony
+
+
 -------------------------------------------------------------------------------
 
 
 Mini todo:
 * zrobienie więcej efektów!!!
+- randomSeedy powiny być > 0 ?
+- drobny renaming:
+  rotationSpeed -> rotSpeed
+- uniezależnić rotSpeed od strength ?
+  albo jakoś inaczej zrobić generowanie rotacji? może generyczna krzywa nie jest tuaj potrzebna ?
+- możliwość skasowania efektu bez natychmiastowego zabijania cząstek 
+  stopEmission ?
 
 - niektóre okienka i sposoby wybierania opcji na mapie są modalne; to psuje animacje
   (nie tylko FXów, ale też np. wody)
