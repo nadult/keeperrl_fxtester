@@ -33,7 +33,6 @@ Animacja kręgów na wodzie:
     PANIC,        // jakiś symbol oznaczający strach i panikę ?
     INSANITY,     // pioruny nad głową (coś jak berserk w innych grach)
     PEACEFULNESS, // ???  
-    LOVE,         // TO samo co peacefulness
     SLEEP,        // ZZZ
 
 	Efekty w pobliżu stóp:
@@ -69,6 +68,7 @@ Animacja kręgów na wodzie:
 
 Panic:
 - trzęsące się symbole nad głową ?
+- do tego trzeba jakąś dobrą teksturkę
 - ale jaki symbol ? może cś z unikodu ?
 - a może po prostu pojawiają się w losowych miejscach nad aureolą gracza ?
 - po pojawieniu się mogą się trząść
@@ -88,6 +88,16 @@ Rózne:
 
 Mini todo:
 * zrobienie więcej efektów!!!
+- jak efekty mają się zachowywać, jak są tworzone poza widokiem?
+  Jak widok wraca na miejsce gdzie powinien się w przeszłości zespawnować efekt, to
+  co się powinno dziać?
+  Przydałby się pewnie save testowy, gdzie dużo się dzieje w tle.
+  Większość efektów pewnie możnaby zwyczajnie spawnować tylko jeśli są w widoku;
+  Efekty typu LastingEffect mogłyby byc co klatkę update-owane; Tylko jak je dobrze restartować?
+  Trzebaby dodać funkcję która odtwarza np. pierwszą pętlę animacji efektu ?
+  Jak to zrobić, żeby nie było zbyt kosztowne ?
+  Jeśli efekty byłyby całkowalne, to dałby się to zrobić szybko; Ale na razie się tym nie martwimy...
+
 - randomSeedy powiny być > 0 ?
 - drobny renaming:
   rotationSpeed -> rotSpeed
