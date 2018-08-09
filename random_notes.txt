@@ -88,6 +88,8 @@ Rózne:
 
 Mini todo:
 * zrobienie więcej efektów!!!
+- poprzenosic rozne efekty do roznych plików ?
+- troche ulepszyc sposob definiowania (zeby trzeba było mniej kodu pisać)
 - jak efekty mają się zachowywać, jak są tworzone poza widokiem?
   Jak widok wraca na miejsce gdzie powinien się w przeszłości zespawnować efekt, to
   co się powinno dziać?
