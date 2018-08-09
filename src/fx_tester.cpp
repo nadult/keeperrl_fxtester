@@ -28,9 +28,6 @@ typedef unsigned int GLuint;
 
 #include "keeperrl/renderer.h"
 
-// TODO: move Color to separate file
-Color::Color(Uint8 r, Uint8 g, Uint8 b, Uint8 a) : SDL_Color{r, g, b, a} {}
-
 namespace fx::tester {
 
 static constexpr int tile_size = Renderer::nominalSize;
@@ -88,7 +85,7 @@ struct FXTester::SpawnTool {
 void FXTester::spawnToolMenu() {
   auto &tool = *m_spawnTool;
 
-  auto names = transform(m_ps->systemDefs(), [](const auto &def) { return def.name.c_str(); });
+  auto names = transform(m_manager->systemDefs(), [](const auto &def) { return def.name.c_str(); });
   selectIndex("New system", tool.system_id, names);
   selectIndex("Spawner type", tool.type, {"single", "repeated"});
 
@@ -100,8 +97,8 @@ void FXTester::spawnToolMenu() {
     float anim_time = 0.0f;
     int num_active = 0, num_total = 0;
 
-    if (m_ps->alive(sel->instanceId)) {
-      auto &ps = m_ps->get(sel->instanceId);
+    if (m_manager->alive(sel->instanceId)) {
+      auto &ps = m_manager->get(sel->instanceId);
       num_active = ps.numActiveParticles();
       num_total = ps.numTotalParticles();
       anim_time = ps.animTime;
@@ -141,7 +138,7 @@ void FXTester::spawnToolInput(CSpan<InputEvent> events) {
   auto &tool = *m_spawnTool;
   for(auto event : events) {
     if(event.keyDown(InputKey::del))
-      tool.remove(*m_ps, m_selectedTile);
+      tool.remove(*m_manager, m_selectedTile);
     if(event.mouseButtonDown(InputButton::left)) {
       if(event.mods() & InputModifier::lctrl)
         tool.select(m_selectedTile);
@@ -217,18 +214,21 @@ void FXTester::drawOccluders(Renderer2D &out) const {
 FXTester::FXTester(float zoom, Maybe<int> fixedFps)
     : m_viewport(GfxDevice::instance().windowSize()), m_fixedFps(fixedFps) {
   m_imgui.emplace(GfxDevice::instance(), ImGuiStyleMode::mini);
-  m_ps.emplace();
+  m_manager.emplace();
 
-  for(auto &pdef : m_ps->particleDefs()) {
+  for (auto& pdef : m_manager->particleDefs()) {
     if (pdef.textureName.empty()) {
       m_particleTextures.emplace_back(PTexture());
       m_particleMaterials.emplace_back(ColorId::purple);
       continue;
-	  }
+    }
     string file_name = "data/particles/" + pdef.textureName;
     Loader loader(file_name);
     m_particleTextures.emplace_back(make_immutable<DTexture>(pdef.textureName, loader));
-    m_particleMaterials.emplace_back(m_particleTextures.back());
+	BlendingMode bm = BlendingMode::normal;
+	if(pdef.blendMode == fx::BlendMode::additive)
+		bm = BlendingMode::additive;
+    m_particleMaterials.emplace_back(m_particleTextures.back(), ColorId::white, bm);
   }
 
   m_spawnTool.emplace();
@@ -243,7 +243,7 @@ FXTester::FXTester(float zoom, Maybe<int> fixedFps)
 
 bool FXTester::spawnEffect(string name, int2 pos, int2 toff) {
   int id = 0;
-  for(auto &def : m_ps->systemDefs()) {
+  for(auto &def : m_manager->systemDefs()) {
     if(def.name == name) {
       auto old_type = m_spawnTool->type;
       m_spawnTool->type = SpawnerType::repeated;
@@ -340,7 +340,7 @@ void FXTester::doMenu() {
 }
 
 void FXTester::tick(GfxDevice &device, double timeDiff) {
-  m_ps->simulateStable(timeDiff * m_animationSpeed);
+  m_manager->simulateStable(timeDiff * m_animationSpeed);
 
   auto events = device.inputEvents();
   m_imgui->beginFrame(device);
@@ -373,7 +373,7 @@ void FXTester::tick(GfxDevice &device, double timeDiff) {
   else if(m_mode == Mode::occlusion)
     occlusionToolInput(events);
 
-  m_spawnTool->update(*m_ps);
+  m_spawnTool->update(*m_manager);
 }
 
 void FXTester::drawCursor(Renderer2D &out, int2 tile_pos, FColor color) const {
@@ -395,7 +395,7 @@ void FXTester::render() const {
     out.addFilledRect(FRect(size), back.texture);
   }
 
-  for(auto &quad : m_ps->genQuads()) {
+  for(auto &quad : m_manager->genQuads()) {
     float2 positions[4], texCoords[4];
     for(int n = 0; n < 4; n++) {
       positions[n] = {quad.positions[n].x * m_zoom, quad.positions[n].y * m_zoom};

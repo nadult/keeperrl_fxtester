@@ -21,7 +21,7 @@ _dummy := $(shell [ -d $(BUILD_DIR)/keeperrl ] || mkdir -p $(BUILD_DIR)/keeperrl
 SHARED_SRC=keeperrl/fx_color keeperrl/fx_vec keeperrl/fx_math keeperrl/fx_curve \
 		   keeperrl/fx_emission_source keeperrl/fx_particle_system keeperrl/fx_factory keeperrl/fx_manager \
 		   keeperrl/fx_spawner \
-		   keeperrl/debug keeperrl/util \
+		   keeperrl/debug keeperrl/util keeperrl/directory_path keeperrl/file_path keeperrl/color \
 		   imgui/imgui imgui/imgui_draw imgui/imgui_demo imgui_wrapper
 
 PROGRAM_SRC=fx_tester
@@ -50,8 +50,8 @@ LIBS=
 #$(shell $(LINUX_PKG_CONFIG) --libs $(LIBS))
 #$(shell $(LINUX_PKG_CONFIG) --cflags $(LIBS))
 
-LINUX_LIBS=$(LINUX_FWK_LIBS) -lstdc++ -lm 
-MINGW_LIBS=$(MINGW_FWK_LIBS) 
+LINUX_LIBS=$(LIBS) $(LINUX_FWK_LIBS) -lstdc++ -lm
+MINGW_LIBS=$(LIBS) $(MINGW_FWK_LIBS)
 
 INCLUDES=-Isrc/ -Ikeeperrl/ -Ikeeperrl/extern/ $(FWK_INCLUDES)
 
