@@ -467,7 +467,7 @@ extern "C" {
 int main(int argc, char **argv) {
   double time = getTime();
   int2 resolution(1300, 800);
-  GfxDeviceFlags gfx_flags = GfxDeviceOpt::resizable | GfxDeviceOpt::vsync;
+  GfxDeviceFlags gfx_flags = GfxDeviceOpt::resizable | GfxDeviceOpt::vsync | GfxDeviceOpt::opengl_debug_handler;
   Backtrace::t_default_mode = BacktraceMode::full;
 
   string spawn_effect, background;
@@ -519,7 +519,8 @@ int main(int argc, char **argv) {
   }
 
   GfxDevice gfx_device;
-  gfx_device.createWindow("FXTester - particle system tester", resolution, gfx_flags);
+  gfx_device.createWindow("FXTester - particle system tester", resolution, gfx_flags, OpenglProfile::compatibility,
+                          2.1);
 
   FXTester tester(zoom, fixedFps);
   if(!spawn_effect.empty()) {
