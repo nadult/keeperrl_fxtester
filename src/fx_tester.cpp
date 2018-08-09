@@ -4,6 +4,7 @@
 #include "keeperrl/fx_manager.h"
 #include "keeperrl/fx_particle_def.h"
 #include "keeperrl/fx_spawner.h"
+#include "keeperrl/fx_renderer.h"
 
 #include "imgui/imgui.h"
 #include "imgui_funcs.h"
@@ -13,6 +14,7 @@
 #include <fwk/gfx/dtexture.h>
 #include <fwk/gfx/gfx_device.h>
 #include <fwk/gfx/material.h>
+#include <fwk/gfx/program_binder.h>
 #include <fwk/gfx/opengl.h>
 #include <fwk/gfx/renderer2d.h>
 #include <fwk/math/box.h>
@@ -215,21 +217,7 @@ FXTester::FXTester(float zoom, Maybe<int> fixedFps)
     : m_viewport(GfxDevice::instance().windowSize()), m_fixedFps(fixedFps) {
   m_imgui.emplace(GfxDevice::instance(), ImGuiStyleMode::mini);
   m_manager.emplace();
-
-  for (auto& pdef : m_manager->particleDefs()) {
-    if (pdef.textureName.empty()) {
-      m_particleTextures.emplace_back(PTexture());
-      m_particleMaterials.emplace_back(ColorId::purple);
-      continue;
-    }
-    string file_name = "data/particles/" + pdef.textureName;
-    Loader loader(file_name);
-    m_particleTextures.emplace_back(make_immutable<DTexture>(pdef.textureName, loader));
-	BlendingMode bm = BlendingMode::normal;
-	if(pdef.blendMode == fx::BlendMode::additive)
-		bm = BlendingMode::additive;
-    m_particleMaterials.emplace_back(m_particleTextures.back(), ColorId::white, bm);
-  }
+  m_renderer.emplace(DirectoryPath("data/particles/"), *m_manager);
 
   m_spawnTool.emplace();
   m_occlusionTool.emplace();
@@ -382,38 +370,42 @@ void FXTester::drawCursor(Renderer2D &out, int2 tile_pos, FColor color) const {
   out.addFilledRect(sel_rect, SimpleMaterial(m_cursor_tex, color));
 }
 
+void FXTester::renderParticles() const {
+  ProgramBinder::unbind();
+  SDL::glPushAttrib(GL_VIEWPORT_BIT);
+  SDL::glMatrixMode(GL_PROJECTION);
+  SDL::glLoadIdentity();
+  SDL::glViewport(0, 0, m_viewport.width(), m_viewport.height());
+  SDL::glOrtho(0.0, m_viewport.width(), m_viewport.height(), 0.0, -1.0, 1.0);
+  SDL::glMatrixMode(GL_MODELVIEW);
+  SDL::glLoadIdentity();
+
+  FVec2 offset = m_topLeftTile * float(Renderer::nominalSize) * m_zoom;
+  m_renderer->draw(m_zoom, -offset.x, -offset.y);
+  SDL::glPopAttrib();
+  // Don't care about matrices here, we're not using fixed function
+}
+
 void FXTester::render() const {
+  GfxDevice::clearColor(FColor(0.1, 0.1, 0.1));
+
   Renderer2D out(m_viewport);
   out.setViewPos(tileToScreen(m_topLeftTile));
-
-  GfxDevice::clearColor(FColor(0.1, 0.1, 0.1));
   float tile_to_screen = m_zoom * float(tile_size);
-
   if (m_backgroundId) {
     auto &back = m_backgrounds[*m_backgroundId];
     auto size = float2(back.texture->size()) * tile_to_screen / float(back.tile_size);
     out.addFilledRect(FRect(size), back.texture);
   }
+  out.render();
 
-  for(auto &quad : m_manager->genQuads()) {
-    float2 positions[4], texCoords[4];
-    for(int n = 0; n < 4; n++) {
-      positions[n] = {quad.positions[n].x * m_zoom, quad.positions[n].y * m_zoom};
-      texCoords[n] = {quad.texCoords[n].x, quad.texCoords[n].y};
-    }
-    FColor color(fwk::IColor(quad.color.r, quad.color.g, quad.color.b, quad.color.a));
-
-    array<FColor, 4> colors{{color, color, color, color}};
-    out.addQuads(positions, texCoords, colors, m_particleMaterials[quad.particleDefId]);
-  }
+  renderParticles();
 
   drawOccluders(out);
-
   if (m_showCursor)
     drawCursor(out, m_selectedTile, FColor(ColorId::white, 0.2f));
   if (m_spawnTool->selection_id != -1)
     drawCursor(out, m_spawnTool->spawners[m_spawnTool->selection_id].tilePos, FColor(ColorId::blue, 0.2f));
-
   out.render();
 }
 
@@ -469,6 +461,9 @@ int main(int argc, char **argv) {
   int2 resolution(1300, 800);
   GfxDeviceFlags gfx_flags = GfxDeviceOpt::resizable | GfxDeviceOpt::vsync | GfxDeviceOpt::opengl_debug_handler;
   Backtrace::t_default_mode = BacktraceMode::full;
+
+  FatalLog.addOutput(DebugOutput::crash());
+  FatalLog.addOutput(DebugOutput::toStream(std::cerr));
 
   string spawn_effect, background;
   int2 spawn_pos, spawn_target_off;

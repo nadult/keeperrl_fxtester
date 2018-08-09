@@ -20,8 +20,8 @@ _dummy := $(shell [ -d $(BUILD_DIR)/keeperrl ] || mkdir -p $(BUILD_DIR)/keeperrl
 
 SHARED_SRC=keeperrl/fx_color keeperrl/fx_vec keeperrl/fx_math keeperrl/fx_curve \
 		   keeperrl/fx_emission_source keeperrl/fx_particle_system keeperrl/fx_factory keeperrl/fx_manager \
-		   keeperrl/fx_spawner \
-		   keeperrl/debug keeperrl/util keeperrl/directory_path keeperrl/file_path keeperrl/color \
+		   keeperrl/fx_spawner keeperrl/fx_renderer keeperrl/fx_draw_buffers \
+		   keeperrl/debug keeperrl/util keeperrl/directory_path keeperrl/file_path keeperrl/color keeperrl/texture \
 		   imgui/imgui imgui/imgui_draw imgui/imgui_demo imgui_wrapper
 
 PROGRAM_SRC=fx_tester
@@ -46,7 +46,7 @@ all: $(LINUX_PROGRAMS) $(MINGW_PROGRAMS)
 FWK_DIR=libfwk
 include $(FWK_DIR)/Makefile.include
 
-LIBS=
+LIBS=-lSDL2_image
 #$(shell $(LINUX_PKG_CONFIG) --libs $(LIBS))
 #$(shell $(LINUX_PKG_CONFIG) --cflags $(LIBS))
 

@@ -35,13 +35,7 @@ DEFINE_ENUM(FXTesterMode, spawn, occlusion);
 
 // TODO: it would be best to drop dependency on libfwk, but we would have to:
 // - rewrite imgui_wrapper (use parts of code from SDL2 imgui example)
-// - rewrite rendering & input parts of FXTester
-//
-// Then we would be able to use FXRenderer in FXTester
-// Right now KeeperRL uses opengl through SDL::gl...; and libfwk does it
-// differently. Those two ways are unfortunately not compatible (mixing them
-// causes crashes...).
-
+// - rewrite input parts of FXTester
 class FXTester {
   public:
   using Mode = FXTesterMode;
@@ -65,6 +59,7 @@ class FXTester {
 
   void tick(GfxDevice &device, double timeDiff);
   void render() const;
+  void renderParticles() const;
 
   bool mainLoop(GfxDevice &device);
   static bool mainLoop(GfxDevice &device, void *this_ptr);
@@ -98,9 +93,7 @@ private:
   UniquePtr<OcclusionTool> m_occlusionTool;
   UniquePtr<ImGuiWrapper> m_imgui;
   UniquePtr<FXManager> m_manager;
-
-  vector<PTexture> m_particleTextures;
-  vector<SimpleMaterial> m_particleMaterials;
+  UniquePtr<FXRenderer> m_renderer;
   PTexture m_cursor_tex;
 
   struct Background {
