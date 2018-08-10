@@ -6,12 +6,12 @@ Wymiary kafli: 24x24 (dwukrotnie powiększone)
   np. drzewka albo niektóre postacie wystają trochę z góry
 
 Mini todo:
+- mnożenie koloru prze alphę w trybie addytywnym ?
+- lepsze domyślne parametry w definicjach
+- Zintegrowanie Defów wewnątrz SybsystemDef?
+- nie rysować partikli które mają alpha == 0 ? Chyba, że są addytywne, wtedy kolor ma znaczenie
+- połączenie EmiterDefa i ParticleDefa?
 - randomSeedy powiny być > 0 ?
-- drobny renaming:
-  rotationSpeed -> rotSpeed
-- uniezależnić rotSpeed od strength ?
-  albo jakoś inaczej zrobić generowanie rotacji? może generyczna krzywa nie jest tuaj potrzebna ?
-
 - niektóre okienka i sposoby wybierania opcji na mapie są modalne; to psuje animacje
   (nie tylko FXów, ale też np. wody)
 - warstwowe rysowanie sprite-ów i efektów
