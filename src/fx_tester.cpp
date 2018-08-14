@@ -292,6 +292,7 @@ void FXTester::doMenu() {
   if (ImGui::InputFloat("Anim speed", &m_animationSpeed))
     m_animationSpeed = clamp(m_animationSpeed, 0.0f, 100.0f);
   ImGui::Checkbox("Show cursor", &m_showCursor);
+  ImGui::Checkbox("Use FBO", &m_renderer->o_useFramebuffer);
   ImGui::Text("%s", format("Cursor: %", m_selectedTile).c_str());
 
   if(ImGui::Button("Select background"))
@@ -381,7 +382,7 @@ void FXTester::renderParticles() const {
   SDL::glLoadIdentity();
 
   FVec2 offset = m_topLeftTile * float(Renderer::nominalSize) * m_zoom;
-  m_renderer->draw(m_zoom, -offset.x, -offset.y);
+  m_renderer->draw(m_zoom, -offset.x, -offset.y, m_viewport.width(), m_viewport.height());
   SDL::glPopAttrib();
   // Don't care about matrices here, we're not using fixed function
 }
@@ -532,6 +533,7 @@ int main(int argc, char **argv) {
       exit(1);
     }
 
+  installOpenglDebugHandler();
   gfx_device.runMainLoop(FXTester::mainLoop, &tester);
 
   return 0;
