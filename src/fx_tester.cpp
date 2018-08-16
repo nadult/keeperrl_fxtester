@@ -1,8 +1,7 @@
 #include "fx_tester.h"
 
-#include "keeperrl/fx_emitter_def.h"
 #include "keeperrl/fx_manager.h"
-#include "keeperrl/fx_particle_def.h"
+#include "keeperrl/fx_defs.h"
 #include "keeperrl/fx_spawner.h"
 #include "keeperrl/fx_renderer.h"
 
@@ -56,7 +55,7 @@ struct FXTester::SpawnTool {
   }
 
   void add(int2 pos, float2 off = float2()) {
-    spawners.emplace_back(type, pos, off, system_id);
+    spawners.emplace_back(type, pos, off, systemName);
     selection_id = spawners.size() - 1;
   }
 
@@ -81,14 +80,14 @@ struct FXTester::SpawnTool {
   int selection_id = -1;
 
   SpawnerType type = SpawnerType::single;
-  ParticleSystemDefId system_id = ParticleSystemDefId(0);
+  FXName systemName = FXName::TEST_SIMPLE;
 };
 
 void FXTester::spawnToolMenu() {
   auto &tool = *m_spawnTool;
 
-  auto names = transform(m_manager->systemDefs(), [](const auto &def) { return def.name.c_str(); });
-  selectIndex("New system", tool.system_id, names);
+  auto names = transform(m_names, [](const auto& str) { return str.c_str(); });
+  selectIndex("New system", tool.systemName, names);
   selectIndex("Spawner type", tool.type, {"single", "repeated"});
 
   ImGui::Text("LMB: add spawner\ndel: remove spawners under cursor");
@@ -226,23 +225,21 @@ FXTester::FXTester(float zoom, Maybe<int> fixedFps)
   loadBackgrounds();
   loadOccluders();
 
+  for (auto fxName : ENUM_ALL(FXName))
+    m_names.emplace_back(EnumInfo<FXName>::getString(fxName));
+
   setZoom(float2(m_viewport.size()) * 0.25f, zoom);
 }
 
 bool FXTester::spawnEffect(string name, int2 pos, int2 toff) {
-  int id = 0;
-  for(auto &def : m_manager->systemDefs()) {
-    if(def.name == name) {
-      auto old_type = m_spawnTool->type;
-      m_spawnTool->type = SpawnerType::repeated;
-      m_spawnTool->system_id = ParticleSystemDefId(id);
-      m_spawnTool->add(pos, float2(toff));
-      m_spawnTool->type = old_type;
-
-      return true;
+  if (auto fxId = EnumInfo<FXName>::fromStringSafe(name)) {
+    auto old_type = m_spawnTool->type;
+    m_spawnTool->type = SpawnerType::repeated;
+    m_spawnTool->systemName = *fxId;
+    m_spawnTool->add(pos, float2(toff));
+    m_spawnTool->type = old_type;
+    return true;
     }
-    id++;
-  }
 
   return false;
 }

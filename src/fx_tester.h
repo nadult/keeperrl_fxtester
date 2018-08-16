@@ -102,6 +102,7 @@ private:
     string name;
   };
 
+  vector<string> m_names;
   vector<Background> m_backgrounds;
   Maybe<int> m_backgroundId;
   Maybe<int> m_fixedFps;

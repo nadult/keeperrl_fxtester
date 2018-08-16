@@ -6,7 +6,26 @@ Wymiary kafli: 24x24 (dwukrotnie powiększone)
   np. drzewka albo niektóre postacie wystają trochę z góry
 
 Mini todo:
-- enumy zamiast const charów w fx_simple
+- problem jak zrobić, żeby efekty bardziej paoswały do gry?
+  rozpikselowanie nie wystarcza...
+
+- fx_simple jako główny interfejs (nie musi byc szybszy)
+  jakby co, to można dodać funkcje operujące na wielu FXach na raz
+  pozostałe interfejsy mozna uprościć
+- łosie zostawiają za sobą efekty prędkości
+  pomyśl jak dobrze załatwić kwestię efektów dla wielu postaci na wielu mapach
+  możemy sprawdzać, czy efekt został zaaplikowany przed chwilą, czy wcześniej
+  jeśli wcześniej to możemy dodać losowy parametr czasowy
+  do tego, trzeba będzie jeszcze zrobić szybkie przesuwanie efektów do przodu w czasie
+
+- efekty są widoczne nawet wtedy gdy postać nie jest widoczna
+  blend out dla efektów? (globalny parametr alpha?)
+- potestować Zoom UI (hiidpi)
+- getFXName w klasie Spell
+- opengl w trybie release
+- bug w openglu (w emailu) 
+- jak zoom == 1 to nie ma sensu renderować do FBO
+
 - Zintegrowanie Defów wewnątrz SybsystemDef?
 - nie rysować partikli które mają alpha == 0 ? Chyba, że są addytywne, wtedy kolor ma znaczenie
 - połączenie EmiterDefa i ParticleDefa?
