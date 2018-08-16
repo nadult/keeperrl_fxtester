@@ -31,3 +31,10 @@ Jak zrobić fajny rendering cząsteczek poprzez FBO?
   blendingu spowoduje że tło z FBO (domyślnie: czarny kolor) zmiesza się z kolorem cząsteczek i
   w efekcie cząsteczki będą inaczej wyglądać (mogą np. mieć czarną otoczkę w miejscach mocno przezroczystych)
   Można by to zrobić renderując całą mapę do FBO razem z efekatmi a później zupscalować wszystko zależnie od zooma;
+
+- magic missile został trochę poprawiony; pikseloza raczej nie pomogła
+  jak uzyskać efekt FXów o fajnych kolorach; W trybie addytywnym jak jest dużo cząsteczek to szybko wszystkie efekty robią
+  się białe...
+
+- dodano fireball
+- 
