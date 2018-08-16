@@ -6,18 +6,27 @@ Wymiary kafli: 24x24 (dwukrotnie powiększone)
   np. drzewka albo niektóre postacie wystają trochę z góry
 
 Mini todo:
-- mnożenie koloru prze alphę w trybie addytywnym ?
-- lepsze domyślne parametry w definicjach
 - Zintegrowanie Defów wewnątrz SybsystemDef?
 - nie rysować partikli które mają alpha == 0 ? Chyba, że są addytywne, wtedy kolor ma znaczenie
 - połączenie EmiterDefa i ParticleDefa?
-- randomSeedy powiny być > 0 ?
-- niektóre okienka i sposoby wybierania opcji na mapie są modalne; to psuje animacje
-  (nie tylko FXów, ale też np. wody)
-- warstwowe rysowanie sprite-ów i efektów
-- ustaw sobie w Vimie, żeby nie używał tabów
-- możliwość wizualizacji krzywych chyba jednak się przyda?
 - pamiętaj o stylu nazewnictwa commitów & zmiennych
 - zainspirować się efektami z innych gier
+
+Mało ważne:
+- możliwość wizualizacji krzywych chyba jednak się przyda?
 - hook do gita, który weryfikuje, że wszystko jest sformatowane jak należy
   (choć przydałaby się też możliwość zignorowania go)
+- ustaw sobie w Vimie, żeby nie używał tabów
+
+Pomysły na potem:
+- warstwowe rysowanie sprite-ów i efektów; Ew. na potem; na razie spróbujmy zrobić coś fajnego
+  z tym co mamy
+
+
+Jak zrobić fajny rendering cząsteczek poprzez FBO?
+
+----- Wrzucić do dokumentu: ----------------------------------------------------------------------
+- Problem: jak renderujemy FXy poprzez FBO, to w grę wchodzi tylko blending addytywny; Inny tryb
+  blendingu spowoduje że tło z FBO (domyślnie: czarny kolor) zmiesza się z kolorem cząsteczek i
+  w efekcie cząsteczki będą inaczej wyglądać (mogą np. mieć czarną otoczkę w miejscach mocno przezroczystych)
+  Można by to zrobić renderując całą mapę do FBO razem z efekatmi a później zupscalować wszystko zależnie od zooma;

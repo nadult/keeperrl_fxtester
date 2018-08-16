@@ -292,7 +292,7 @@ void FXTester::doMenu() {
   if (ImGui::InputFloat("Anim speed", &m_animationSpeed))
     m_animationSpeed = clamp(m_animationSpeed, 0.0f, 100.0f);
   ImGui::Checkbox("Show cursor", &m_showCursor);
-  ImGui::Checkbox("Use FBO", &m_renderer->o_useFramebuffer);
+  ImGui::Checkbox("Use FBO", &m_renderer->useFramebuffer);
   ImGui::Text("%s", format("Cursor: %", m_selectedTile).c_str());
 
   if(ImGui::Button("Select background"))
