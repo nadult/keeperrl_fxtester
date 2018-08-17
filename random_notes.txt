@@ -21,12 +21,14 @@ Mini todo:
 - efekty są widoczne nawet wtedy gdy postać nie jest widoczna
   blend out dla efektów? (globalny parametr alpha?)
 - potestować Zoom UI (hiidpi)
-- getFXName w klasie Spell
-- opengl w trybie release
 - bug w openglu (w emailu) 
 - jak zoom == 1 to nie ma sensu renderować do FBO
 
 - Zintegrowanie Defów wewnątrz SybsystemDef?
+  Problem: idki partikli są używane do identyfikacji tekstur
+  może wydzielić definicjie tekstur? W definicjach subsystemów trzymamy odnośnik do
+  tekstur
+
 - nie rysować partikli które mają alpha == 0 ? Chyba, że są addytywne, wtedy kolor ma znaczenie
 - połączenie EmiterDefa i ParticleDefa?
 - pamiętaj o stylu nazewnictwa commitów & zmiennych
