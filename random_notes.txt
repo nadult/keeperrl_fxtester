@@ -6,6 +6,18 @@ Wymiary kafli: 24x24 (dwukrotnie powiększone)
   np. drzewka albo niektóre postacie wystają trochę z góry
 
 Mini todo:
+
+Problemy związane z gameplayem:
+- niektóre efekty działają po zabiciu postaci
+- fxy nie współpracują z systemem widoczności
+
+- możemy w momencie renderowania danego obiektu wykrywać czy powinien też być animowany jakiś efekt
+  możemy trzymać tablicę obiektów wyświetlanych z poprzedniej klatki;
+  jeśli widok się zmienił, to efekty które wyszły poza zakres są kasowane
+  jeśli dany obiekt był wyświetlany w poprzedniej klatce i nie miał danego efektu, to odpalamy efekt od początku
+  jeśli dany obiekt dopiero co się pojawił to odpalamy efekt z losowego punktu (ale takiego, żeby było wiadomo, że nie jest od początku)
+
+
 - problem jak zrobić, żeby efekty bardziej paoswały do gry?
   rozpikselowanie nie wystarcza...
 
@@ -59,3 +71,28 @@ Jak zrobić fajny rendering cząsteczek poprzez FBO?
 
 - dodano fireball
 - 
+
+
+
+------------------------------- Odpalanie FXów od środka / szybki restart FXów ---------------------------
+
+- zmienić nazwę fx_simple na fx_interface ?
+- EXPLSION
+- toString dla enumów
+- odseparować parametr odpowiedzialny za kolor
+- współdzielenie TextureDefów, pozostałe defy kopiowane po sub-systemach
+- przeniesc blend_mode do texturedefu
+- definiowanie sekwencji, które później można by odtwarzać ?
+  co w przypadku płomienia, który jest za każdym razem inny ?
+
+  to jest tylko po to, żeby można było zacząć animację, mógłbym zapisać sobie kilka startowych sekwencji,
+  a dalej normalnie je animować!
+  Czyli chcielibyśmy zapisywac snapshoty różnych animacji, żeby później można było je odtworzyć
+  ok ale co z parametrami ?
+
+  Sekwencje zapisywalibyśmy tylko dla niektórych animacji (tych typu lastingEffect).
+  Jak to zrobić dla ognia ? Powinno się dać, ale może trzeba będzie więcej klatek zapisać
+  
+  Czy rendering snapshotów zajmie dużo czasu ? Trzeba sprawdzić
+
+- a może dałoby się renderować je 

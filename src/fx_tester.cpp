@@ -55,7 +55,10 @@ struct FXTester::SpawnTool {
   }
 
   void add(int2 pos, float2 off = float2()) {
-    spawners.emplace_back(type, pos, off, systemName);
+    if (snapshotKey)
+      spawners.emplace_back(type, pos, off, systemName, *snapshotKey);
+    else
+      spawners.emplace_back(type, pos, off, systemName);
     selection_id = spawners.size() - 1;
   }
 
@@ -81,6 +84,7 @@ struct FXTester::SpawnTool {
 
   SpawnerType type = SpawnerType::single;
   FXName systemName = FXName::TEST_SIMPLE;
+  optional<SnapshotKey> snapshotKey;
 };
 
 void FXTester::spawnToolMenu() {
@@ -89,6 +93,17 @@ void FXTester::spawnToolMenu() {
   auto names = transform(m_names, [](const auto& str) { return str.c_str(); });
   selectIndex("New system", tool.systemName, names);
   selectIndex("Spawner type", tool.type, {"single", "repeated"});
+
+  {
+    bool useSnapshot = !!tool.snapshotKey;
+    if (ImGui::Checkbox("Use snapshots", &useSnapshot))
+      tool.snapshotKey = useSnapshot ? SnapshotKey() : optional<SnapshotKey>();
+
+    if (tool.snapshotKey) {
+      ImGui::InputFloat("startAnimTime", &tool.snapshotKey->animTime);
+      ImGui::SliderFloat("param0", &tool.snapshotKey->param0, 0.0f, 1.0f);
+    }
+  }
 
   ImGui::Text("LMB: add spawner\ndel: remove spawners under cursor");
   ImGui::Text("LMB + ctrl: select\n");
@@ -462,6 +477,7 @@ int main(int argc, char **argv) {
 
   FatalLog.addOutput(DebugOutput::crash());
   FatalLog.addOutput(DebugOutput::toStream(std::cerr));
+  InfoLog.addOutput(DebugOutput::toStream(std::cerr));
 
   string spawn_effect, background;
   int2 spawn_pos, spawn_target_off;
