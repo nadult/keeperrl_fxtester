@@ -38,16 +38,18 @@ flags = [
 '-Wall', '-Wextra', '-Werror', '-Woverloaded-virtual', '-Wnon-virtual-dtor', '-Werror=return-type', '-Werror=switch',
 '-Wimplicit-fallthrough', '-Wno-reorder', '-Wuninitialized', '-Wno-unused-function', '-Wno-unused-variable',
 '-Wno-unused-parameter', '-Wparentheses', '-Wno-overloaded-virtual', '-Wno-undefined-inline',
-'-DFWK_TESTING_MODE',
+'-DFWK_TESTING_MODE', '-DSTX_NO_STD_VARIANT',
 
 '-x', 'c++','-fexceptions', '-std=c++1z',
 
+'-isystem', '/usr/include/c++/8',
+'-isystem', '/usr/include/c++/8/x86_64-pc-linux-gnu',
+'-isystem', '/usr/include/c++/8/backward',
+'-isystem', '/usr/local/include',
+'-isystem', '/usr/include',
 '-Isrc/',
 '-Ilibfwk/include',
 '-Ikeeperrl/', '-Ikeeperrl/extern/',
-'-isystem', '/usr/include/bullet',
-'-isystem', '/usr/include',
-'-isystem', '/usr/local/include',
 ]
 
 
