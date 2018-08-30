@@ -24,7 +24,7 @@ SHARED_SRC=keeperrl/fx_color keeperrl/fx_vec keeperrl/fx_math keeperrl/fx_curve 
 		   keeperrl/debug keeperrl/util keeperrl/directory_path keeperrl/file_path keeperrl/color keeperrl/texture \
 		   imgui/imgui imgui/imgui_draw imgui/imgui_demo imgui_wrapper
 
-PROGRAM_SRC=fx_tester
+PROGRAM_SRC=fx_tester tex_mixer
 
 ALL_SRC=$(PROGRAM_SRC) $(SHARED_SRC) $(IMGUI_SRC)
 

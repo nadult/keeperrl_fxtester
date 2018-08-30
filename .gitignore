@@ -1,4 +1,5 @@
 build/
 fx_tester
+tex_mixer
 .ycm_extra_conf.pyc
 Makefile.local
