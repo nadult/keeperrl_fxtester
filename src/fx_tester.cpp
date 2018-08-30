@@ -100,8 +100,12 @@ void FXTester::spawnToolMenu() {
       tool.snapshotKey = useSnapshot ? SnapshotKey() : optional<SnapshotKey>();
 
     if (tool.snapshotKey) {
-      ImGui::InputFloat("startAnimTime", &tool.snapshotKey->animTime);
-      ImGui::SliderFloat("param0", &tool.snapshotKey->param0, 0.0f, 1.0f);
+		int id = 0;
+	  for(auto &scalar : tool.snapshotKey->scalar) {
+		char name[128];
+		snprintf(name, sizeof(name), "scalar #%d", id++);
+        ImGui::SliderFloat(name, &scalar, 0.0f, 1.0f);
+	  }
     }
   }
 
