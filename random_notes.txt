@@ -12,7 +12,6 @@ Mini todo:
 
 Problemy związane z gameplayem:
 - niektóre efekty działają po zabiciu postaci
-- fxy nie współpracują z systemem widoczności
 
 - zmienić nazwę fx_simple na fx_interface ?
 - toString dla enumów
