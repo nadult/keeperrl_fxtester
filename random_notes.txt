@@ -6,16 +6,9 @@ Wymiary kafli: 24x24 (dwukrotnie powiększone)
   np. drzewka albo niektóre postacie wystają trochę z góry
 
 Mini todo:
-
 - BLEND ADD!
 
-Problemy związane z gameplayem:
 - niektóre efekty działają po zabiciu postaci
-
-- zmienić nazwę fx_simple na fx_interface ?
-- toString dla enumów
-- współdzielenie TextureDefów, pozostałe defy kopiowane po sub-systemach
-- przeniesc blend_mode do texturedefu
 
 - możemy w momencie renderowania danego obiektu wykrywać czy powinien też być animowany jakiś efekt
   możemy trzymać tablicę obiektów wyświetlanych z poprzedniej klatki;
@@ -23,29 +16,12 @@ Problemy związane z gameplayem:
   jeśli dany obiekt był wyświetlany w poprzedniej klatce i nie miał danego efektu, to odpalamy efekt od początku
   jeśli dany obiekt dopiero co się pojawił to odpalamy efekt z losowego punktu (ale takiego, żeby było wiadomo, że nie jest od początku)
 
-
 - problem jak zrobić, żeby efekty bardziej paoswały do gry?
   rozpikselowanie nie wystarcza...
 
-- fx_simple jako główny interfejs (nie musi byc szybszy)
-  jakby co, to można dodać funkcje operujące na wielu FXach na raz
-  pozostałe interfejsy mozna uprościć
-- łosie zostawiają za sobą efekty prędkości
-  pomyśl jak dobrze załatwić kwestię efektów dla wielu postaci na wielu mapach
-  możemy sprawdzać, czy efekt został zaaplikowany przed chwilą, czy wcześniej
-  jeśli wcześniej to możemy dodać losowy parametr czasowy
-  do tego, trzeba będzie jeszcze zrobić szybkie przesuwanie efektów do przodu w czasie
-
-- efekty są widoczne nawet wtedy gdy postać nie jest widoczna
-  blend out dla efektów? (globalny parametr alpha?)
 - potestować Zoom UI (hiidpi)
 - bug w openglu (w emailu) 
 - jak zoom == 1 to nie ma sensu renderować do FBO
-
-- Zintegrowanie Defów wewnątrz SybsystemDef?
-  Problem: idki partikli są używane do identyfikacji tekstur
-  może wydzielić definicjie tekstur? W definicjach subsystemów trzymamy odnośnik do
-  tekstur
 
 - nie rysować partikli które mają alpha == 0 ? Chyba, że są addytywne, wtedy kolor ma znaczenie
 - połączenie EmiterDefa i ParticleDefa?
@@ -57,6 +33,7 @@ Mało ważne:
 - hook do gita, który weryfikuje, że wszystko jest sformatowane jak należy
   (choć przydałaby się też możliwość zignorowania go)
 - ustaw sobie w Vimie, żeby nie używał tabów
+- toString dla enumów
 
 Pomysły na potem:
 - warstwowe rysowanie sprite-ów i efektów; Ew. na potem; na razie spróbujmy zrobić coś fajnego
