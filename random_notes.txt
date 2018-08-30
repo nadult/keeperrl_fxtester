@@ -8,7 +8,6 @@ Wymiary kafli: 24x24 (dwukrotnie powiększone)
 Mini todo:
 
 - BLEND ADD!
-- Błąd w UniqueEntity::Id() !!!
 
 Problemy związane z gameplayem:
 - niektóre efekty działają po zabiciu postaci
