@@ -20,7 +20,7 @@ _dummy := $(shell [ -d $(BUILD_DIR)/keeperrl ] || mkdir -p $(BUILD_DIR)/keeperrl
 
 SHARED_SRC=keeperrl/fx_color keeperrl/fx_vec keeperrl/fx_math keeperrl/fx_curve \
 		   keeperrl/fx_emission_source keeperrl/fx_particle_system keeperrl/fx_factory keeperrl/fx_manager \
-		   keeperrl/fx_spawner keeperrl/fx_renderer keeperrl/fx_draw_buffers keeperrl/framebuffer keeperrl/opengl \
+		   keeperrl/fx_renderer keeperrl/fx_draw_buffers keeperrl/framebuffer keeperrl/opengl \
 		   keeperrl/debug keeperrl/util keeperrl/directory_path keeperrl/file_path keeperrl/color keeperrl/texture \
 		   imgui/imgui imgui/imgui_draw imgui/imgui_demo imgui_wrapper
 

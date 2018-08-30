@@ -2,7 +2,6 @@
 
 #include "keeperrl/fx_manager.h"
 #include "keeperrl/fx_defs.h"
-#include "keeperrl/fx_spawner.h"
 #include "keeperrl/fx_renderer.h"
 
 #include "imgui/imgui.h"
@@ -29,6 +28,8 @@ typedef unsigned int GLuint;
 
 #include "keeperrl/renderer.h"
 
+RICH_ENUM(SpawnerType, single, repeated);
+
 namespace fx::tester {
 
 static constexpr int tile_size = Renderer::nominalSize;
@@ -36,10 +37,41 @@ static constexpr int tile_size = Renderer::nominalSize;
 // ------------------------------------------------------------------------------------------------
 // ------------------------------------- SPAWN TOOL -----------------------------------------------
 
+struct Spawner {
+  void update(FXManager& manager) {
+    if (isDead)
+      return;
+
+    if (manager.dead(instanceId)) {
+      if (spawnCount > 0 && type == SpawnerType::single) {
+        isDead = true;
+        return;
+      }
+
+      spawnCount++;
+      instanceId = manager.addSystem(systemName, initConfig);
+    }
+
+    if (!manager.dead(instanceId))
+      manager.get(instanceId).params = params;
+  }
+
+  IVec2 tilePos;
+  ParticleSystemId instanceId;
+  int spawnCount = 0;
+  SpawnerType type = SpawnerType::single;
+  FXName systemName = FXName::FIRE;
+  bool isDead = false;
+
+  SystemParams params;
+  InitConfig initConfig;
+};
+
 struct FXTester::SpawnTool {
   void update(FXManager &mgr) {
-    for(auto &spawner : spawners)
+    for (auto& spawner : spawners)
       spawner.update(mgr);
+
     for(int n = 0; n < spawners.size(); n++)
       if (spawners[n].isDead) {
         if(selection_id == n)
@@ -55,11 +87,12 @@ struct FXTester::SpawnTool {
   }
 
   void add(int2 pos, float2 off = float2()) {
-    if (snapshotKey)
-      spawners.emplace_back(type, pos, off, systemName, *snapshotKey);
-    else
-      spawners.emplace_back(type, pos, off, systemName);
-    selection_id = spawners.size() - 1;
+    selection_id = spawners.size();
+    auto newSpawner = defaultSpawner;
+    newSpawner.tilePos = pos;
+    newSpawner.initConfig.pos = (FVec2(pos.x, pos.y) + FVec2(0.5f)) * float(tile_size);
+    newSpawner.initConfig.targetOff = off;
+    spawners.emplace_back(newSpawner);
   }
 
   void select(int2 pos) {
@@ -75,39 +108,42 @@ struct FXTester::SpawnTool {
 
   void remove(FXManager &mgr, int2 pos) {
     for(auto &spawner : spawners)
-      if (spawner.tilePos == pos)
-        spawner.kill(mgr);
+      if (spawner.tilePos == pos) {
+        mgr.kill(spawner.instanceId, false);
+        spawner.isDead = true;
+      }
   }
 
   vector<Spawner> spawners;
   int selection_id = -1;
-
-  SpawnerType type = SpawnerType::single;
-  FXName systemName = FXName::TEST_SIMPLE;
-  optional<SnapshotKey> snapshotKey;
+  Spawner defaultSpawner;
 };
 
 void FXTester::spawnToolMenu() {
   auto &tool = *m_spawnTool;
+  auto& def = tool.defaultSpawner;
 
   auto names = transform(m_names, [](const auto& str) { return str.c_str(); });
-  selectIndex("New system", tool.systemName, names);
-  selectIndex("Spawner type", tool.type, {"single", "repeated"});
+  selectIndex("New system", def.systemName, names);
+  selectIndex("Spawner type", def.type, {"single", "repeated"});
 
-  {
-    bool useSnapshot = !!tool.snapshotKey;
-    if (ImGui::Checkbox("Use snapshots", &useSnapshot))
-      tool.snapshotKey = useSnapshot ? SnapshotKey() : optional<SnapshotKey>();
+  auto& snapshotKey = def.initConfig.snapshotKey;
+  bool useSnapshot = !!snapshotKey;
+  if (ImGui::Checkbox("Use snapshots", &useSnapshot))
+    snapshotKey = useSnapshot ? SnapshotKey() : optional<SnapshotKey>();
 
-    if (tool.snapshotKey) {
-		int id = 0;
-	  for(auto &scalar : tool.snapshotKey->scalar) {
-		char name[128];
-		snprintf(name, sizeof(name), "scalar #%d", id++);
-        ImGui::SliderFloat(name, &scalar, 0.0f, 1.0f);
-	  }
+  if (snapshotKey) {
+    int id = 0;
+    bool apply = false;
+    for (auto& scalar : snapshotKey->scalar) {
+      char name[128];
+      snprintf(name, sizeof(name), "scalar #%d", id++);
+      if (ImGui::SliderFloat(name, &scalar, 0.0f, 1.0f))
+        apply = true;
     }
-  }
+    if (apply)
+      snapshotKey->apply(def.params);
+    }
 
   ImGui::Text("LMB: add spawner\ndel: remove spawners under cursor");
   ImGui::Text("LMB + ctrl: select\n");
@@ -252,11 +288,12 @@ FXTester::FXTester(float zoom, Maybe<int> fixedFps)
 
 bool FXTester::spawnEffect(string name, int2 pos, int2 toff) {
   if (auto fxId = EnumInfo<FXName>::fromStringSafe(name)) {
-    auto old_type = m_spawnTool->type;
-    m_spawnTool->type = SpawnerType::repeated;
-    m_spawnTool->systemName = *fxId;
+    auto& def = m_spawnTool->defaultSpawner;
+    auto old_type = def.type;
+    def.type = SpawnerType::repeated;
+    def.systemName = *fxId;
     m_spawnTool->add(pos, float2(toff));
-    m_spawnTool->type = old_type;
+    def.type = old_type;
     return true;
     }
 
@@ -397,7 +434,7 @@ void FXTester::renderParticles() const {
   SDL::glMatrixMode(GL_MODELVIEW);
   SDL::glLoadIdentity();
 
-  FVec2 offset = m_topLeftTile * float(Renderer::nominalSize) * m_zoom;
+  FVec2 offset = m_topLeftTile * float(tile_size) * m_zoom;
   m_renderer->draw(m_zoom, -offset.x, -offset.y, m_viewport.width(), m_viewport.height());
   SDL::glPopAttrib();
   // Don't care about matrices here, we're not using fixed function
