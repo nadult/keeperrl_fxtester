@@ -88,6 +88,7 @@ private:
   float m_animationSpeed = 1.0f;
   bool m_showCursor = false;
   EnumFlags<FBOChannel> m_showFboChannels;
+  float m_zoomFboChannels = 1.0f;
 
   struct SpawnTool;
   struct OcclusionTool;

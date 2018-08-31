@@ -360,6 +360,10 @@ void FXTester::doMenu() {
             m_showFboChannels &= ~channel;
         }
       }
+      ImGui::PushItemWidth(100.0f);
+      if (ImGui::InputFloat("zoom", &m_zoomFboChannels))
+        m_zoomFboChannels = clamp(m_zoomFboChannels, 1.0f, 8.0f);
+      ImGui::PopItemWidth();
       ImGui::EndPopup();
     }
   }
@@ -508,7 +512,8 @@ void FXTester::drawFboChannels() const {
     bool rgbMode = isOneOf(channel, FBOChannel::blend_rgb, FBOChannel::add_rgb);
 
     SDL::glDisable(GL_TEXTURE_2D);
-    glQuad(pos.x - 2.0f, pos.y - 2.0f, pos.x + texSize.x + 2.0f, pos.y + texSize.y + 2.0f);
+    FVec2 endPos = pos + FVec2(texSize);
+    glQuad(pos.x - 2.0f, pos.y - 2.0f, endPos.x + 2.0f, endPos.y + 2.0f);
 
     SDL::glEnable(GL_TEXTURE_2D);
     SDL::glBindTexture(GL_TEXTURE_2D, id);
@@ -524,7 +529,16 @@ void FXTester::drawFboChannels() const {
       SDL::glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB, GL_SRC_ALPHA);
     }
 
-    glQuad(pos.x, pos.y, pos.x + texSize.x, pos.y + texSize.y);
+    FVec2 texRange = FVec2(1.0f / m_zoomFboChannels);
+    FVec2 minTex = FVec2(0.5) - texRange * 0.5f;
+    FVec2 maxTex = FVec2(0.5) + texRange * 0.5f;
+
+    SDL::glBegin(GL_QUADS);
+    SDL::glTexCoord2f(minTex.x, minTex.y), SDL::glVertex2f(pos.x, endPos.y);
+    SDL::glTexCoord2f(maxTex.x, minTex.y), SDL::glVertex2f(endPos.x, endPos.y);
+    SDL::glTexCoord2f(maxTex.x, maxTex.y), SDL::glVertex2f(endPos.x, pos.y);
+    SDL::glTexCoord2f(minTex.x, maxTex.y), SDL::glVertex2f(pos.x, pos.y);
+    SDL::glEnd();
     pos += FVec2(0.0f, texSize.y + 20);
   }
 

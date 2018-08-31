@@ -7,7 +7,7 @@ Wymiary kafli: 24x24 (dwukrotnie powiększone)
 
 Mini todo:
 - BLEND ADD! Ale przy renderingu FBO a nie poszczególnych cząstek!
-
+- jak zoom == 1 to nie ma sensu renderować do FBO
 - niektóre efekty działają po zabiciu postaci
 
 - możemy w momencie renderowania danego obiektu wykrywać czy powinien też być animowany jakiś efekt
