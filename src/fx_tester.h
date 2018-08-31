@@ -32,6 +32,7 @@ using fwk::clamp;
 using namespace fwk;
 
 DEFINE_ENUM(FXTesterMode, spawn, occlusion);
+DEFINE_ENUM(FBOChannel, blend_rgb, blend_alpha, add_rgb, add_alpha);
 
 // TODO: it would be best to drop dependency on libfwk, but we would have to:
 // - rewrite imgui_wrapper (use parts of code from SDL2 imgui example)
@@ -69,11 +70,13 @@ private:
   static PTexture loadTexture(string file_name);
   void loadBackgrounds();
   void setZoom(float2 screenPos, float zoom);
+  void drawFboChannels() const;
 
   float2 screenToTile(float2) const;
   float2 tileToScreen(int2) const;
   float2 tileToScreen(float2) const;
 
+  // TODO: remove m_ ?
   int m_menuWidth;
   int2 m_menuSize;
 
@@ -84,6 +87,7 @@ private:
   float m_zoom = 2.0f;
   float m_animationSpeed = 1.0f;
   bool m_showCursor = false;
+  EnumFlags<FBOChannel> m_showFboChannels;
 
   struct SpawnTool;
   struct OcclusionTool;
@@ -94,7 +98,8 @@ private:
   UniquePtr<ImGuiWrapper> m_imgui;
   UniquePtr<FXManager> m_manager;
   UniquePtr<FXRenderer> m_renderer;
-  PTexture m_cursor_tex;
+
+  PTexture m_cursorTex;
 
   struct Background {
     PTexture texture;

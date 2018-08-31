@@ -6,7 +6,7 @@ Wymiary kafli: 24x24 (dwukrotnie powiększone)
   np. drzewka albo niektóre postacie wystają trochę z góry
 
 Mini todo:
-- BLEND ADD!
+- BLEND ADD! Ale przy renderingu FBO a nie poszczególnych cząstek!
 
 - niektóre efekty działają po zabiciu postaci
 
@@ -40,3 +40,56 @@ Pomysły na potem:
   z tym co mamy
 
 Jak zrobić fajny rendering cząsteczek poprzez FBO?
+
+
+
+---------------------------------- Lepszy blending -------------------------------------------------
+
+- dziwny warning w fx_testerze na NVIDii
+- wielkosci tkstur (potegi dwojki)
+
+- możliwość generowania dwóch DrawParticli z jednego Particla (z różnymi teksturkami)
+- zamienić textureName na coś innego (bo nie jest to do końca tekstura, może dałoby się tutaj np. robić takie bajery
+  jak w Diablo3 z wieloma teksturkami per particle?)
+
+- problem: tryb addytywny sprawia wrażenie jakby cząsteczki się świeciły, nie chcemy się tego zupełnie pozbywać
+  moglibyśmy renderować do teksturki typu glow która byłaby addytywna ?
+  cały czas mamy problem: jaka część wyniku do glow a jaka normalnie ?
+
+
+- chcę, żeby parametr alpha wpływał na moc blendowania i dodawania
+  nie powinien zmieniać koloru  
+
+- możliwość przypisania wielu tekstur do jednej cząsteczki ?
+
+- chcemy wygenerować dwie tkestury FBO:
+  - jedna do normalnego blendowania (ma kanał alpha)
+  - jedna do blendowania addytywnego
+
+Jak w normalnym blendowaniu łączyć kolory? I od jakiego koloru powinienem zacząć ?
+
+
+- np. mam 3 kolory;
+  od jakiego koloru powinienem zaczynać ?
+
+    (0, 0, 0), 0
+  + (Ar, Ag, Ab), Aa
+  + (Br, Bg, Bb), Ba
+  + (Cr, Cg, Cb), Ca
+
+    (((Dst * (1 - a)) + A * a) * (1 - b) + B * b) * (1 - c) + C * c
+
+  Dst * (1 - a) * (1 - b) * (1 - c)
+  A * a * (1 - b) * (1 - c)
+  B * b * (1 - c)
+  C * c
+   
+  Sum = 0
+  Sum = Sum * (1 - a) + A * a
+  Sum = Sum * (1 - b) + B * b
+  Sum = Sum * (1 - c) + C * c
+  
+
+   Dst * (1 - s) + S * s
+
+- czy każdy efekt renderuję niezależnie? Mógłbym wtedy zaaplikować końcowy kolor do teksturek

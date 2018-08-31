@@ -276,7 +276,7 @@ FXTester::FXTester(float zoom, Maybe<int> fixedFps)
   m_spawnTool.emplace();
   m_occlusionTool.emplace();
 
-  m_cursor_tex = loadTexture("data/cursor.png");
+  m_cursorTex = loadTexture("data/cursor.png");
   loadBackgrounds();
   loadOccluders();
 
@@ -335,7 +335,6 @@ void FXTester::doMenu() {
     initialized = true;
   }
 
-  selectEnum("Mode", m_mode);
   {
     float zoom = m_zoom;
     if(ImGui::InputFloat("Zoom", &zoom))
@@ -346,10 +345,30 @@ void FXTester::doMenu() {
     m_animationSpeed = clamp(m_animationSpeed, 0.0f, 100.0f);
   ImGui::Checkbox("Show cursor", &m_showCursor);
   ImGui::Checkbox("Use FBO", &m_renderer->useFramebuffer);
-  ImGui::Text("%s", format("Cursor: %", m_selectedTile).c_str());
+
+  if (m_renderer->useFramebuffer) {
+    ImGui::SameLine();
+    if (ImGui::Button("Show FBO channels"))
+      ImGui::OpenPopup("select_channels");
+    if (ImGui::BeginPopup("select_channels")) {
+      for (auto channel : all<FBOChannel>()) {
+        bool selected = (bool)(m_showFboChannels & channel);
+        if (ImGui::Checkbox(fwk::toString(channel), &selected)) {
+          if (selected)
+            m_showFboChannels |= channel;
+          else
+            m_showFboChannels &= ~channel;
+        }
+      }
+      ImGui::EndPopup();
+    }
+  }
 
   if(ImGui::Button("Select background"))
     ImGui::OpenPopup("select_back");
+
+  ImGui::Text("%s", format("Cursor: %", m_selectedTile).c_str());
+
   if(ImGui::BeginPopup("select_back")) {
     if (ImGui::MenuItem("disabled", nullptr, !m_backgroundId))
       m_backgroundId = fwk::none;
@@ -364,6 +383,7 @@ void FXTester::doMenu() {
 
   ImGui::Separator();
 
+  selectEnum("Mode", m_mode);
   if(m_mode == Mode::spawn)
     spawnToolMenu();
   else
@@ -421,7 +441,7 @@ void FXTester::tick(GfxDevice &device, double timeDiff) {
 void FXTester::drawCursor(Renderer2D &out, int2 tile_pos, FColor color) const {
   float2 sel_pos = float2(tile_pos * tile_size) - float2(2);
   auto sel_rect = FRect(sel_pos, sel_pos + float2(tile_size + 4)) * m_zoom;
-  out.addFilledRect(sel_rect, SimpleMaterial(m_cursor_tex, color));
+  out.addFilledRect(sel_rect, SimpleMaterial(m_cursorTex, color));
 }
 
 void FXTester::renderParticles() const {
@@ -455,12 +475,64 @@ void FXTester::render() const {
 
   renderParticles();
 
+  if (m_showFboChannels)
+    drawFboChannels();
+
   drawOccluders(out);
   if (m_showCursor)
     drawCursor(out, m_selectedTile, FColor(ColorId::white, 0.2f));
   if (m_spawnTool->selection_id != -1)
     drawCursor(out, m_spawnTool->spawners[m_spawnTool->selection_id].tilePos, FColor(ColorId::blue, 0.2f));
   out.render();
+}
+
+void FXTester::drawFboChannels() const {
+  auto ids = m_renderer->fboIds();
+  auto texSize = m_renderer->fboSize();
+
+  int defaultMode = 0, defaultOp = 0, defaultSrc = 0, defaultCombine = 0;
+  SDL::glGetTexEnviv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, &defaultMode);
+  SDL::glGetTexEnviv(GL_TEXTURE_ENV, GL_OPERAND0_RGB, &defaultOp);
+  SDL::glGetTexEnviv(GL_TEXTURE_ENV, GL_SRC0_RGB, &defaultSrc);
+  SDL::glGetTexEnviv(GL_TEXTURE_ENV, GL_COMBINE_RGB, &defaultCombine);
+
+  FVec2 pos(m_viewport.width() - texSize.x - 20, 20);
+  SDL::glDisable(GL_BLEND);
+  glColor(Color::WHITE);
+
+  for (auto channel : all<FBOChannel>()) {
+    if (!(m_showFboChannels & channel))
+      continue;
+
+    auto id = isOneOf(channel, FBOChannel::blend_alpha, FBOChannel::blend_rgb) ? ids.first : ids.second;
+    bool rgbMode = isOneOf(channel, FBOChannel::blend_rgb, FBOChannel::add_rgb);
+
+    SDL::glDisable(GL_TEXTURE_2D);
+    glQuad(pos.x - 2.0f, pos.y - 2.0f, pos.x + texSize.x + 2.0f, pos.y + texSize.y + 2.0f);
+
+    SDL::glEnable(GL_TEXTURE_2D);
+    SDL::glBindTexture(GL_TEXTURE_2D, id);
+    if (rgbMode) {
+      SDL::glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
+      SDL::glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_REPLACE);
+      SDL::glTexEnvi(GL_TEXTURE_ENV, GL_SRC0_RGB, GL_TEXTURE);
+      SDL::glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB, GL_SRC_COLOR);
+    } else {
+      SDL::glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
+      SDL::glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_REPLACE);
+      SDL::glTexEnvi(GL_TEXTURE_ENV, GL_SRC0_RGB, GL_TEXTURE);
+      SDL::glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB, GL_SRC_ALPHA);
+    }
+
+    glQuad(pos.x, pos.y, pos.x + texSize.x, pos.y + texSize.y);
+    pos += FVec2(0.0f, texSize.y + 20);
+  }
+
+  SDL::glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, defaultMode);
+  SDL::glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, defaultCombine);
+  SDL::glTexEnvi(GL_TEXTURE_ENV, GL_SRC0_RGB, defaultSrc);
+  SDL::glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB, defaultOp);
+  SDL::glEnable(GL_BLEND);
 }
 
 bool FXTester::mainLoop(GfxDevice &device) {
@@ -587,7 +659,7 @@ int main(int argc, char **argv) {
       exit(1);
     }
 
-  installOpenglDebugHandler();
+  ::installOpenglDebugHandler();
   gfx_device.runMainLoop(FXTester::mainLoop, &tester);
 
   return 0;
