@@ -91,7 +91,7 @@ struct FXTester::SpawnTool {
     auto newSpawner = defaultSpawner;
     newSpawner.tilePos = pos;
     newSpawner.initConfig.pos = (FVec2(pos.x, pos.y) + FVec2(0.5f)) * float(tile_size);
-    newSpawner.initConfig.targetOff = off;
+    newSpawner.initConfig.targetOff = off * float(tile_size);
     spawners.emplace_back(newSpawner);
   }
 
@@ -279,6 +279,9 @@ FXTester::FXTester(float zoom, Maybe<int> fixedFps)
   m_cursorTex = loadTexture("data/cursor.png");
   loadBackgrounds();
   loadOccluders();
+
+  //m_zoomFboChannels = 4.0f;
+  //m_showFboChannels = FBOChannel::add_alpha | FBOChannel::add_rgb;
 
   for (auto fxName : ENUM_ALL(FXName))
     m_names.emplace_back(EnumInfo<FXName>::getString(fxName));

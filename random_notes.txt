@@ -9,6 +9,7 @@ Mini todo:
 - BLEND ADD! Ale przy renderingu FBO a nie poszczególnych cząstek!
 - jak zoom == 1 to nie ma sensu renderować do FBO
 - niektóre efekty działają po zabiciu postaci
+- płomień się czasami restartuje (trzeba podpalić cały las)
 
 - możemy w momencie renderowania danego obiektu wykrywać czy powinien też być animowany jakiś efekt
   możemy trzymać tablicę obiektów wyświetlanych z poprzedniej klatki;
