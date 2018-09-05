@@ -28,8 +28,6 @@ typedef unsigned int GLuint;
 
 #include "keeperrl/renderer.h"
 
-RICH_ENUM(SpawnerType, single, repeated);
-
 namespace fx::tester {
 
 static constexpr int tile_size = Renderer::nominalSize;
@@ -43,7 +41,7 @@ struct Spawner {
       return;
 
     if (manager.dead(instanceId)) {
-      if (spawnCount > 0 && type == SpawnerType::single) {
+      if (spawnCount > 0 && !autoRespawn) {
         isDead = true;
         return;
       }
@@ -59,15 +57,19 @@ struct Spawner {
   IVec2 tilePos;
   ParticleSystemId instanceId;
   int spawnCount = 0;
-  SpawnerType type = SpawnerType::single;
   FXName systemName = FXName::FIRE;
   bool isDead = false;
+  bool autoRespawn = false;
 
   SystemParams params;
   InitConfig initConfig;
 };
 
 struct FXTester::SpawnTool {
+  SpawnTool() {
+    defaultSpawner.initConfig.targetOff = {1.0f, 0.0f};
+  }
+
   void update(FXManager &mgr) {
     for (auto& spawner : spawners)
       spawner.update(mgr);
@@ -86,13 +88,17 @@ struct FXTester::SpawnTool {
       selection_id = -1;
   }
 
-  void add(int2 pos, float2 off = float2()) {
+  void add(int2 pos, float2 off) {
     selection_id = spawners.size();
     auto newSpawner = defaultSpawner;
     newSpawner.tilePos = pos;
     newSpawner.initConfig.pos = (FVec2(pos.x, pos.y) + FVec2(0.5f)) * float(tile_size);
     newSpawner.initConfig.targetOff = off * float(tile_size);
     spawners.emplace_back(newSpawner);
+  }
+
+  void add(int2 pos) {
+    add(pos, defaultSpawner.initConfig.targetOff);
   }
 
   void select(int2 pos) {
@@ -125,8 +131,9 @@ void FXTester::spawnToolMenu() {
 
   auto names = transform(m_names, [](const auto& str) { return str.c_str(); });
   selectIndex("New system", def.systemName, names);
-  selectIndex("Spawner type", def.type, {"single", "repeated"});
-
+  ImGui::InputFloat2("TargetOff", def.initConfig.targetOff.v);
+  ImGui::Checkbox("Auto respawn", &def.autoRespawn);
+  ImGui::SameLine();
   auto& snapshotKey = def.initConfig.snapshotKey;
   bool useSnapshot = !!snapshotKey;
   if (ImGui::Checkbox("Use snapshots", &useSnapshot))
@@ -292,11 +299,11 @@ FXTester::FXTester(float zoom, Maybe<int> fixedFps)
 bool FXTester::spawnEffect(string name, int2 pos, int2 toff) {
   if (auto fxId = EnumInfo<FXName>::fromStringSafe(name)) {
     auto& def = m_spawnTool->defaultSpawner;
-    auto old_type = def.type;
-    def.type = SpawnerType::repeated;
+    auto oldRespawn = def.autoRespawn;
+    def.autoRespawn = true;
     def.systemName = *fxId;
     m_spawnTool->add(pos, float2(toff));
-    def.type = old_type;
+    def.autoRespawn = oldRespawn;
     return true;
     }
 
@@ -609,8 +616,12 @@ int main(int argc, char **argv) {
   FatalLog.addOutput(DebugOutput::toStream(std::cerr));
   InfoLog.addOutput(DebugOutput::toStream(std::cerr));
 
-  string spawn_effect, background;
-  int2 spawn_pos, spawn_target_off;
+  string background;
+  struct SpawnCommand {
+    string name;
+    int2 pos, off;
+  };
+  vector<SpawnCommand> spawns;
 
   float zoom = 2.0f;
   Maybe<int> fixedFps;
@@ -630,17 +641,15 @@ int main(int argc, char **argv) {
       gfx_flags |= GfxDeviceOpt::maximized;
     } else if(argument == "-spawn") {
       ASSERT(n + 3 < argc);
-      spawn_effect = argv[++n];
-      spawn_pos.x = fwk::fromString<int>(argv[++n]);
-      spawn_pos.y = fwk::fromString<int>(argv[++n]);
+      int2 pos(fwk::fromString<int>(argv[n + 2]), fwk::fromString<int>(argv[n + 3]));
+      spawns.emplace_back(SpawnCommand{argv[n + 1], pos, {}});
+      n += 3;
     } else if(argument == "-spawn-to") {
       ASSERT(n + 5 < argc);
-      spawn_effect = argv[++n];
-      spawn_pos.x = fwk::fromString<int>(argv[++n]);
-      spawn_pos.y = fwk::fromString<int>(argv[++n]);
-	  spawn_target_off.x = fwk::fromString<int>(argv[++n]);
-	  spawn_target_off.y = fwk::fromString<int>(argv[++n]);
-	  spawn_target_off -= spawn_pos;
+      int2 pos1(fwk::fromString<int>(argv[n + 2]), fwk::fromString<int>(argv[n + 3]));
+      int2 pos2(fwk::fromString<int>(argv[n + 4]), fwk::fromString<int>(argv[n + 5]));
+      spawns.emplace_back(SpawnCommand{argv[n + 1], pos1, pos2 - pos1});
+      n += 5;
     } else if(argument == "-background") {
       ASSERT(n + 1 < argc);
       background = argv[++n];
@@ -662,12 +671,12 @@ int main(int argc, char **argv) {
                           2.1);
 
   FXTester tester(zoom, fixedFps);
-  if(!spawn_effect.empty()) {
-    if(!tester.spawnEffect(spawn_effect, spawn_pos, spawn_target_off)) {
-      printf("Unknown effect: %s\n", spawn_effect.c_str());
+  for (auto spawn : spawns) {
+    if (!tester.spawnEffect(spawn.name, spawn.pos, spawn.off)) {
+      printf("Unknown effect: %s\n", spawn.name.c_str());
       exit(1);
     }
-    tester.focusOn(spawn_pos);
+    tester.focusOn(spawn.pos);
   }
 
   if(!background.empty())
