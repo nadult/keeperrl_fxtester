@@ -7,7 +7,6 @@ Wymiary kafli: 24x24 (dwukrotnie powiększone)
 
 Mini todo:
 - bug w openglu (w emailu) 
-
 - dziwny warning w fx_testerze na NVIDii
 - wielkosci tkstur (potegi dwojki)
 - jak zoom == 1 to nie ma sensu renderować do FBO
