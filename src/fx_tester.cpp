@@ -518,8 +518,8 @@ void FXTester::drawFboChannels() const {
     if (!(m_showFboChannels & channel))
       continue;
 
-    auto id = isOneOf(channel, FBOChannel::blend_alpha, FBOChannel::blend_rgb) ? ids.first : ids.second;
-    bool rgbMode = isOneOf(channel, FBOChannel::blend_rgb, FBOChannel::add_rgb);
+    auto id = ::isOneOf(channel, FBOChannel::blend_alpha, FBOChannel::blend_rgb) ? ids.first : ids.second;
+    bool rgbMode = ::isOneOf(channel, FBOChannel::blend_rgb, FBOChannel::add_rgb);
 
     SDL::glDisable(GL_TEXTURE_2D);
     FVec2 endPos = pos + FVec2(texSize);

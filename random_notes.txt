@@ -6,6 +6,7 @@ Wymiary kafli: 24x24 (dwukrotnie powiększone)
   np. drzewka albo niektóre postacie wystają trochę z góry
 
 Mini todo:
+- opcja ustawienia domyślnego koloru dla efektu w FXTesterze?
 - czar przyspieszenia powinien byc widoczny tylko jak jest to tymczasowe przyspieszenie?
 - chmury pyłu po zniszczeniu ścianu powinny mieć kolor bardziej pasujący do niej
 - czasami gra działa w bardzo przyspieszonym trybie, wtedy niektórych efektów jest zdecydowanie
