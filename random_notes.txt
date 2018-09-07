@@ -2,7 +2,19 @@ Główna dokumentacja jest w dokumencie na google-docsach:
 https://docs.google.com/document/d/10MbrynYjchbdK_8ktb1hMgdaupQAVE-z4DZIZ5x-Pts/edit
 
 *** Pomysły na efekty:
+- najpierw chyba warto poprawić wszystkie FXy do czarów i walki
+  - stun ray
+  - force bolt
+  - magic missile jest do dupy; Trzeba zrobić od nowa
+  - fire sphere: normalna animacja + pojawjanie się & znikanie
+  - czary leczenia siebie i innych
+  - kolorystyka czarów powinna sprawiać, że łatwo rozróżnialne są czary pozytywne od negatywnych
+  - przywołanie insektów: efekt do spawnowania
+  - lepszy circular blast
+  - lepsze dopasowanie ognia do elementów tła?
 - jak postać przechodzi pod drzewem, to mogą opadać liście
+- pochodnie mogłyby mieć ogień animowany z FXów
+- złoto i metale mogą od czasu do czasu się fajnie świecić (drobne błyski)
 - ...
 
 *** Optymalizacje:
@@ -12,19 +24,24 @@ https://docs.google.com/document/d/10MbrynYjchbdK_8ktb1hMgdaupQAVE-z4DZIZ5x-Pts/
   jeśli na ekranie jest np. kilkanaście efektów to gracz raczej nie zauważy, że niektóre są takie same
 - Przy generowaniu particli możemy je od razu wrzucać do odpowiednich buforów (różne bufory dla
   różnych sposobów blendingu, tekstur, etc.)
+- Przełączenie się na domyślne 30 FPS ?
 
 
 *** Poprawki / ulepszenia systemowe:
-- niektóre efekty nie działają dobrze w trybie przyspieszonym (spawnuje się za dużo cząsteczek);
-  Coś trzerba z tym zrobić
 - opcja ustawienia domyślnego parametru koloru dla efektu?
 - bug w openglu (w emailu) 
 - dziwny warning w fx_testerze na NVIDii
 - wielkosci tekstur (potegi dwojki)
 - prosta wizualizacja krzywych w edytorze (żeby było wiadomo, że dana krzywa przebiega tak jak chcemy)
 - można łatwo dodać efekty które są wyświetlane pod postaciami (wystarczy dodać dodatkową warstwę FBO)
+- targetOff mógłby wpływać na domyślny kierunek emisji?
 
 
 *** Do sprawdzenia / przetestowania:
 - sprawdzić jak wszystko działa w trybie HiDPI (zoom w UIu)
 - niektóre efekty działają po zabiciu postaci ?
+
+
+*** Pozostałe:
+- Bug w grze: można łatwo sprawdzić gdzie jest tunel a gdzie nie ma próbując wykopać tam tunel 
+- Jak wyświetlamy czary FXów to zwykłe efekty (bazujące na sprite-ach) efekty nie powinny być widoczne

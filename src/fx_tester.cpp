@@ -67,7 +67,7 @@ struct Spawner {
 
 struct FXTester::SpawnTool {
   SpawnTool() {
-    defaultSpawner.initConfig.targetOff = {1.0f, 0.0f};
+    defaultSpawner.initConfig.targetOffset = {1.0f, 0.0f};
   }
 
   void update(FXManager &mgr) {
@@ -93,12 +93,12 @@ struct FXTester::SpawnTool {
     auto newSpawner = defaultSpawner;
     newSpawner.tilePos = pos;
     newSpawner.initConfig.pos = (FVec2(pos.x, pos.y) + FVec2(0.5f)) * float(tile_size);
-    newSpawner.initConfig.targetOff = off * float(tile_size);
+    newSpawner.initConfig.targetOffset = off * float(tile_size);
     spawners.emplace_back(newSpawner);
   }
 
   void add(int2 pos) {
-    add(pos, defaultSpawner.initConfig.targetOff);
+    add(pos, defaultSpawner.initConfig.targetOffset);
   }
 
   void select(int2 pos) {
@@ -131,7 +131,7 @@ void FXTester::spawnToolMenu() {
 
   auto names = transform(m_names, [](const auto& str) { return str.c_str(); });
   selectIndex("New system", def.systemName, names);
-  ImGui::InputFloat2("TargetOff", def.initConfig.targetOff.v);
+  ImGui::InputFloat2("targetOffset", def.initConfig.targetOffset.v);
   ImGui::Checkbox("Auto respawn", &def.autoRespawn);
   ImGui::SameLine();
   auto& snapshotKey = def.initConfig.snapshotKey;
