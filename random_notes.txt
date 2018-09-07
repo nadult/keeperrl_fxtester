@@ -1,61 +1,30 @@
 Główna dokumentacja jest w dokumencie na google-docsach:
 https://docs.google.com/document/d/10MbrynYjchbdK_8ktb1hMgdaupQAVE-z4DZIZ5x-Pts/edit
 
-Wymiary kafli: 24x24 (dwukrotnie powiększone)
-  niektóre sprite-y na kaflach wystają poza region samego kafla
-  np. drzewka albo niektóre postacie wystają trochę z góry
+*** Pomysły na efekty:
+- jak postać przechodzi pod drzewem, to mogą opadać liście
+- ...
 
-Mini todo:
-- opcja ustawienia domyślnego koloru dla efektu w FXTesterze?
-- czar przyspieszenia powinien byc widoczny tylko jak jest to tymczasowe przyspieszenie?
-- chmury pyłu po zniszczeniu ścianu powinny mieć kolor bardziej pasujący do niej
-- czasami gra działa w bardzo przyspieszonym trybie, wtedy niektórych efektów jest zdecydowanie
-  za dużo (wykopywanie tuneli)
-  może po prostu dajmy trochę mniej cząsteczek przy wykopywaniu
-  prędkość odtwarzania efektów powinna zależeć od prędkości działania gry?
+*** Optymalizacje:
+- jak zoom == 1 to w trybie blend nie ma sensu renderować do FBO
+- nie rysować partikli które mają alpha == 0
+- Różne instancje (szczególnie jak korzystamy ze snapshotów) mogą korzystać z tej samej animacji
+  jeśli na ekranie jest np. kilkanaście efektów to gracz raczej nie zauważy, że niektóre są takie same
+- Przy generowaniu particli możemy je od razu wrzucać do odpowiednich buforów (różne bufory dla
+  różnych sposobów blendingu, tekstur, etc.)
 
-- Czy dodawać więcej efektów, czy skupić się na tych co już zrobiliśmy?
-  - Gdzie jeszcze dodać efekty?
-- można łatwo dodać efekty które są wyświetlane pod postaciami (wystarczy dodać dodatkową warstwę FBO)
 
+*** Poprawki / ulepszenia systemowe:
+- niektóre efekty nie działają dobrze w trybie przyspieszonym (spawnuje się za dużo cząsteczek);
+  Coś trzerba z tym zrobić
+- opcja ustawienia domyślnego parametru koloru dla efektu?
 - bug w openglu (w emailu) 
 - dziwny warning w fx_testerze na NVIDii
-- wielkosci tkstur (potegi dwojki)
-- jak zoom == 1 to nie ma sensu renderować do FBO
-- niektóre efekty działają po zabiciu postaci
+- wielkosci tekstur (potegi dwojki)
+- prosta wizualizacja krzywych w edytorze (żeby było wiadomo, że dana krzywa przebiega tak jak chcemy)
+- można łatwo dodać efekty które są wyświetlane pod postaciami (wystarczy dodać dodatkową warstwę FBO)
 
-- Czasami gra działa w trybie przyspieszonym (w trybie turowym); wtedy np. jak idziemy po piasku
-  to efekty odpalają się prawie, że w tym samym czasie;
 
-Opcjonalnie (zastanowić się czy się przyda):
-- możliwość generowania dwóch DrawParticli z jednego Particla (z różnymi teksturkami)
-- zamienić textureName na coś innego (bo nie jest to do końca tekstura, może dałoby się tutaj np. robić takie bajery
-  jak w Diablo3 z wieloma teksturkami per particle?)
-
-- możemy w momencie renderowania danego obiektu wykrywać czy powinien też być animowany jakiś efekt
-  możemy trzymać tablicę obiektów wyświetlanych z poprzedniej klatki;
-  jeśli widok się zmienił, to efekty które wyszły poza zakres są kasowane
-  jeśli dany obiekt był wyświetlany w poprzedniej klatce i nie miał danego efektu, to odpalamy efekt od początku
-  jeśli dany obiekt dopiero co się pojawił to odpalamy efekt z losowego punktu (ale takiego, żeby było wiadomo, że nie jest od początku)
-
-- problem jak zrobić, żeby efekty bardziej paoswały do gry?
-  rozpikselowanie nie wystarcza...
-
-- potestować Zoom UI (hiidpi)
-- jak zoom == 1 to nie ma sensu renderować do FBO
-
-- nie rysować partikli które mają alpha == 0 ? Chyba, że są addytywne, wtedy kolor ma znaczenie
-- połączenie EmiterDefa i ParticleDefa?
-- pamiętaj o stylu nazewnictwa commitów & zmiennych
-- zainspirować się efektami z innych gier
-
-Mało ważne:
-- możliwość wizualizacji krzywych chyba jednak się przyda?
-- hook do gita, który weryfikuje, że wszystko jest sformatowane jak należy
-  (choć przydałaby się też możliwość zignorowania go)
-- ustaw sobie w Vimie, żeby nie używał tabów
-- toString dla enumów
-
-Pomysły na potem:
-- warstwowe rysowanie sprite-ów i efektów; Ew. na potem; na razie spróbujmy zrobić coś fajnego
-  z tym co mamy
+*** Do sprawdzenia / przetestowania:
+- sprawdzić jak wszystko działa w trybie HiDPI (zoom w UIu)
+- niektóre efekty działają po zabiciu postaci ?
