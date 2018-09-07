@@ -2,6 +2,14 @@ Główna dokumentacja jest w dokumencie na google-docsach:
 https://docs.google.com/document/d/10MbrynYjchbdK_8ktb1hMgdaupQAVE-z4DZIZ5x-Pts/edit
 
 *** Pomysły na efekty:
+- lepszy pomysł na air blast:
+  powinien byc dużo szybszy i od razu spawnować efekty na całej długości trajektorii
+  cząsteczki powinni też być trochę bardziej chmurzaste
+
+  w sumie to inne efekty czarów tez mogłyby od razu spawnować się na końcu i bardzo
+  szybko spawnować cząsteczki na całej długości toru lotu;
+  Kształt cząsteczek mógłby świadczyć o tym w jakim kierunku leciał pocisk
+
 - najpierw chyba warto poprawić wszystkie FXy do czarów i walki
   - stun ray
   - force bolt
