@@ -10,15 +10,17 @@ https://docs.google.com/document/d/10MbrynYjchbdK_8ktb1hMgdaupQAVE-z4DZIZ5x-Pts/
   szybko spawnować cząsteczki na całej długości toru lotu;
   Kształt cząsteczek mógłby świadczyć o tym w jakim kierunku leciał pocisk
 
+- co ma sie dziać z efektami jak postać ginie? niektóre raczej nie powinny od razu znikać
+  ale powinna się odgrywać jakaś animacja
+  Trzeba po prostu informować FXViewManagera o ubitych postaciach
+
 - najpierw chyba warto poprawić wszystkie FXy do czarów i walki
   - stun ray
   - force bolt
   - magic missile jest do dupy; Trzeba zrobić od nowa
-  - fire sphere: normalna animacja + pojawjanie się & znikanie
   - czary leczenia siebie i innych
   - kolorystyka czarów powinna sprawiać, że łatwo rozróżnialne są czary pozytywne od negatywnych
   - przywołanie insektów: efekt do spawnowania
-  - lepszy circular blast
   - lepsze dopasowanie ognia do elementów tła?
 - jak postać przechodzi pod drzewem, to mogą opadać liście
 - pochodnie mogłyby mieć ogień animowany z FXów
