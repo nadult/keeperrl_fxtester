@@ -53,3 +53,8 @@ https://docs.google.com/document/d/10MbrynYjchbdK_8ktb1hMgdaupQAVE-z4DZIZ5x-Pts/
 *** Pozostałe:
 - Bug w grze: można łatwo sprawdzić gdzie jest tunel a gdzie nie ma próbując wykopać tam tunel 
 - Jak wyświetlamy czary FXów to zwykłe efekty (bazujące na sprite-ach) efekty nie powinny być widoczne
+
+
+*** Inspiracja:
+- tooth & tail
+- ...
