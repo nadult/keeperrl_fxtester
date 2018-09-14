@@ -2,27 +2,21 @@ Główna dokumentacja jest w dokumencie na google-docsach:
 https://docs.google.com/document/d/10MbrynYjchbdK_8ktb1hMgdaupQAVE-z4DZIZ5x-Pts/edit
 
 *** Pomysły na efekty:
-- lepszy pomysł na air blast:
-  powinien byc dużo szybszy i od razu spawnować efekty na całej długości trajektorii
-  cząsteczki powinni też być trochę bardziej chmurzaste
-
-  w sumie to inne efekty czarów tez mogłyby od razu spawnować się na końcu i bardzo
-  szybko spawnować cząsteczki na całej długości toru lotu;
-  Kształt cząsteczek mógłby świadczyć o tym w jakim kierunku leciał pocisk
-
-- co ma sie dziać z efektami jak postać ginie? niektóre raczej nie powinny od razu znikać
-  ale powinna się odgrywać jakaś animacja
-  Trzeba po prostu informować FXViewManagera o ubitych postaciach
+- niektóre FXy działają zbyt powoli? W grze efekt często jest natychmiastowy a później dopiero
+  FX dolatuje do celu; Przykład: fireball, magic missile
+- magic missile słabo wygląda i słabo się komponuje z resztą gry; Jak to zrobić lepiej?
+- ostateczny wybuch magicznego pocisku powinien byc widoczny na docelowej postaci
+- fireball robi damage na każdym z widocznych kafli tak samo, wybuch końcowy sugeruje coś innego
+  to nie jest fireball z icewind dale-a :)
+- z jakiegoś powodu magic_missile jest spawnowane podwójnie
 
 - najpierw chyba warto poprawić wszystkie FXy do czarów i walki
-  - stun ray
-  - force bolt
   - magic missile jest do dupy; Trzeba zrobić od nowa
-  - czary leczenia siebie i innych
-  - kolorystyka czarów powinna sprawiać, że łatwo rozróżnialne są czary pozytywne od negatywnych
   - przywołanie insektów: efekt do spawnowania
   - lepsze dopasowanie ognia do elementów tła?
 - jak postać przechodzi pod drzewem, to mogą opadać liście
+  problem: drzewo jest wyświetlane pod postacią, a liście będą z przodu?
+
 - pochodnie mogłyby mieć ogień animowany z FXów
 - złoto i metale mogą od czasu do czasu się fajnie świecić (drobne błyski)
 - ...
@@ -38,19 +32,18 @@ https://docs.google.com/document/d/10MbrynYjchbdK_8ktb1hMgdaupQAVE-z4DZIZ5x-Pts/
 
 
 *** Poprawki / ulepszenia systemowe:
+- co ma sie dziać z efektami jak postać ginie? niektóre raczej nie powinny od razu znikać
+  ale powinna się odgrywać jakaś animacja
+  Trzeba po prostu informować FXViewManagera o ubitych postaciach
 - opcja ustawienia domyślnego parametru koloru dla efektu?
 - bug w openglu (w emailu) 
 - dziwny warning w fx_testerze na NVIDii
 - wielkosci tekstur (potegi dwojki)
 - prosta wizualizacja krzywych w edytorze (żeby było wiadomo, że dana krzywa przebiega tak jak chcemy)
 - można łatwo dodać efekty które są wyświetlane pod postaciami (wystarczy dodać dodatkową warstwę FBO)
-- targetOff mógłby wpływać na domyślny kierunek emisji?
-
 
 *** Do sprawdzenia / przetestowania:
 - sprawdzić jak wszystko działa w trybie HiDPI (zoom w UIu)
-- niektóre efekty działają po zabiciu postaci ?
-
 
 *** Pozostałe:
 - Bug w grze: można łatwo sprawdzić gdzie jest tunel a gdzie nie ma próbując wykopać tam tunel 
