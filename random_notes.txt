@@ -1,23 +1,23 @@
 Główna dokumentacja jest w dokumencie na google-docsach:
 https://docs.google.com/document/d/10MbrynYjchbdK_8ktb1hMgdaupQAVE-z4DZIZ5x-Pts/edit
 
+
+- pochodnie mogłyby mieć ogień animowany z FXów
+  - problem: czasami są wyświetlane pod kursorem; czasami sa wyświetlane z mniejszą alfą;
+    jak renderujemy efekty po powinniśmy móc kontrolowac alfę efektów?
+- glittering dla złota; ale itemki muszą mieć genericId
+
 *** Pomysły na efekty:
 - niektóre FXy działają zbyt powoli? W grze efekt często jest natychmiastowy a później dopiero
   FX dolatuje do celu; Przykład: fireball, magic missile
-- magic missile słabo wygląda i słabo się komponuje z resztą gry; Jak to zrobić lepiej?
-- ostateczny wybuch magicznego pocisku powinien byc widoczny na docelowej postaci
 - fireball robi damage na każdym z widocznych kafli tak samo, wybuch końcowy sugeruje coś innego
   to nie jest fireball z icewind dale-a :)
-- z jakiegoś powodu magic_missile jest spawnowane podwójnie
 
-- najpierw chyba warto poprawić wszystkie FXy do czarów i walki
-  - magic missile jest do dupy; Trzeba zrobić od nowa
-  - przywołanie insektów: efekt do spawnowania
-  - lepsze dopasowanie ognia do elementów tła?
+- lepsze dopasowanie ognia do elementów tła? ale jak?
+- przywołanie insektów: efekt do spawnowania
 - jak postać przechodzi pod drzewem, to mogą opadać liście
   problem: drzewo jest wyświetlane pod postacią, a liście będą z przodu?
 
-- pochodnie mogłyby mieć ogień animowany z FXów
 - złoto i metale mogą od czasu do czasu się fajnie świecić (drobne błyski)
 - ...
 
