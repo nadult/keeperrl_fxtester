@@ -1,25 +1,7 @@
 Główna dokumentacja jest w dokumencie na google-docsach:
 https://docs.google.com/document/d/10MbrynYjchbdK_8ktb1hMgdaupQAVE-z4DZIZ5x-Pts/edit
 
-
-- pochodnie mogłyby mieć ogień animowany z FXów
-  - problem: czasami są wyświetlane pod kursorem; czasami sa wyświetlane z mniejszą alfą;
-    jak renderujemy efekty po powinniśmy móc kontrolowac alfę efektów?
-- glittering dla złota; ale itemki muszą mieć genericId
-
 *** Pomysły na efekty:
-- niektóre FXy działają zbyt powoli? W grze efekt często jest natychmiastowy a później dopiero
-  FX dolatuje do celu; Przykład: fireball, magic missile
-- fireball robi damage na każdym z widocznych kafli tak samo, wybuch końcowy sugeruje coś innego
-  to nie jest fireball z icewind dale-a :)
-
-- lepsze dopasowanie ognia do elementów tła? ale jak?
-- przywołanie insektów: efekt do spawnowania
-- jak postać przechodzi pod drzewem, to mogą opadać liście
-  problem: drzewo jest wyświetlane pod postacią, a liście będą z przodu?
-
-- złoto i metale mogą od czasu do czasu się fajnie świecić (drobne błyski)
-- ...
 
 *** Optymalizacje:
 - jak zoom == 1 to w trybie blend nie ma sensu renderować do FBO
@@ -30,26 +12,10 @@ https://docs.google.com/document/d/10MbrynYjchbdK_8ktb1hMgdaupQAVE-z4DZIZ5x-Pts/
   różnych sposobów blendingu, tekstur, etc.)
 - Przełączenie się na domyślne 30 FPS ?
 
-
 *** Poprawki / ulepszenia systemowe:
-- co ma sie dziać z efektami jak postać ginie? niektóre raczej nie powinny od razu znikać
-  ale powinna się odgrywać jakaś animacja
-  Trzeba po prostu informować FXViewManagera o ubitych postaciach
 - opcja ustawienia domyślnego parametru koloru dla efektu?
-- bug w openglu (w emailu) 
-- dziwny warning w fx_testerze na NVIDii
-- wielkosci tekstur (potegi dwojki)
-- prosta wizualizacja krzywych w edytorze (żeby było wiadomo, że dana krzywa przebiega tak jak chcemy)
-- można łatwo dodać efekty które są wyświetlane pod postaciami (wystarczy dodać dodatkową warstwę FBO)
 
 *** Do sprawdzenia / przetestowania:
-- sprawdzić jak wszystko działa w trybie HiDPI (zoom w UIu)
 
 *** Pozostałe:
-- Bug w grze: można łatwo sprawdzić gdzie jest tunel a gdzie nie ma próbując wykopać tam tunel 
-- Jak wyświetlamy czary FXów to zwykłe efekty (bazujące na sprite-ach) efekty nie powinny być widoczne
 
-
-*** Inspiracja:
-- tooth & tail
-- ...
