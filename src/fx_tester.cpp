@@ -54,12 +54,20 @@ struct Spawner {
       manager.get(instanceId).params = params;
   }
 
+  FVec2 tileOffset() const {
+	  FVec2 out(0.5f);
+	  if(creatureOffset)
+		  out += FVec2(0.0f, -0.125f);
+	  return out;
+  }
+
   IVec2 tilePos;
   ParticleSystemId instanceId;
   int spawnCount = 0;
   FXName systemName = FXName::FIRE;
   bool isDead = false;
   bool autoRespawn = false;
+  bool creatureOffset = false;
 
   SystemParams params;
   InitConfig initConfig;
@@ -92,7 +100,7 @@ struct FXTester::SpawnTool {
     selection_id = spawners.size();
     auto newSpawner = defaultSpawner;
     newSpawner.tilePos = pos;
-    newSpawner.initConfig.pos = (FVec2(pos.x, pos.y) + FVec2(0.5f)) * float(tile_size);
+    newSpawner.initConfig.pos = (FVec2(pos.x, pos.y) + newSpawner.tileOffset()) * float(tile_size);
     newSpawner.initConfig.targetOffset = off * float(tile_size);
     spawners.emplace_back(newSpawner);
   }
@@ -132,6 +140,7 @@ void FXTester::spawnToolMenu() {
   auto names = transform(m_names, [](const auto& str) { return str.c_str(); });
   selectIndex("New system", def.systemName, names);
   ImGui::InputFloat2("targetOffset", def.initConfig.targetOffset.v);
+  ImGui::Checkbox("Creature effect (small offset)", &def.creatureOffset);
   ImGui::Checkbox("Auto respawn", &def.autoRespawn);
   ImGui::SameLine();
   auto& snapshotKey = def.initConfig.snapshotKey;
