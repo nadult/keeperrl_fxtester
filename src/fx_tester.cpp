@@ -416,7 +416,7 @@ void FXTester::doMenu() {
 }
 
 void FXTester::tick(GfxDevice &device, double timeDiff) {
-  m_manager->simulateStable(timeDiff * m_animationSpeed);
+  m_manager->simulateStable(timeDiff * m_animationSpeed, m_fixedFps.orElse(60));
 
   auto events = device.inputEvents();
   m_imgui->beginFrame(device);
@@ -564,18 +564,7 @@ bool FXTester::mainLoop(GfxDevice &device) {
   static double lastTime = time - 1.0 / 60.0;
   double timeDiff = time - lastTime;
   lastTime = time;
-
-  if (m_fixedFps) {
-    double desiredFrameTime = 1.0 / double(*m_fixedFps);
-    if (timeDiff < desiredFrameTime) {
-      fwk::sleep(desiredFrameTime - timeDiff);
-      lastTime = getTime();
-    }
-    timeDiff = desiredFrameTime;
-  } else {
-    timeDiff = clamp(timeDiff, 1 / 240.0, 1 / 5.0);
-  }
-
+  timeDiff = clamp(timeDiff, 1 / 240.0, 1 / 5.0);
   m_viewport = IRect(device.windowSize());
 
   tick(device, timeDiff);
@@ -660,6 +649,7 @@ int main(int argc, char **argv) {
       ASSERT(n + 1 < argc);
       fixedFps = fwk::fromString<int>(argv[++n]);
       ASSERT(fixedFps >= 1 && fixedFps <= 60);
+      ASSERT(60 % *fixedFps == 0);
     } else {
       printf("Unsupported argument: %s\n", argument.c_str());
       exit(1);
