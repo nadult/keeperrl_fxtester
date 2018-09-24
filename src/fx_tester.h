@@ -41,7 +41,7 @@ class FXTester {
   public:
   using Mode = FXTesterMode;
 
-  FXTester(float zoom, Maybe<int> fixedFps = none);
+  FXTester(float zoom, float speed, Maybe<int> fixedFps = none);
 
   bool spawnEffect(string, int2, int2);
   void focusOn(int2);

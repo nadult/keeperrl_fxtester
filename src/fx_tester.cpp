@@ -274,8 +274,8 @@ void FXTester::drawOccluders(Renderer2D &out) const {
 // ------------------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------------------
 
-FXTester::FXTester(float zoom, Maybe<int> fixedFps)
-    : m_viewport(GfxDevice::instance().windowSize()), m_fixedFps(fixedFps) {
+FXTester::FXTester(float zoom, float speed, Maybe<int> fixedFps)
+    : m_viewport(GfxDevice::instance().windowSize()), m_animationSpeed(speed), m_fixedFps(fixedFps) {
   m_imgui.emplace(GfxDevice::instance(), ImGuiStyleMode::mini);
   m_manager.emplace();
   m_renderer.emplace(DirectoryPath("data/particles/"), *m_manager);
@@ -613,6 +613,7 @@ int main(int argc, char **argv) {
   vector<SpawnCommand> spawns;
 
   float zoom = 2.0f;
+  float speed = 1.0f;
   Maybe<int> fixedFps;
 
   for(int n = 1; n < argc; n++) {
@@ -642,7 +643,11 @@ int main(int argc, char **argv) {
     } else if(argument == "-background") {
       ASSERT(n + 1 < argc);
       background = argv[++n];
-    } else if(argument == "-zoom") {
+    } else if (argument == "-speed") {
+      ASSERT(n + 1 < argc);
+      speed = fwk::fromString<float>(argv[++n]);
+      ASSERT(speed >= 0.0f && speed < 100.0f);
+    } else if (argument == "-zoom") {
       ASSERT(n + 1 < argc);
       zoom = fwk::fromString<float>(argv[++n]);
     } else if(argument == "-fixed-fps") {
@@ -660,7 +665,7 @@ int main(int argc, char **argv) {
   gfx_device.createWindow("FXTester - particle system tester", resolution, gfx_flags, OpenglProfile::compatibility,
                           2.1);
 
-  FXTester tester(zoom, fixedFps);
+  FXTester tester(zoom, speed, fixedFps);
   for (auto spawn : spawns) {
     if (!tester.spawnEffect(spawn.name, spawn.pos, spawn.off)) {
       printf("Unknown effect: %s\n", spawn.name.c_str());

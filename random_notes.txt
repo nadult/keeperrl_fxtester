@@ -19,3 +19,27 @@ https://docs.google.com/document/d/10MbrynYjchbdK_8ktb1hMgdaupQAVE-z4DZIZ5x-Pts/
 
 *** Pozostałe:
 
+
+
+
+TELEPORT: dwie wersje (zniknięcie i pojawienie się)
+          warianty tego FXa mozna użyć przy spawnowaniu różnych magicznych postaci
+
+musi zasłonić na początku całą postać
+opcje: standardowo kołowo, ale już dużo jest takich czarów, lepiej jakoś inaczej
+opcja: bazujący na bańkach albo sferach
+opcja: wciąganie / wyrzucanie z dziury
+
+kula (troszkę spłaszczona na bokach) która jest wciągana do środka
+albo linia lecąca od dołu zmazuje kulę
+pojawianie się tak samo tylko w drugą stronę
+
+
+Jak zrobić fajną kulę ? żeby miała fajny kształt i poświatę... blendowana addytywnie
+Jak ją zmazać ? mnożenie dwóch tekstur ?
+czy da się bez tego ?
+
+
+Problem: wycentrowanie czarów na lewitującej postaci
+Pomysł: odpalanie water-splasah tylko przy pierwszym wejściu do wody
+        nie wygląda to dobrze; Postać nie sprawia wrażenia jakby była w wodzie
