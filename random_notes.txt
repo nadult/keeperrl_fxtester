@@ -43,3 +43,5 @@ czy da się bez tego ?
 Problem: wycentrowanie czarów na lewitującej postaci
 Pomysł: odpalanie water-splasah tylko przy pierwszym wejściu do wody
         nie wygląda to dobrze; Postać nie sprawia wrażenia jakby była w wodzie
+
+RICH_ENUM : unsigned char ?

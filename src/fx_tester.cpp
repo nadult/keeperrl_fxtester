@@ -194,15 +194,6 @@ void FXTester::spawnToolMenu() {
       snprintf(title, sizeof(title), "Color #%d", idx++);
       ImGui::ColorEdit3(title, c.v);
     }
-
-    const char *dir_names[8] = {"North (0,-1)",       "South (0,+1)",       "E (+1,0)",           "W (-1,0)",
-                                "North east (+1,-1)", "North west (-1,-1)", "South east (+1,+1)", "South west (-1,+1)"};
-    idx = 0;
-    for(auto &d : sel->params.dir) {
-      char title[256]; // TODO: proper formatting
-      snprintf(title, sizeof(title), "Dir #%d", idx++);
-      selectIndex(title, d, dir_names);
-    }
   }
 }
 
@@ -467,7 +458,7 @@ void FXTester::drawCursor(Renderer2D &out, int2 tile_pos, FColor color) const {
   out.addFilledRect(sel_rect, SimpleMaterial(m_cursorTex, color));
 }
 
-void FXTester::renderParticles() const {
+void FXTester::renderParticles(bool front) const {
   ProgramBinder::unbind();
   SDL::glPushAttrib(GL_VIEWPORT_BIT);
   SDL::glMatrixMode(GL_PROJECTION);
@@ -478,7 +469,8 @@ void FXTester::renderParticles() const {
   SDL::glLoadIdentity();
 
   FVec2 offset = m_topLeftTile * float(tile_size) * m_zoom;
-  m_renderer->draw(m_zoom, -offset.x, -offset.y, m_viewport.width(), m_viewport.height());
+  auto layer = front? fx::Layer::front : fx::Layer::back;
+  m_renderer->draw(m_zoom, -offset.x, -offset.y, m_viewport.width(), m_viewport.height(), layer);
   SDL::glPopAttrib();
   // Don't care about matrices here, we're not using fixed function
 }
@@ -496,12 +488,14 @@ void FXTester::render() const {
   }
   out.render();
 
-  renderParticles();
+  renderParticles(false);
+  drawOccluders(out);
+  out.render();
 
+  renderParticles(true);
   if (m_showFboChannels)
     drawFboChannels();
 
-  drawOccluders(out);
   if (m_showCursor)
     drawCursor(out, m_selectedTile, FColor(ColorId::white, 0.2f));
   if (m_spawnTool->selection_id != -1)
@@ -643,7 +637,15 @@ int main(int argc, char **argv) {
       int2 pos(fwk::fromString<int>(argv[n + 2]), fwk::fromString<int>(argv[n + 3]));
       spawns.emplace_back(SpawnCommand{argv[n + 1], pos, {}});
       n += 3;
-    } else if(argument == "-spawn-to") {
+     } else if(argument == "-spawn-rect") {
+      ASSERT(n + 5 < argc);
+      int2 pos(fwk::fromString<int>(argv[n + 2]), fwk::fromString<int>(argv[n + 3]));
+      int2 size(fwk::fromString<int>(argv[n + 4]), fwk::fromString<int>(argv[n + 5]));
+	  for(int x = 0; x < size.x; x++)
+		  for(int y = 0; y < size.y; y++)
+		      spawns.emplace_back(SpawnCommand{argv[n + 1], pos + int2(x, y) - size / 2, {}});
+      n += 5;
+   } else if(argument == "-spawn-to") {
       ASSERT(n + 5 < argc);
       int2 pos1(fwk::fromString<int>(argv[n + 2]), fwk::fromString<int>(argv[n + 3]));
       int2 pos2(fwk::fromString<int>(argv[n + 4]), fwk::fromString<int>(argv[n + 5]));
@@ -675,13 +677,23 @@ int main(int argc, char **argv) {
                           2.1);
 
   FXTester tester(zoom, speed, fixedFps);
+  int2 sum;
+  int sum_count = 0;
+
   for (auto spawn : spawns) {
     if (!tester.spawnEffect(spawn.name, spawn.pos, spawn.off)) {
       printf("Unknown effect: %s\n", spawn.name.c_str());
       exit(1);
     }
-    tester.focusOn(spawn.pos);
+	sum += spawn.pos;
+	sum_count++;
+	if(spawn.off != int2()) {
+		sum += spawn.pos + spawn.off;
+		sum_count++;
+	}
   }
+  if(sum_count > 0)
+  tester.focusOn(sum / sum_count);
 
   if(!background.empty())
     if(!tester.setBackground(background)) {

@@ -58,7 +58,7 @@ INCLUDES=-Isrc/ -Ikeeperrl/ -Ikeeperrl/extern/ $(FWK_INCLUDES)
 
 NICE_FLAGS=-Wall -Wextra -Woverloaded-virtual -Wnon-virtual-dtor -Werror=return-type -Werror=switch -Wimplicit-fallthrough\
 		   -Wno-reorder -Wuninitialized -Wno-unused-function -Wno-unused-variable -Wno-unused-parameter -Werror=format \
-		   -Wparentheses -Wno-overloaded-virtual -Wno-undefined-inline #-Werror
+		   -Wparentheses -Wno-overloaded-virtual -Wno-undefined-inline -Wno-sign-compare #-Werror
 FLAGS += -DFWK_TESTING_MODE -DSTX_NO_STD_VARIANT
 ifdef CLANG
 LINUX_FLAGS+=-Wconstant-conversion
