@@ -45,3 +45,12 @@ Pomysł: odpalanie water-splasah tylko przy pierwszym wejściu do wody
         nie wygląda to dobrze; Postać nie sprawia wrażenia jakby była w wodzie
 
 RICH_ENUM : unsigned char ?
+
+jak postacie pojawiają się za pierwszym razem po odpaleniu gry, to FXy nie są odpalane ze snaposhotów
+ (SPEED) z jakiegoś powodu...
+
+glow dla workshopów (kuznia, wymyslec cos dla innych workshopów)
+
+Użyć FXVariantName w furniture_fx & w OtherEffect
+
+- Kolory dla efektów
