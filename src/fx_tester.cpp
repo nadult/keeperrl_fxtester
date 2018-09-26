@@ -296,12 +296,13 @@ FXTester::FXTester(float zoom, float speed, Maybe<int> fixedFps)
   setZoom(float2(m_viewport.size()) * 0.25f, zoom);
 }
 
-bool FXTester::spawnEffect(string name, int2 pos, int2 toff) {
+bool FXTester::spawnEffect(string name, int2 pos, int2 toff, IColor col) {
   if (auto fxId = EnumInfo<FXName>::fromStringSafe(name)) {
     auto& def = m_spawnTool->defaultSpawner;
     auto oldRespawn = def.autoRespawn;
     def.autoRespawn = true;
     def.systemName = *fxId;
+	def.params.color[0] = FColor(col).rgb();
     m_spawnTool->add(pos, float2(toff));
     def.autoRespawn = oldRespawn;
     return true;
@@ -617,6 +618,7 @@ int main(int argc, char **argv) {
 
   float zoom = 2.0f;
   float speed = 1.0f;
+  IColor color = ColorId::white;
   Maybe<int> fixedFps;
 
   for(int n = 1; n < argc; n++) {
@@ -632,6 +634,12 @@ int main(int argc, char **argv) {
       gfx_flags &= ~GfxDeviceOpt::vsync;
     } else if(argument == "-maximized") {
       gfx_flags |= GfxDeviceOpt::maximized;
+    } else if(argument == "-color") {
+      ASSERT(n + 3 < argc);
+	  int3 col(fwk::fromString<int>(argv[n + 1]), fwk::fromString<int>(argv[n + 2]),
+			  fwk::fromString<int>(argv[n + 3]));
+	  color = {col.x, col.y, col.z};
+	  n += 3;
     } else if(argument == "-spawn") {
       ASSERT(n + 3 < argc);
       int2 pos(fwk::fromString<int>(argv[n + 2]), fwk::fromString<int>(argv[n + 3]));
@@ -681,7 +689,7 @@ int main(int argc, char **argv) {
   int sum_count = 0;
 
   for (auto spawn : spawns) {
-    if (!tester.spawnEffect(spawn.name, spawn.pos, spawn.off)) {
+    if (!tester.spawnEffect(spawn.name, spawn.pos, spawn.off, color)) {
       printf("Unknown effect: %s\n", spawn.name.c_str());
       exit(1);
     }

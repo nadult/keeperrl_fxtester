@@ -43,7 +43,7 @@ class FXTester {
 
   FXTester(float zoom, float speed, Maybe<int> fixedFps = none);
 
-  bool spawnEffect(string, int2, int2);
+  bool spawnEffect(string, int2, int2, IColor);
   void focusOn(int2);
   bool setBackground(string);
 
