@@ -19,38 +19,15 @@ https://docs.google.com/document/d/10MbrynYjchbdK_8ktb1hMgdaupQAVE-z4DZIZ5x-Pts/
 
 *** Pozostałe:
 
-
-
-
-TELEPORT: dwie wersje (zniknięcie i pojawienie się)
-          warianty tego FXa mozna użyć przy spawnowaniu różnych magicznych postaci
-
-musi zasłonić na początku całą postać
-opcje: standardowo kołowo, ale już dużo jest takich czarów, lepiej jakoś inaczej
-opcja: bazujący na bańkach albo sferach
-opcja: wciąganie / wyrzucanie z dziury
-
-kula (troszkę spłaszczona na bokach) która jest wciągana do środka
-albo linia lecąca od dołu zmazuje kulę
-pojawianie się tak samo tylko w drugą stronę
-
-
-Jak zrobić fajną kulę ? żeby miała fajny kształt i poświatę... blendowana addytywnie
-Jak ją zmazać ? mnożenie dwóch tekstur ?
-czy da się bez tego ?
-
-
-Problem: wycentrowanie czarów na lewitującej postaci
-Pomysł: odpalanie water-splasah tylko przy pierwszym wejściu do wody
-        nie wygląda to dobrze; Postać nie sprawia wrażenia jakby była w wodzie
-
 RICH_ENUM : unsigned char ?
 
-jak postacie pojawiają się za pierwszym razem po odpaleniu gry, to FXy nie są odpalane ze snaposhotów
- (SPEED) z jakiegoś powodu...
+Bug: jak postacie pojawiają się za pierwszym razem po odpaleniu gry, to FXy nie są odpalane ze snaposhotów
+      (np. SPEED) z jakiegoś powodu...
+Bug: GLITTERING pojawiający się na brzegach złota i czarnego kafla oświetla za bardzo czarny kafel (widać kontrast)...
 
-glow dla workshopów (kuznia, wymyslec cos dla innych workshopów)
+- zamienić SpellFX na FXInfo / albo nowy enum ?
+- spawn collor w summonie mógłby zależeć od rodzaju kreatury
 
-Użyć FXVariantName w furniture_fx & w OtherEffect
-
-- Kolory dla efektów
+Uwaga: jak podbijam jakiś przeciwników to czasami nie dostaję wogóle XPków, może fajnie by było jakby było wiadome
+  ile XPków za podbicie kogo się dostanie, i ile XPków potrzeba do kolejnego poziomu (transparentność zasad jest generalnie
+  dobrym pomysłem)
