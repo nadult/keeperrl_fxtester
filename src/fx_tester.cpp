@@ -147,6 +147,7 @@ void FXTester::spawnToolMenu() {
   bool useSnapshot = !!snapshotKey;
   if (ImGui::Checkbox("Use snapshots", &useSnapshot))
     snapshotKey = useSnapshot ? SnapshotKey() : optional<SnapshotKey>();
+  ImGui::Checkbox("Ordered draw mode", &def.initConfig.orderedDraw);
 
   if (snapshotKey) {
     int id = 0;
@@ -362,6 +363,7 @@ void FXTester::doMenu() {
     if (ImGui::Button("Show FBO channels"))
       ImGui::OpenPopup("select_channels");
     if (ImGui::BeginPopup("select_channels")) {
+		ImGui::Checkbox("Ordered draw channels", &m_showOrderedFboChannels);
       for (auto channel : all<FBOChannel>()) {
         bool selected = (bool)(m_showFboChannels & channel);
         if (ImGui::Checkbox(fwk::toString(channel), &selected)) {
@@ -459,23 +461,6 @@ void FXTester::drawCursor(Renderer2D &out, int2 tile_pos, FColor color) const {
   out.addFilledRect(sel_rect, SimpleMaterial(m_cursorTex, color));
 }
 
-void FXTester::renderParticles(bool front) const {
-  ProgramBinder::unbind();
-  SDL::glPushAttrib(GL_VIEWPORT_BIT);
-  SDL::glMatrixMode(GL_PROJECTION);
-  SDL::glLoadIdentity();
-  SDL::glViewport(0, 0, m_viewport.width(), m_viewport.height());
-  SDL::glOrtho(0.0, m_viewport.width(), m_viewport.height(), 0.0, -1.0, 1.0);
-  SDL::glMatrixMode(GL_MODELVIEW);
-  SDL::glLoadIdentity();
-
-  FVec2 offset = m_topLeftTile * float(tile_size) * m_zoom;
-  auto layer = front? fx::Layer::front : fx::Layer::back;
-  m_renderer->draw(m_zoom, -offset.x, -offset.y, m_viewport.width(), m_viewport.height(), layer);
-  SDL::glPopAttrib();
-  // Don't care about matrices here, we're not using fixed function
-}
-
 void FXTester::render() const {
   GfxDevice::clearColor(FColor(0.1, 0.1, 0.1));
 
@@ -489,11 +474,31 @@ void FXTester::render() const {
   }
   out.render();
 
-  renderParticles(false);
+  m_renderer->prepareOrdered(::none);
+
+  {
+  ProgramBinder::unbind();
+  SDL::glPushAttrib(GL_VIEWPORT_BIT);
+  SDL::glMatrixMode(GL_PROJECTION);
+  SDL::glLoadIdentity();
+  SDL::glViewport(0, 0, m_viewport.width(), m_viewport.height());
+  SDL::glOrtho(0.0, m_viewport.width(), m_viewport.height(), 0.0, -1.0, 1.0);
+  SDL::glMatrixMode(GL_MODELVIEW);
+  SDL::glLoadIdentity();
+
+  FVec2 offset = m_topLeftTile * float(tile_size) * m_zoom;
+  m_renderer->setView(m_zoom, -offset.x, -offset.y, m_viewport.width(), m_viewport.height());
+
+  m_renderer->drawUnordered(fx::Layer::back);
   drawOccluders(out);
   out.render();
 
-  renderParticles(true);
+  m_renderer->drawAllOrdered();
+  m_renderer->drawUnordered(fx::Layer::front);
+  SDL::glPopAttrib();
+  // Don't care about matrices here, we're not using fixed function
+  }
+
   if (m_showFboChannels)
     drawFboChannels();
 
@@ -505,7 +510,7 @@ void FXTester::render() const {
 }
 
 void FXTester::drawFboChannels() const {
-  auto ids = m_renderer->fboIds();
+  auto ids = m_renderer->fboIds(m_showOrderedFboChannels);
   auto texSize = m_renderer->fboSize();
 
   int defaultMode = 0, defaultOp = 0, defaultSrc = 0, defaultCombine = 0;

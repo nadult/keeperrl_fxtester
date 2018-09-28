@@ -64,3 +64,7 @@ Jak zrobić rendering, żeby można było lepiej komponować FXy ze sobą?
   w przypadku rzeczywistych problemów z wydajnością)
 
 - jak dobrze zmapować recty w world na fbo? to nie jest takie oczywiste...
+  chcemy po prostu, żeby piksele wylądowały na odpowiednich pozycjach
+  worldRecty powinny być całkowite!
+
+  kafel ma zawsze 24 piksele i dodatkowo jak renderujemy w zoomie, to po prostu mnozymy przez 2

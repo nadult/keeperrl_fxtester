@@ -60,7 +60,6 @@ class FXTester {
 
   void tick(GfxDevice &device, double timeDiff);
   void render() const;
-  void renderParticles(bool front) const;
 
   bool mainLoop(GfxDevice &device);
   static bool mainLoop(GfxDevice &device, void *this_ptr);
@@ -88,6 +87,7 @@ private:
   float m_animationSpeed = 1.0f;
   bool m_showCursor = false;
   EnumFlags<FBOChannel> m_showFboChannels;
+  bool m_showOrderedFboChannels = false;
   float m_zoomFboChannels = 1.0f;
 
   struct SpawnTool;
