@@ -474,7 +474,7 @@ void FXTester::render() const {
   }
   out.render();
 
-  m_renderer->prepareOrdered(::none);
+  m_renderer->prepareOrdered();
 
   {
   ProgramBinder::unbind();
