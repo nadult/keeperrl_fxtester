@@ -280,6 +280,7 @@ FXTester::FXTester(float zoom, float speed, Maybe<int> fixedFps)
   m_imgui.emplace(GfxDevice::instance(), ImGuiStyleMode::mini);
   m_manager.emplace();
   m_renderer.emplace(DirectoryPath("data/particles/"), *m_manager);
+  m_renderer->loadTextures();
 
   m_spawnTool.emplace();
   m_occlusionTool.emplace();
