@@ -19,6 +19,19 @@ https://docs.google.com/document/d/10MbrynYjchbdK_8ktb1hMgdaupQAVE-z4DZIZ5x-Pts/
 
 *** Pozostałe:
 
+- FX dla smoka
+  przydały się jakiś glow, tylko jak to dodać w tym wypadku?
+
+- FX do gazu
+
+- podzielić factory na kilka plików
+- deception jak pojawiają się postacie, to powinien być FX teleportu?
+- efekt destrukcji dla drzewa?
+
+- pierwszy parametr buff/debuff powinien wpływać na wielkość efektu
+
+- pytanie: czy można używac body size aby dopasować debuff/buff do sprite-a ? problem: to bardziej zależy od szerokości
+
 RICH_ENUM : unsigned char ?
 
 Bug: jak postacie pojawiają się za pierwszym razem po odpaleniu gry, to FXy nie są odpalane ze snaposhotów
