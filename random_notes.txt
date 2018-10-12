@@ -19,23 +19,13 @@ https://docs.google.com/document/d/10MbrynYjchbdK_8ktb1hMgdaupQAVE-z4DZIZ5x-Pts/
 
 *** Pozostałe:
 
-
-Do optymalizacji:
-  rotateVector w defaultDrawParticle
-  drawOrdered / drawUnordered: wrzucenie tekstur do atlasu?
-  gzipa mozna zamienic na zstd
-
-- FX dla smoka
-  przydały się jakiś glow, tylko jak to dodać w tym wypadku?
-
-- czy wyświetlać efekt slow dla świń (screenshot)?
-
+- back layery dla efektów ordered nie rysują się z tyłu...
+- back layery byłyby bardzo przydatne w debuffie
 - podzielić factory na kilka plików
+- czy wyświetlać efekt slow dla świń (screenshot)?
 - deception jak pojawiają się postacie, to powinien być FX teleportu?
 - efekt destrukcji dla drzewa?
-
 - pierwszy parametr buff/debuff powinien wpływać na wielkość efektu
-
 - pytanie: czy można używac body size aby dopasować debuff/buff do sprite-a ? problem: to bardziej zależy od szerokości
 
 RICH_ENUM : unsigned char ?
