@@ -19,10 +19,16 @@ https://docs.google.com/document/d/10MbrynYjchbdK_8ktb1hMgdaupQAVE-z4DZIZ5x-Pts/
 
 *** Pozostałe:
 
+
+Do optymalizacji:
+  rotateVector w defaultDrawParticle
+  drawOrdered / drawUnordered: wrzucenie tekstur do atlasu?
+  gzipa mozna zamienic na zstd
+
 - FX dla smoka
   przydały się jakiś glow, tylko jak to dodać w tym wypadku?
 
-- FX do gazu
+- czy wyświetlać efekt slow dla świń (screenshot)?
 
 - podzielić factory na kilka plików
 - deception jak pojawiają się postacie, to powinien być FX teleportu?

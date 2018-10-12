@@ -59,7 +59,7 @@ class FXTester {
   void doMenu();
 
   void tick(GfxDevice &device, double timeDiff);
-  void render() const;
+  void render();
 
   bool mainLoop(GfxDevice &device);
   static bool mainLoop(GfxDevice &device, void *this_ptr);
@@ -89,6 +89,10 @@ private:
   EnumFlags<FBOChannel> m_showFboChannels;
   bool m_showOrderedFboChannels = false;
   float m_zoomFboChannels = 1.0f;
+
+  // TODO: map enums to timers
+  vector<double> m_simulationTimes, m_preparationTimes, m_renderingTimes;
+  double avgTime(vector<double>&);
 
   struct SpawnTool;
   struct OcclusionTool;

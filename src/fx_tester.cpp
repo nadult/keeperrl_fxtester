@@ -339,6 +339,15 @@ void FXTester::setZoom(float2 screenPos, float zoom) {
   m_topLeftTile += oldPos - new_pos;
 }
 
+double FXTester::avgTime(vector<double>& times) {
+  int num = times.size(); //min((int)times.size(), 60);
+
+  double sum = 0.0;
+  for (int n = (int)times.size() - num; n < times.size(); n++)
+    sum += times[n];
+  return sum / double(num);
+}
+
 void FXTester::doMenu() {
   ImGui::Begin("FXTester", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
   ImGui::SetWindowSize(m_menuSize);
@@ -407,6 +416,11 @@ void FXTester::doMenu() {
   else
     occlusionToolMenu();
 
+  ImGui::Separator();
+  ImGui::Text("Simulation time: %.2f ms\nPreparation time: %.2fms\nRendering time: %.2f ms",
+              avgTime(m_simulationTimes) * 1000.0, avgTime(m_preparationTimes) * 1000.0,
+              avgTime(m_renderingTimes) * 1000.0);
+
   static bool showTestWindow = 0;
   if (showTestWindow) {
     ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiSetCond_FirstUseEver);
@@ -420,7 +434,9 @@ void FXTester::doMenu() {
 }
 
 void FXTester::tick(GfxDevice &device, double timeDiff) {
+  auto time = getTime();
   m_manager->simulateStable(timeDiff * m_animationSpeed, m_fixedFps.orElse(60));
+  m_simulationTimes.emplace_back(getTime() - time);
 
   auto events = device.inputEvents();
   m_imgui->beginFrame(device);
@@ -462,7 +478,7 @@ void FXTester::drawCursor(Renderer2D &out, int2 tile_pos, FColor color) const {
   out.addFilledRect(sel_rect, SimpleMaterial(m_cursorTex, color));
 }
 
-void FXTester::render() const {
+void FXTester::render() {
   GfxDevice::clearColor(FColor(0.1, 0.1, 0.1));
 
   Renderer2D out(m_viewport);
@@ -475,7 +491,9 @@ void FXTester::render() const {
   }
   out.render();
 
+  auto time = getTime();
   m_renderer->prepareOrdered();
+  m_preparationTimes.emplace_back(getTime() - time);
 
   {
   ProgramBinder::unbind();
@@ -490,12 +508,19 @@ void FXTester::render() const {
   FVec2 offset = m_topLeftTile * float(tile_size) * m_zoom;
   m_renderer->setView(m_zoom, -offset.x, -offset.y, m_viewport.width(), m_viewport.height());
 
+  time = getTime();
   m_renderer->drawUnordered(fx::Layer::back);
+  auto renderingTime = getTime() - time;
+
   drawOccluders(out);
   out.render();
 
+  time = getTime();
   m_renderer->drawAllOrdered();
   m_renderer->drawUnordered(fx::Layer::front);
+  renderingTime += getTime() - time;
+  m_renderingTimes.emplace_back(renderingTime);
+
   SDL::glPopAttrib();
   // Don't care about matrices here, we're not using fixed function
   }
