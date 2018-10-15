@@ -4,8 +4,6 @@ https://docs.google.com/document/d/10MbrynYjchbdK_8ktb1hMgdaupQAVE-z4DZIZ5x-Pts/
 *** Pomysły na efekty:
 
 *** Optymalizacje:
-- jak zoom == 1 to w trybie blend nie ma sensu renderować do FBO
-- nie rysować partikli które mają alpha == 0
 - Różne instancje (szczególnie jak korzystamy ze snapshotów) mogą korzystać z tej samej animacji
   jeśli na ekranie jest np. kilkanaście efektów to gracz raczej nie zauważy, że niektóre są takie same
 - Przy generowaniu particli możemy je od razu wrzucać do odpowiednich buforów (różne bufory dla
@@ -26,18 +24,4 @@ https://docs.google.com/document/d/10MbrynYjchbdK_8ktb1hMgdaupQAVE-z4DZIZ5x-Pts/
 - efekt destrukcji dla drzewa?
 - pytanie: czy można używac body size aby dopasować debuff/buff do sprite-a ? problem: to bardziej zależy od szerokości
 
-RICH_ENUM : unsigned char ?
-
-Bug: Efekty typu unordered rysują się na wierzchu FOWa i czarnych nieodkrytych kafli;
-  - stencil odpada, bo FOW jest przezroczysty i postacie czasami są przezroczyste (invisibility)
-  - można rysować FOWy i czarne kafle do kanału alfa efektów, ale to by wymagało najpierw refaktoringu renderingu
-  - można rysowac wszystkie efekty jako ordered? Problem: ordered nie obsługuje dobrze tylnej warstwy
-
 Bug: efekty ordered nie obsługują renderingu do tylnej warstwy; jak to dobrze zrobić?
-
-Dziwne: czy wyświetlać efekt slow dla świń (screenshot)?
-
-Dziwne: jak pierwszy raz rzucam czar (fireball, magic missile albo np. flamethrower) przez drzewo to leci na dlugosc 4 kafli
-        za drugim razem zawsze konczy sie na plonącym drzewie
-
-Dziwne: jak się kontroluje postać inną niż keeper i się zginie, to gra pyta się, czy wyświetlić historię (chociaz gra się nie kończy)
