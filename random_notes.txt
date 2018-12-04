@@ -11,7 +11,12 @@ https://docs.google.com/document/d/10MbrynYjchbdK_8ktb1hMgdaupQAVE-z4DZIZ5x-Pts/
 - Przełączenie się na domyślne 30 FPS ?
 
 *** Poprawki / ulepszenia systemowe:
+- coś jest nie tak z teksturką glow w fireballu (widoczne jak się weźmie teksturki z najnowszego KeeperRLa)
+- fire sphere zbyt szybko miga
+- jak się da niski FPS to fire sphere wygląda niaczej w testerze
 - opcja ustawienia domyślnego parametru koloru dla efektu?
+- raz się zdarzyło, że była zła teksturka dla fire sphere w trybie bez fbo
+- orby wyświetlają się pod fire sphere
 
 *** Do sprawdzenia / przetestowania:
 
