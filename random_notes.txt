@@ -30,3 +30,9 @@ https://docs.google.com/document/d/10MbrynYjchbdK_8ktb1hMgdaupQAVE-z4DZIZ5x-Pts/
 - pytanie: czy można używac body size aby dopasować debuff/buff do sprite-a ? problem: to bardziej zależy od szerokości
 
 Bug: efekty ordered nie obsługują renderingu do tylnej warstwy; jak to dobrze zrobić?
+
+
+Bug z wodą: taką sytuację można łatwo odtworzyć dając bardzo dużą (1000) wartość w funkcji interpQuadratic;
+   najprostszy fix to dodanie clampa w tej funkcji;
+   Ale jak to się dzieje, że jest tam przekazywana taka duża wartość?
+   - błąd jest chyba w sample, w iteracji po kluczach (może się zdarzyć, że bierzemy z -1)
