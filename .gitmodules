@@ -1,9 +1,9 @@
 [submodule "imgui"]
 	path = imgui
-	url = git@github.com:nadult/imgui.git
+	url = ../extern_imgui.git
 [submodule "libfwk"]
 	path = libfwk
-	url = git@github.com:nadult/libfwk.git
+	url = ../libfwk.git
 [submodule "keeperrl"]
 	path = keeperrl
-	url = https://github.com/miki151/keeperrl.git
+	url = ../keeperrl.git
